@@ -1,3 +1,4 @@
 [submodule "thirdparty/LevekGL"]
+    branch=main
 	path = thirdparty/LevekGL
 	url = git@github.com:GrapixLeGrand/LevekGL.git

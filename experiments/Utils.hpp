@@ -14,8 +14,8 @@ struct SkyBoxPipelineState {
     Levek::VertexArray* cubeMapVa;
 
     Levek::Shader cubeMapShader = Levek::ShaderFactory::makeFromFile(
-		SAMPLES_DIRECTORY"/resources/shaders/skybox.vert",
-		SAMPLES_DIRECTORY"/resources/shaders/skybox.frag"
+		LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/shaders/skybox.vert",
+		LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/shaders/skybox.frag"
 	);
 
 	SkyBoxPipelineState(const std::vector<std::string>& imagePaths) {
@@ -52,7 +52,7 @@ const std::vector<std::string> static getSkyBoxPaths() {
 
 	std::vector<std::string> skyBoxImagesPaths { "right.jpg", "left.jpg", "top.jpg", "bottom.jpg", "front.jpg", "back.jpg" };
     for (auto it = skyBoxImagesPaths.begin(); it != skyBoxImagesPaths.end(); it++) {
-        (*it) = SAMPLES_DIRECTORY"/resources/skybox/" + (*it);
+        (*it) = LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/skybox/" + (*it);
     }
 
 	return skyBoxImagesPaths;

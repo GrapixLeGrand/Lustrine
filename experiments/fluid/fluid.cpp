@@ -4,7 +4,7 @@
 
 #include "LevekGL.hpp"
 #include "../Utils.hpp"
-#include "simulation.hpp"
+#include "../../src/Lustrine.hpp"
 
 int resolutionX = 1280;
 int resolutionY = 720;
@@ -22,15 +22,15 @@ int main(void) {
     windowController->initImGui();
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
-    Levek::Model* model = meshLoader->loadFromFile(SAMPLES_DIRECTORY"/particles/models/billboard.obj");
+    Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/models/billboard.obj");
     const Levek::Mesh* sphere = model->getMesh(0);
 
     Levek::PerspectiveCamera camera({20, 20, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
     glm::mat4 projection = camera.getProjection();
 
     Levek::Shader shaderInstances = Levek::ShaderFactory::makeFromFile(
-        SAMPLES_DIRECTORY"/particles/shaders/sphere_inst.vert",
-        SAMPLES_DIRECTORY"/particles/shaders/sphere_inst.frag"
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/sphere_inst.vert",
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/sphere_inst.frag"
     );
     
     float particleScale = 1.0f;
@@ -86,11 +86,11 @@ int main(void) {
     //plan state
 
     Levek::Shader planeShader = Levek::ShaderFactory::makeFromFile(
-        SAMPLES_DIRECTORY"/particles/shaders/ground.vert",
-        SAMPLES_DIRECTORY"/particles/shaders/ground.frag"
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/ground.vert",
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/ground.frag"
     );
 
-    Levek::Model* planeModel = meshLoader->loadFromFile(SAMPLES_DIRECTORY"/resources/plane.obj");
+    Levek::Model* planeModel = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/plane.obj");
     const Levek::Mesh* planeMesh = planeModel->getMesh(0);
     //Levek::Mesh planeMesh = Levek::makePlane(1.0f);
 
@@ -103,7 +103,7 @@ int main(void) {
     Levek::VertexArray planeVA;
     planeVA.addBuffer(planeVBO, planeLayout);
     
-    Levek::Texture unitTexture = Levek::Texture(SAMPLES_DIRECTORY"/resources/unit.png");
+    Levek::Texture unitTexture = Levek::Texture(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/unit.png");
     unitTexture.set(Levek::TextureParameters::TextureWrapMode::REPEAT);
     unitTexture.set(Levek::TextureParameters::TextureLODFunction::LINEAR, Levek::TextureParameters::TextureLODFunction::LINEAR);
     

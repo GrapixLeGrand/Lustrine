@@ -29,6 +29,8 @@ set(LUSTRINE_TARGET_INCLUDE_DIRS
 
 target_include_directories(Lustrine ${LUSTRINE_TARGET_INCLUDE_DIRS})
 
+add_compile_definitions(LUSTRINE_EXPERIMENTS_DIRECTORY="${Lustrine_SOURCE_DIR}/experiments")
+
 add_subdirectory(experiments)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
