@@ -18,29 +18,29 @@ int main(void) {
     Levek::WindowController* windowController = engine->getWindowController();
     Levek::InputController* inputController = engine->getInputController();
 
-    windowController->setWindowTitle("Particles");
+    windowController->setWindowTitle("Fluid");
     windowController->initImGui();
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
-    Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/models/billboard.obj");
+    Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
     const Levek::Mesh* sphere = model->getMesh(0);
 
     Levek::PerspectiveCamera camera({20, 20, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
     glm::mat4 projection = camera.getProjection();
 
     Levek::Shader shaderInstances = Levek::ShaderFactory::makeFromFile(
-        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/sphere_inst.vert",
-        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/sphere_inst.frag"
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/sphere_inst.vert",
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/sphere_inst.frag"
     );
     
     float particleScale = 1.0f;
 
-    Simulation simulation;
+    Lustrine::Simulation simulation;
     int particleX = 20;
     int particleY = 30;
     int particleZ = 20;
-    init_sim(&simulation, particleX, particleY, particleZ);
-    fill_grid(&simulation);
+    Lustrine::init_sim(&simulation, particleX, particleY, particleZ);
+    Lustrine::fill_grid(&simulation);
 
     /*
     int num_particles = 1000;
@@ -86,8 +86,8 @@ int main(void) {
     //plan state
 
     Levek::Shader planeShader = Levek::ShaderFactory::makeFromFile(
-        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/ground.vert",
-        LUSTRINE_EXPERIMENTS_DIRECTORY"/particles/shaders/ground.frag"
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/ground.vert",
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/ground.frag"
     );
 
     Levek::Model* planeModel = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/plane.obj");
@@ -114,7 +114,7 @@ int main(void) {
 
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
-        simulate(&simulation);
+        Lustrine::simulate(&simulation);
 
         particlesPositionsVBO.Update(simulation.positions.data(), simulation.positions.size() * 3 * 4);
         renderer->clear();

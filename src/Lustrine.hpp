@@ -5,6 +5,7 @@
 
 //https://on-demand.gputechconf.com/gtc/2014/presentations/S4117-fast-fixed-radius-nearest-neighbor-gpu.pdf
 
+namespace Lustrine {
 struct Simulation;
 
 typedef float (*W_fun)(const Simulation*, float);
@@ -128,3 +129,5 @@ extern void assign_particles_to_cells(Simulation* simulation);
 extern void find_neighbors_counting_sort(Simulation* simulation);
 
 extern void simulate(Simulation* simulation);
+
+};

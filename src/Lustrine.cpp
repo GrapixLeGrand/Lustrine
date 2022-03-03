@@ -5,6 +5,8 @@
 #include <utility>
 #include <algorithm>
 
+namespace Lustrine {
+
 constexpr double pi = 3.14159265358979323846;
 
 void init_sim(Simulation* simulation, int particlesX, int particlesY, int particlesZ) {
@@ -567,3 +569,5 @@ void simulate(Simulation* simulation) {
     }
 
 }
+
+};
