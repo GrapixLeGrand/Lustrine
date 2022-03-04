@@ -192,7 +192,7 @@ int main(void) {
 
 
             if (ImGui::Button("reset")) {
-                Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
+                //Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
                 Lustrine::init_sim(&simulation, &domain, grids);
             }
             ImGui::EndTabItem();

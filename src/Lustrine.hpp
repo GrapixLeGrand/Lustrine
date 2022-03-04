@@ -11,7 +11,6 @@
 namespace Lustrine {
 struct Simulation;
 
-
 extern void init_sim(Simulation* simulation, const Domain* domain, std::vector<ParticlesGrid>& grids);
 
 extern void init_grid_box(const Simulation* simulation, ParticlesGrid* grid, int X, int Y, int Z);

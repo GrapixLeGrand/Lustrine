@@ -109,8 +109,8 @@ void init_grid_box(const Simulation* simulation, ParticlesGrid* grid, int X, int
     grid->positions = std::vector<glm::vec3>(grid->num_particles, {0, 0, 0});
     grid->colors = std::vector<glm::vec4>(grid->num_particles, {0, 0, 0, 1});
 
-    float diameter = simulation->particleDiameter;
-    float radius = simulation->particleRadius;
+    const float diameter = simulation->particleDiameter;
+    const float radius = simulation->particleRadius;
     glm::vec3 offset = glm::vec3(radius, radius, radius);
 
     for (int x = 0; x < X; x++) {
@@ -189,8 +189,8 @@ void simulate(Simulation* simulation, float dt) {
     }
 
     //find_neighbors_counting_sort(simulation);
-    //find_neighbors_uniform_grid(simulation);
-    find_neighbors_brute_force(simulation);
+    find_neighbors_uniform_grid(simulation);
+    //find_neighbors_brute_force(simulation);
 
     //solve pressure
     for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {

@@ -176,6 +176,9 @@ void find_neighbors_uniform_grid(Simulation* simulation) {
 
                             for (int i = 0; i < current_cell_indices.size(); i++) {
                                 const int current_index = current_cell_indices[i];
+                                if (current_index >= simulation->ptr_fluid_static_start) {
+                                    continue;
+                                }
                                 const glm::vec3& self = simulation->positions_star[current_index];
                                 for (int j = 0; j < neighbor_cell_indices.size(); j++) {
                                     const int neighbor_index = neighbor_cell_indices[j];
