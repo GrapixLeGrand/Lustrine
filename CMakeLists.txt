@@ -9,7 +9,7 @@ enable_testing()
 #option(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8/glm/glm.hpp")
 
 set(ENV{LEVEKGL_USE_INTERNAL_GLM_REQUESTED})
-set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8/glm/glm.hpp")
+set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
 
 add_subdirectory(thirdparty)
 
