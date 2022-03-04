@@ -89,7 +89,7 @@ void counting_sort(Simulation* simulation) {
 }
 
 void clear_neighbors(Simulation* simulation) {
-    for (int i = 0; i < simulation->num_particles; i++) {
+    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
         simulation->neighbors[i].clear();
     }
 }
@@ -98,17 +98,19 @@ void find_neighbors_brute_force(Simulation* simulation) {
 
     clear_neighbors(simulation);
 
-    for (int i = 0; i < simulation->num_particles; i++) {
+    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
         glm::vec3& self = simulation->positions_star[i];
         for (int j = i + 1; j < simulation->num_particles; j++) {
             glm::vec3& other = simulation->positions_star[j];
             glm::vec3 tmp = self - other;
             if (glm::dot(tmp, tmp) <= simulation->kernelRadius * simulation->kernelRadius) {
                 simulation->neighbors[i].push_back(j);
-                simulation->neighbors[j].push_back(i);
+                if (j < simulation->ptr_fluid_dynamic_end) {
+                    simulation->neighbors[j].push_back(i);
+                }
             }
-        }
-    }
+        } //for 2
+    } // for 1
 
 }
 

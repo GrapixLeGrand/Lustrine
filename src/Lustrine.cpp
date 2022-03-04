@@ -13,14 +13,25 @@ namespace Lustrine {
 
 constexpr double pi = 3.14159265358979323846;
 
-void init_sim(Simulation* simulation, int particlesX, int particlesY, int particlesZ) {
+void init_sim(Simulation* simulation, const Domain* domain, std::vector<ParticlesGrid>& grids) {
 
-    simulation->particlesX = particlesX;
-    simulation->particlesY = particlesY;
-    simulation->particlesZ = particlesZ;
-    simulation->num_particles = particlesX * particlesY * particlesZ;
+    std::sort(
+        grids.begin(),
+        grids.end(), 
+        [](const auto a, const auto b) {
+            return a.type < b.type; 
+        }
+    );
 
-    simulation->max_neighbors = simulation->num_particles - 1;
+    int num_particles = 0;
+
+    for (int i = 0; i < grids.size(); i++) {
+        num_particles += grids[i].num_particles;
+    }
+
+    simulation->num_particles = num_particles; //particlesX * particlesY * particlesZ;
+
+    //simulation->max_neighbors = simulation->num_particles - 1;
 
     simulation->positions = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
     simulation->positions_star = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
@@ -62,13 +73,41 @@ void init_sim(Simulation* simulation, int particlesX, int particlesY, int partic
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
     simulation->times = std::vector<double>(10, 0);
+
+    int current_type = grids[0].type;
+    simulation->ptr_fluid_dynamic_start = 0;
+    simulation->ptr_fluid_static_start = -1;
+    simulation->ptr_fluid_static_end = simulation->num_particles - 1;
+    int offset = 0;
+
+    for (int i = 0; i < grids.size(); i++) {
+        ParticlesGrid& grid = grids[i];
+        if (grid.type != current_type) {
+            simulation->ptr_fluid_dynamic_end = i;
+            simulation->ptr_fluid_static_start = i;
+        }
+        for (int j = 0; j < grids[i].num_particles; j++) {
+            simulation->positions[j + offset] = grids[i].positions[j];
+            simulation->colors[j + offset] = grids[i].colors[j];
+        }
+        offset += grids[i].num_particles;
+    }
+
+    if (simulation->ptr_fluid_static_start == -1) { //no static particles
+        simulation->ptr_fluid_dynamic_end = simulation->num_particles - 1;
+        simulation->ptr_fluid_static_start = simulation->ptr_fluid_static_end;
+    }
 }
 
-void fill_grid(Simulation* simulation) {
+void init_grid_box(const Simulation* simulation, ParticlesGrid* grid, int X, int Y, int Z) {
 
-    int X = simulation->particlesX;
-    int Y = simulation->particlesY;
-    int Z = simulation->particlesZ;
+    grid->num_particles = X * Y * Z;
+    grid->particlesX = X;
+    grid->particlesY = Y;
+    grid->particlesZ = Z;
+
+    grid->positions = std::vector<glm::vec3>(grid->num_particles, {0, 0, 0});
+    grid->colors = std::vector<glm::vec4>(grid->num_particles, {0, 0, 0, 1});
 
     float diameter = simulation->particleDiameter;
     float radius = simulation->particleRadius;
@@ -78,8 +117,8 @@ void fill_grid(Simulation* simulation) {
         for (int y = 0; y < Y; y++) {
             for (int z = 0; z < Z; z++) {
                 
-                glm::vec3& position = simulation->positions[x * Y * Z + y * Z + z];
-                glm::vec4& color = simulation->colors[x * Y * Z + y * Z + z];
+                glm::vec3& position = grid->positions[x * Y * Z + y * Z + z];
+                glm::vec4& color = grid->colors[x * Y * Z + y * Z + z];
 
                 position.x = x * diameter;
                 position.y = y * diameter; 
@@ -122,7 +161,7 @@ float resolve_collision(float value, float min, float max) {
 }
 
 void simulate(Simulation* simulation, float dt) {
-    
+
     dt = glm::clamp(dt, 0.001f, 0.01f);
     simulation->time_step = dt;
 
@@ -144,17 +183,17 @@ void simulate(Simulation* simulation, float dt) {
     //float dt = simulation->time_step;
 
     //integration
-    for (int i = 0; i < n; i++) {
+    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
         velocities[i] += simulation->gravity * simulation->mass * dt;
         positions_star[i] = positions[i] + velocities[i] * dt; //prediction
     }
 
     //find_neighbors_counting_sort(simulation);
-    find_neighbors_uniform_grid(simulation);
-    //find_neighbors(simulation);
+    //find_neighbors_uniform_grid(simulation);
+    find_neighbors_brute_force(simulation);
 
     //solve pressure
-    for (int i = 0; i < n; i++) {
+    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
 
         float densitiy = 0.0;
         for (int j = 0; j < neighbors[i].size(); j++) {
@@ -186,7 +225,7 @@ void simulate(Simulation* simulation, float dt) {
 
     }
     
-    for (int i = 0; i < n; i++) {
+    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
 
         //equation 13 (applying pressure force correction)
         pressures_forces[i] = glm::vec3(0.0);

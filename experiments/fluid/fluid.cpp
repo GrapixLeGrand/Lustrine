@@ -37,11 +37,10 @@ int main(void) {
     float particleScale = 1.0f;
 
     Lustrine::Simulation simulation;
-    int particleX = 20;
-    int particleY = 30;
-    int particleZ = 20;
-    Lustrine::init_sim(&simulation, particleX, particleY, particleZ);
-    Lustrine::fill_grid(&simulation);
+    Lustrine::Domain domain {30, 30, 30};
+    std::vector<Lustrine::ParticlesGrid> grids (1);
+    Lustrine::init_grid_box(&simulation, &grids[0], 15, 20, 15);
+    Lustrine::init_sim(&simulation, &domain, grids);
 
     /*
     int num_particles = 1000;
@@ -193,8 +192,8 @@ int main(void) {
 
 
             if (ImGui::Button("reset")) {
-                init_sim(&simulation, particleX, particleY, particleZ);
-                fill_grid(&simulation);
+                Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
+                Lustrine::init_sim(&simulation, &domain, grids);
             }
             ImGui::EndTabItem();
             simulation.cubic_kernel_k *= factor;

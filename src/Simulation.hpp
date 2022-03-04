@@ -9,12 +9,34 @@ struct Simulation;
 typedef float (*W_fun)(const Simulation*, float);
 typedef glm::vec3 (*gradW_fun)(const Simulation*, const glm::vec3&);
 
-struct ParticleInCell {
-    int cell_id; //cell index of the particle in the grid
-    int index; //index of the particle in the unsorted array
+enum ParticleType {
+    FLUID_DYNAMIC = 0,
+    FLUID_STATIC = 1
+};
+
+struct Domain {
+    float X = 0;
+    float Y = 0;
+    float Z = 0;
+};
+
+struct ParticlesGrid {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec4> colors;
+    int num_particles;
+    int particlesX;
+    int particlesY;
+    int particlesZ;
+    ParticleType type;
 };
 
 struct Simulation {
+
+    int ptr_fluid_dynamic_start = 0;
+    int ptr_fluid_dynamic_end = 0;
+
+    int ptr_fluid_static_start = 0;
+    int ptr_fluid_static_end = 0;
     
     W_fun W = nullptr;
     gradW_fun gradW = nullptr;
