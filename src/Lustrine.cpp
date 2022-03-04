@@ -13,7 +13,7 @@ namespace Lustrine {
 
 constexpr double pi = 3.14159265358979323846;
 
-void init_sim(Simulation* simulation, const Domain* domain, std::vector<ParticlesChunk>& chunks) {
+void init_sim(Simulation* simulation, const Domain* domain, std::vector<Chunk>& chunks) {
 
     std::sort(
         chunks.begin(),
@@ -81,7 +81,7 @@ void init_sim(Simulation* simulation, const Domain* domain, std::vector<Particle
     int offset = 0;
 
     for (int i = 0; i < chunks.size(); i++) {
-        ParticlesChunk& chunk = chunks[i];
+        Chunk& chunk = chunks[i];
         if (chunk.type != current_type) {
             simulation->ptr_fluid_dynamic_end = offset;
             simulation->ptr_fluid_static_start = offset;
@@ -101,7 +101,7 @@ void init_sim(Simulation* simulation, const Domain* domain, std::vector<Particle
 
 }
 
-extern void init_chunk_box(const Simulation* simulation, ParticlesChunk* chunk, int X, int Y, int Z, glm::vec3 position, ChunkType type, glm::vec4 chunkColor) {
+extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, ChunkType type, glm::vec4 chunkColor) {
     
     chunk->type = type;
     chunk->num_particles = X * Y * Z;
@@ -146,7 +146,7 @@ extern void init_chunk_box(const Simulation* simulation, ParticlesChunk* chunk, 
     }
 }
 
-void init_chunk_box(const Simulation* simulation, ParticlesChunk* chunk, int X, int Y, int Z) {
+void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z) {
     init_chunk_box(simulation, chunk, X, Y, Z, glm::vec3(0.0), ChunkType::FLUID_DYNAMIC, glm::vec4(1.0));
 }
 
@@ -263,5 +263,59 @@ void simulate(Simulation* simulation, float dt) {
     }
 
 }
+
+extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid, Chunk* chunk, ChunkType type) {
+
+    chunk->type = type;
+    chunk->num_particles = grid->num_occupied_grid_cells;
+    chunk->has_one_color_per_particles = grid->has_one_color_per_cell;
+
+    chunk->positions = std::vector<glm::vec3>(chunk->num_particles, {0, 0, 0});
+    chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 1});
+
+    const float diameter = simulation->particleDiameter;
+    const float radius = simulation->particleRadius;
+    glm::vec3 offset = glm::vec3(radius, radius, radius);
+
+    int counter = 0;
+    for (int x = 0; x < grid->X; x++) {
+        for (int y = 0; y < grid->Y; y++) {
+            for (int z = 0; z < grid->Z; z++) {
+                
+                int index = x * grid->Y * grid->Z + y * grid->Z + z;
+
+                if (grid->cells[index] == false) { //no voxel here
+                    continue;
+                }
+
+                glm::vec3& particle_position = chunk->positions[counter];
+
+                particle_position.x = x * diameter;
+                particle_position.y = y * diameter;
+                particle_position.z = z * diameter;
+
+                const glm::vec4& voxel_color = grid->colors[index];
+                glm::vec4& chunk_color = chunk->colors[counter];
+
+                //particle_position += position;
+
+                if (chunk->has_one_color_per_particles == true) {
+                    chunk_color.r = voxel_color.r;
+                    chunk_color.g = voxel_color.g;
+                    chunk_color.b = voxel_color.b;
+                    chunk_color.a = voxel_color.a;
+                } else {
+                    //color = chunkColor;
+                }
+
+                
+                counter++;
+            } //end for z
+        } //end for y
+    } //end for x
+
+}
+
+
 
 };

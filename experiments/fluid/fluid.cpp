@@ -38,9 +38,9 @@ int main(void) {
 
     Lustrine::Simulation simulation;
     Lustrine::Domain domain {30, 30, 30};
-    std::vector<Lustrine::ParticlesChunk> chunks (2);
+    std::vector<Lustrine::Chunk> chunks (2);
     Lustrine::init_chunk_box(&simulation, &chunks[0], 15, 20, 15, {0, 0, 0}, Lustrine::ChunkType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
-    Lustrine::init_chunk_box(&simulation, &chunks[1], 10, 10, 10, {20, 0, 20}, Lustrine::ChunkType::FLUID_STATIC, glm::vec4(1.0, 0.0, 0.0, 1.0));
+    Lustrine::init_chunk_box(&simulation, &chunks[1], 10, 10, 10, {15, 0, 15}, Lustrine::ChunkType::FLUID_STATIC, glm::vec4(1.0, 0.0, 0.0, 1.0));
     Lustrine::init_sim(&simulation, &domain, chunks);
 
     /*

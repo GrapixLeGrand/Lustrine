@@ -20,7 +20,8 @@ struct Domain {
     float Z = 0;
 };
 
-struct ParticlesChunk {
+
+struct Chunk {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec4> colors;
     glm::vec3 color;
@@ -32,6 +33,18 @@ struct ParticlesChunk {
     int particlesY;
     int particlesZ;
     ChunkType type;
+};
+
+struct Grid {
+    std::vector<bool> cells;
+    std::vector<glm::vec4> colors;
+    glm::vec4 color;
+    bool has_one_color_per_cell;
+    int X;
+    int Y;
+    int Z;
+    int num_grid_cells;
+    int num_occupied_grid_cells;
 };
 
 struct Simulation {
