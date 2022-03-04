@@ -9,7 +9,7 @@ struct Simulation;
 typedef float (*W_fun)(const Simulation*, float);
 typedef glm::vec3 (*gradW_fun)(const Simulation*, const glm::vec3&);
 
-enum ParticleType {
+enum ChunkType {
     FLUID_DYNAMIC = 0,
     FLUID_STATIC = 1
 };
@@ -20,14 +20,18 @@ struct Domain {
     float Z = 0;
 };
 
-struct ParticlesGrid {
+struct ParticlesChunk {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec4> colors;
+    glm::vec3 color;
+
+    bool has_one_color_per_particles = false;
+
     int num_particles;
     int particlesX;
     int particlesY;
     int particlesZ;
-    ParticleType type;
+    ChunkType type;
 };
 
 struct Simulation {

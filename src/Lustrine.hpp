@@ -11,9 +11,11 @@
 namespace Lustrine {
 struct Simulation;
 
-extern void init_sim(Simulation* simulation, const Domain* domain, std::vector<ParticlesGrid>& grids);
+extern void init_sim(Simulation* simulation, const Domain* domain, std::vector<ParticlesChunk>& grids);
 
-extern void init_grid_box(const Simulation* simulation, ParticlesGrid* grid, int X, int Y, int Z);
+extern void init_chunk_box(const Simulation* simulation, ParticlesChunk* chunk, int X, int Y, int Z, glm::vec3 position, ChunkType type, glm::vec4 color);
+extern void init_chunk_box(const Simulation* simulation, ParticlesChunk* chunk, int X, int Y, int Z);
+
 //extern void fill_grid(Simulation* simulation);
 
 extern float s_coor(const Simulation* simulation, float rl);

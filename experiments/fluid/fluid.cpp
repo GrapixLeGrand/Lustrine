@@ -38,9 +38,10 @@ int main(void) {
 
     Lustrine::Simulation simulation;
     Lustrine::Domain domain {30, 30, 30};
-    std::vector<Lustrine::ParticlesGrid> grids (1);
-    Lustrine::init_grid_box(&simulation, &grids[0], 15, 20, 15);
-    Lustrine::init_sim(&simulation, &domain, grids);
+    std::vector<Lustrine::ParticlesChunk> chunks (2);
+    Lustrine::init_chunk_box(&simulation, &chunks[0], 15, 20, 15, {0, 0, 0}, Lustrine::ChunkType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_chunk_box(&simulation, &chunks[1], 10, 10, 10, {20, 0, 20}, Lustrine::ChunkType::FLUID_STATIC, glm::vec4(1.0, 0.0, 0.0, 1.0));
+    Lustrine::init_sim(&simulation, &domain, chunks);
 
     /*
     int num_particles = 1000;
@@ -193,7 +194,7 @@ int main(void) {
 
             if (ImGui::Button("reset")) {
                 //Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
-                Lustrine::init_sim(&simulation, &domain, grids);
+                Lustrine::init_sim(&simulation, &domain, chunks);
             }
             ImGui::EndTabItem();
             simulation.cubic_kernel_k *= factor;
