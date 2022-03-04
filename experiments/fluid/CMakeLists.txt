@@ -1,5 +1,7 @@
 project(particles)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mfma")
+
 if (UNIX)
 	#
 	#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")

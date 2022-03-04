@@ -17,12 +17,15 @@ link_directories(${Lustrine_SOURCE_DIR}/src)
 
 set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
+    "src/Kernels.cpp"
+    "src/Neighbors.cpp"
 )
 
 add_library(Lustrine STATIC ${LUSTRINE_SOURCES})
 target_link_libraries(Lustrine LevekGL)
 
-set(LUSTRINE_TARGET_INCLUDE_DIRS 
+set(LUSTRINE_TARGET_INCLUDE_DIRS
+    PUBLIC "src"
     PRIVATE "thirdparty/glm-0.9.9.8"
     PUBLIC "thirdparty/LevekGL"   
 )

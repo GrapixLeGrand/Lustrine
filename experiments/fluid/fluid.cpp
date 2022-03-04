@@ -4,7 +4,8 @@
 
 #include "LevekGL.hpp"
 #include "../Utils.hpp"
-#include "../../src/Lustrine.hpp"
+#include "Lustrine.hpp"
+
 
 int resolutionX = 1280;
 int resolutionY = 720;
@@ -114,7 +115,7 @@ int main(void) {
 
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
-        Lustrine::simulate(&simulation);
+        Lustrine::simulate(&simulation, windowController->getDeltaTime());
 
         particlesPositionsVBO.Update(simulation.positions.data(), simulation.positions.size() * 3 * 4);
         renderer->clear();
@@ -158,6 +159,11 @@ int main(void) {
         if (ImGui::BeginTabItem("Simulation")) {
 
             ImGui::Text("%d fps", (int) (1.0f / windowController->getDeltaTime()));
+            ImGui::Text("%d fps sim", (int) (1.0f / simulation.time_step));
+
+            ImGui::Text("t prepare %lf ms", simulation.times[0]);
+            ImGui::Text("t neigh %lf ms", simulation.times[1]);
+
             ImGui::Text("particle radius %.3f", simulation.particleRadius);
             ImGui::Text("particle diameter %.3f", simulation.particleDiameter);
             ImGui::Text("kernel radius %.3f", simulation.kernelRadius);
