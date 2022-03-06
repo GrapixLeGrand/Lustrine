@@ -21,7 +21,17 @@ set(LUSTRINE_SOURCES
     "src/Neighbors.cpp"
 )
 
+set(LUSTRINEWRAPPER_SOURCES
+    "src/Lustrine.cpp"
+    "src/Kernels.cpp"
+    "src/Neighbors.cpp"
+    "src/LustrineWrapper.cpp"
+)
+
+
 add_library(Lustrine STATIC ${LUSTRINE_SOURCES})
+add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
+
 target_link_libraries(Lustrine LevekGL)
 
 set(LUSTRINE_TARGET_INCLUDE_DIRS
@@ -31,6 +41,7 @@ set(LUSTRINE_TARGET_INCLUDE_DIRS
 )
 
 target_include_directories(Lustrine ${LUSTRINE_TARGET_INCLUDE_DIRS})
+target_include_directories(LustrineWrapper ${LUSTRINE_TARGET_INCLUDE_DIRS})
 
 add_compile_definitions(LUSTRINE_EXPERIMENTS_DIRECTORY="${Lustrine_SOURCE_DIR}/experiments")
 
