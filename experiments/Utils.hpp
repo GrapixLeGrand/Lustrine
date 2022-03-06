@@ -154,6 +154,6 @@ static void UpdateCameraWithMouseOnDrag(Levek::InputController* inputController,
 }
 
 static void addImGuiVec3(const glm::vec3& v) {
-	ImGui::Text("[%.3f, %.3f, %.3f]", v[0], v[1], v[2]);
+	//ImGui::Text("[%.3f, %.3f, %.3f]", v[0], v[1], v[2]);
 } 
 

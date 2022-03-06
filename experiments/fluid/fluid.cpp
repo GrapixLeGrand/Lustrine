@@ -1,6 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+/*
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
+*/
 
 #include "LevekGL.hpp"
 #include "../Utils.hpp"
@@ -20,7 +25,7 @@ int main(void) {
     Levek::InputController* inputController = engine->getInputController();
 
     windowController->setWindowTitle("Fluid");
-    windowController->initImGui();
+    //windowController->initImGui();
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
     Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
@@ -149,7 +154,7 @@ int main(void) {
         planeShader.setUniformMat4f("mvp", vp);
         planeShader.setUniform1i("tex", 0);
         renderer->draw(&planeVA, &planeIBO, &planeShader);
-
+        /*
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -214,7 +219,7 @@ int main(void) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+        */
         lineRenderer->SetViewProjection(projection * camera.getView());
         //lineRenderer->AddLine({0, 0, 0}, {1, 0, 0}, {1.0, 0.0, 0.0, 1.0}); 
         //lineRenderer->AddLine({0, 0, 0}, {0, 1, 0}, {0.0, 1.0, 0.0, 1.0});
