@@ -19,6 +19,7 @@ set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
     "src/Kernels.cpp"
     "src/Neighbors.cpp"
+    "src/VoxelLoader.cpp"
 )
 
 add_library(Lustrine STATIC ${LUSTRINE_SOURCES})

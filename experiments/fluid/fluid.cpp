@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <string>
 
 #include "LevekGL.hpp"
 #include "../Utils.hpp"
@@ -38,7 +39,12 @@ int main(void) {
 
     Lustrine::Simulation simulation;
     Lustrine::Domain domain {30, 30, 30};
-    std::vector<Lustrine::Chunk> chunks (2);
+    std::vector<Lustrine::Chunk> chunks (3);
+    Lustrine::Grid model_grid;
+
+    Lustrine::init_grid_from_magika_voxel(&model_grid, LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox");
+    Lustrine::init_chunk_from_grid(&simulation, &model_grid, &chunks[2], Lustrine::FLUID_STATIC);
+
     Lustrine::init_chunk_box(&simulation, &chunks[0], 15, 20, 15, {0, 0, 0}, Lustrine::ChunkType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
     Lustrine::init_chunk_box(&simulation, &chunks[1], 10, 10, 10, {15, 0, 15}, Lustrine::ChunkType::FLUID_STATIC, glm::vec4(1.0, 0.0, 0.0, 1.0));
     Lustrine::init_sim(&simulation, &domain, chunks);

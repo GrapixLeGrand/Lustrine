@@ -5,7 +5,7 @@
 #include "Neighbors.hpp"
 #include <vector>
 #include "glm/glm.hpp"
-#include "VoxelLoader.hpp"
+#include <string>
 
 //https://on-demand.gputechconf.com/gtc/2014/presentations/S4117-fast-fixed-radius-nearest-neighbor-gpu.pdf
 
@@ -18,6 +18,7 @@ extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, in
 extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z);
 extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid, Chunk* chunk, ChunkType type);
 
+extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path);
 
 //extern void fill_grid(Simulation* simulation);
 

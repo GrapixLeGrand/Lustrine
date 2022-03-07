@@ -271,7 +271,7 @@ extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid,
     chunk->has_one_color_per_particles = grid->has_one_color_per_cell;
 
     chunk->positions = std::vector<glm::vec3>(chunk->num_particles, {0, 0, 0});
-    chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 1});
+    chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 0});
 
     const float diameter = simulation->particleDiameter;
     const float radius = simulation->particleRadius;
@@ -315,7 +315,9 @@ extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid,
     } //end for x
 
 }
-
-
+/*
+void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
+    init_grid_from_magika_voxel_dont_call_me(grid, path);
+}*/
 
 };

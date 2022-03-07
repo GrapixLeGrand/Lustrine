@@ -1,8 +1,10 @@
 
-#include "VoxelLoader.hpp"
+#include "Lustrine.hpp"
 #include <iostream>
-#include "../thirdparty/opengametools/ogt_vox.h"
+
 #define OGT_VOX_IMPLEMENTATION
+#include "../thirdparty/opengametools/ogt_vox.h"
+
 
 namespace Lustrine {
     // a helper function to load a magica voxel scene given a filename.
@@ -45,7 +47,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
     if (scene->num_models < 1) {
         std::cout << "Emtpy voxel model" << std::endl;
     }
-
+    std::cout << scene->num_layers << std::endl;
     const ogt_vox_model* model = scene->models[0];
 
     grid->X = model->size_x;
@@ -53,8 +55,8 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
     grid->Z = model->size_z;
 
     grid->num_grid_cells = model->size_x * model->size_y * model->size_z;
-    grid->cells = std::vector<bool> (grid->num_grid_cells, 0);
-    grid->colors = std::vector<glm::vec4> (grid->num_grid_cells, {0, 0, 0, 0});
+    grid->cells = std::vector<bool>(grid->num_grid_cells, false);
+    grid->colors = std::vector<glm::vec4>(grid->num_grid_cells, {0, 0, 0, 0});
     grid->has_one_color_per_cell = true;
 
     int counter = 0;
@@ -62,7 +64,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
         for (int y = 0; y < grid->Y; y++) {
             for (int z = 0; z < grid->Z; z++) {
                 int voxel_index = x + (y * model->size_x) + (z * model->size_x * model->size_y);
-                int grid_index = (y * grid->X * grid->Z) + (x * grid->Z) + z;
+                int grid_index = (x * grid->Y * grid->Z) + (y * grid->Z) + z;
                 uint8_t color_index = model->voxel_data[voxel_index];
 
                 if (color_index == 0) { //voxel is non existent
@@ -72,10 +74,12 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
                 ogt_vox_rgba voxel_color = scene->palette.color[color_index];
                 grid->cells[grid_index] = true;
                 glm::vec4& grid_color = grid->colors[grid_index];
-                grid_color.r = voxel_color.r;
+
+                grid_color.r = voxel_color.r;   
                 grid_color.g = voxel_color.g;
                 grid_color.b = voxel_color.b;
                 grid_color.a = voxel_color.a;
+                grid_color /= 255.0;
 
                 counter++;
             }
