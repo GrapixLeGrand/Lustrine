@@ -35,7 +35,7 @@ set(LUSTRINEWRAPPER_SOURCES
 
 
 add_library(Lustrine STATIC ${LUSTRINE_SOURCES})
-add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
+add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
 
 target_link_libraries(Lustrine LevekGL)
 
