@@ -28,7 +28,9 @@ int main(void) {
     Levek::InputController* inputController = engine->getInputController();
 
     windowController->setWindowTitle("Fluid");
-    //windowController->initImGui();
+    #ifdef PLATFORM_UNIX
+    windowController->initImGui();
+    #endif
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
     Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
@@ -44,6 +46,7 @@ int main(void) {
     
     float particleScale = 1.0f;
 
+    //////////////////////////////////////////////////////////////////////////////////////////
     Lustrine::Simulation simulation;
     Lustrine::SimulationParameters parameters;
     parameters.X = 30.0f;
@@ -63,25 +66,7 @@ int main(void) {
 
     Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
 
-    /*
-    int num_particles = 1000;
-    int lim = 10; //(num_particles, {0, 0, 0});
-    int num_colors = 256;
-    std::vector<glm::vec3> particlesPositions (num_particles, {0, 0, 0}); // { {0, 0, 0}, {1, 0, 0}, {2, 0, 0}, {3, 0, 0} };
-    std::vector<unsigned int> particlesColors (num_particles, 0);
-    std::vector<glm::vec4> palette (num_colors, {0, 0, 0, 1.0});
-    for (int i = 0; i < num_particles; i++) {
-        particlesPositions[i].x = std::rand() % lim;
-        particlesPositions[i].y = std::rand() % lim;
-        particlesPositions[i].z = std::rand() % lim;
-        particlesColors[i] = std::rand() % 16;
-        if (i < num_colors)  {
-            palette[i].r = ((float) std::rand() / RAND_MAX);
-            palette[i].g = ((float) std::rand() / RAND_MAX);
-            palette[i].b = ((float) std::rand() / RAND_MAX);
-            palette[i].a = 1.0f;
-        }
-    }*/
+    //////////////////////////////////////////////////////////////////////////////////////////
 
     Levek::VertexBuffer particlesPositionsVBO = Levek::VertexBuffer(simulation.positions.data(), simulation.positions.size() * 3 * 4);
     Levek::VertexBuffer particlesColorsVBO = Levek::VertexBuffer(simulation.colors.data(), simulation.colors.size() * 4 * 4);
@@ -169,7 +154,8 @@ int main(void) {
         planeShader.setUniformMat4f("mvp", vp);
         planeShader.setUniform1i("tex", 0);
         renderer->draw(&planeVA, &planeIBO, &planeShader);
-        /*
+        
+        #ifdef PLATFORM_UNIX
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -180,9 +166,6 @@ int main(void) {
 
             ImGui::Text("%d fps", (int) (1.0f / windowController->getDeltaTime()));
             ImGui::Text("%d fps sim", (int) (1.0f / simulation.time_step));
-
-            ImGui::Text("t prepare %lf ms", simulation.times[0]);
-            ImGui::Text("t neigh %lf ms", simulation.times[1]);
 
             ImGui::Text("particle radius %.3f", simulation.particleRadius);
             ImGui::Text("particle diameter %.3f", simulation.particleDiameter);
@@ -214,7 +197,7 @@ int main(void) {
 
             if (ImGui::Button("reset")) {
                 //Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
-                Lustrine::init_sim(&simulation, &domain, chunks);
+                Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
             }
             ImGui::EndTabItem();
             simulation.cubic_kernel_k *= factor;
@@ -234,7 +217,8 @@ int main(void) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        */
+        #endif
+
         lineRenderer->SetViewProjection(projection * camera.getView());
         //lineRenderer->AddLine({0, 0, 0}, {1, 0, 0}, {1.0, 0.0, 0.0, 1.0}); 
         //lineRenderer->AddLine({0, 0, 0}, {0, 1, 0}, {0.0, 1.0, 0.0, 1.0});

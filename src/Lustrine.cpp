@@ -252,14 +252,10 @@ void simulate(Simulation* simulation, float dt) {
     std::vector<glm::vec3>& positions = simulation->positions;
     std::vector<glm::vec3>& positions_star = simulation->positions_star;
     std::vector<glm::vec3>& velocities = simulation->velocities;
-    //std::vector<glm::vec3>& pressures_forces = simulation->pressures_forces;
-
-    //std::vector<float>& densities = simulation->densities;
     std::vector<float>& lambdas = simulation->lambdas;
     std::vector<std::vector<int>>& neighbors = simulation->neighbors;
     
     float kernelRadius = simulation->kernelRadius;
-    //float dt = simulation->time_step;
 
     //integration
     for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {

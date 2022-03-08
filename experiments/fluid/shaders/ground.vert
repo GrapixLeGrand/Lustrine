@@ -11,5 +11,7 @@ out vec2 v2f_tex_coord;
 void main()
 {
     v2f_tex_coord = vertex_uv;
-    gl_Position = mvp * vec4(vertex_position, 1.0); 
+    vec3 position = vertex_position;
+    position.xz += 15.0;
+    gl_Position = mvp * vec4(position, 1.0); 
 }

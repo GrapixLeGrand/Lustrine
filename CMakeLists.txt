@@ -4,6 +4,10 @@ cmake_policy(SET CMP0079 NEW)
 include(CTest)
 enable_testing()
 
+if (UNIX)
+    add_compile_definitions(PLATFORM_UNIX)
+endif()
+
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} "Include paths to external GLM library" ON)
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} OFF)
 #option(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8/glm/glm.hpp")
@@ -45,6 +49,7 @@ target_include_directories(Lustrine ${LUSTRINE_TARGET_INCLUDE_DIRS})
 target_include_directories(LustrineWrapper ${LUSTRINE_TARGET_INCLUDE_DIRS})
 
 add_compile_definitions(LUSTRINE_EXPERIMENTS_DIRECTORY="${Lustrine_SOURCE_DIR}/experiments")
+
 
 add_subdirectory(experiments)
 

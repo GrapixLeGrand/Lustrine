@@ -141,6 +141,8 @@ struct Simulation {
     std::vector<int> counts;
     std::vector<int> counting_sort_sorted_indices;
 
+    // TODO Everything for the sand goes bellow
+    
 };
 
 
