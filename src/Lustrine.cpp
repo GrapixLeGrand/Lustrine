@@ -10,38 +10,36 @@
 
 namespace Lustrine {
 
-
 constexpr double pi = 3.14159265358979323846;
 
-void init_sim(Simulation* simulation, const Domain* domain, std::vector<Chunk>& chunks) {
+void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
+
+    simulation->chunks.reserve(grids.size());
+    for (int i = 0; i < grids.size(); i++) {
+        Chunk chunk;
+        init_chunk_from_grid(parameters, &chunk, &grids[i], positions[i], grids[i].type);
+        simulation->chunks.push_back(chunk);
+    }
 
     std::sort(
-        chunks.begin(),
-        chunks.end(), 
+        simulation->chunks.begin(),
+        simulation->chunks.end(), 
         [](const auto a, const auto b) {
             return a.type < b.type; 
         }
     );
 
     int num_particles = 0;
-
-    for (int i = 0; i < chunks.size(); i++) {
-        num_particles += chunks[i].num_particles;
+    for (int i = 0; i < simulation->chunks.size(); i++) {
+        num_particles += simulation->chunks[i].num_particles;
     }
 
-    simulation->num_particles = num_particles; //particlesX * particlesY * particlesZ;
-
-    //simulation->max_neighbors = simulation->num_particles - 1;
+    simulation->num_particles = num_particles;
 
     simulation->positions = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
     simulation->positions_star = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
     simulation->velocities = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
-    simulation->pressures_forces = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
-
-    simulation->densities = std::vector<float>(simulation->num_particles, 0);
     simulation->lambdas = std::vector<float>(simulation->num_particles, 0);
-
-    simulation->vorticities = std::vector<glm::vec3>(simulation->num_particles, {0, 0, 0});
 
     simulation->neighbors = std::vector<std::vector<int>>(simulation->num_particles);
     simulation->colors = std::vector<glm::vec4>(simulation->num_particles, {0, 0, 0, 0});
@@ -72,36 +70,103 @@ void init_sim(Simulation* simulation, const Domain* domain, std::vector<Chunk>& 
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    simulation->times = std::vector<double>(10, 0);
-
-    int current_type = chunks[0].type;
-    simulation->ptr_fluid_dynamic_start = 0;
-    simulation->ptr_fluid_static_start = -1;
-    simulation->ptr_fluid_static_end = simulation->num_particles;
+    int current_type = simulation->chunks[0].type;
+    simulation->ptr_fluid_start = 0;
+    simulation->ptr_static_start = -1;
+    simulation->ptr_static_end = simulation->num_particles;
     int offset = 0;
 
-    for (int i = 0; i < chunks.size(); i++) {
-        Chunk& chunk = chunks[i];
+    for (int i = 0; i < simulation->chunks.size(); i++) {
+        Chunk& chunk = simulation->chunks[i];
         if (chunk.type != current_type) {
-            simulation->ptr_fluid_dynamic_end = offset;
-            simulation->ptr_fluid_static_start = offset;
+            simulation->ptr_fluid_end = offset;
+            simulation->ptr_static_start = offset;
         }
-        for (int j = 0; j < chunks[i].num_particles; j++) {
-            simulation->positions[j + offset] = chunks[i].positions[j];
-            simulation->positions_star[j + offset] = chunks[i].positions[j];
-            simulation->colors[j + offset] = chunks[i].colors[j];
+        for (int j = 0; j < simulation->chunks[i].num_particles; j++) {
+            simulation->positions[j + offset] = simulation->chunks[i].positions[j];
+            simulation->positions_star[j + offset] = simulation->chunks[i].positions[j];
+            if (simulation->chunks[i].has_one_color_per_particles) {
+                simulation->colors[j + offset] = simulation->chunks[i].colors[j];
+            } else {
+                simulation->colors[j + offset] = simulation->chunks[i].color;
+            }
         }
-        offset += chunks[i].num_particles;
+        offset += simulation->chunks[i].num_particles;
     }
 
-    if (simulation->ptr_fluid_static_start == -1) { //no static particles
-        simulation->ptr_fluid_dynamic_end = simulation->num_particles - 1;
-        simulation->ptr_fluid_static_start = simulation->ptr_fluid_static_end;
+    if (simulation->ptr_static_start == -1) { //no static particles
+        simulation->ptr_fluid_end = simulation->num_particles - 1;
+        simulation->ptr_fluid_start = simulation->ptr_static_end;
     }
+}
+
+void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color) {
+    
+    grid->type = type;
+    grid->num_grid_cells = X * Y * Z;
+    grid->num_occupied_grid_cells = grid->num_grid_cells;
+    grid->X = X;
+    grid->Y = Y;
+    grid->Z = Z;
+    grid->has_one_color_per_cell = false;
+
+    grid->cells = std::vector<bool>(grid->num_grid_cells, true);
+    grid->color = color;
+
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
 
 }
 
-extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, ChunkType type, glm::vec4 chunkColor) {
+void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type) {
+    
+    chunk->type = type;
+    chunk->num_particles = grid->num_occupied_grid_cells;
+    chunk->has_one_color_per_particles = grid->has_one_color_per_cell;
+
+    chunk->positions = std::vector<glm::vec3>(chunk->num_particles, {0, 0, 0});
+    if (chunk->has_one_color_per_particles) {
+        chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 1});
+    } else {
+        chunk->color = grid->color;
+    }
+
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
+    glm::vec3 offset = glm::vec3(radius, radius, radius);
+    int X = grid->X; int Y = grid->Y; int Z = grid->Z;
+    int counter = 0; //because chunk is disorganized we cannot use grid indices
+
+    for (int x = 0; x < X; x++) {
+        for (int y = 0; y < Y; y++) {
+            for (int z = 0; z < Z; z++) {
+                
+                if (grid->cells[x * Y * Z + y * Z + z] == true) { //a particle present at the current grid cell
+                    glm::vec3& particle_position = chunk->positions[counter];
+
+                    particle_position.x = x * diameter;
+                    particle_position.y = y * diameter; 
+                    particle_position.z = z * diameter; 
+
+                    particle_position += position;
+
+                    if (chunk->has_one_color_per_particles == true) {
+                        const glm::vec4& grid_color = grid->colors[x * Y * Z + y * Z + z];
+                        glm::vec4& chunk_color = chunk->colors[counter];
+                        chunk_color = grid_color;
+                    }
+
+                    particle_position += offset;
+                    counter++;
+                }
+
+            }
+        }
+    }
+}
+
+/*
+extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, MaterialType type, glm::vec4 chunkColor) {
     
     chunk->type = type;
     chunk->num_particles = X * Y * Z;
@@ -113,8 +178,8 @@ extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, in
     chunk->positions = std::vector<glm::vec3>(chunk->num_particles, {0, 0, 0});
     chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 1});
 
-    const float diameter = simulation->particleDiameter;
-    const float radius = simulation->particleRadius;
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
     glm::vec3 offset = glm::vec3(radius, radius, radius);
 
     for (int x = 0; x < X; x++) {
@@ -146,12 +211,13 @@ extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, in
     }
 }
 
-void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z) {
-    init_chunk_box(simulation, chunk, X, Y, Z, glm::vec3(0.0), ChunkType::FLUID_DYNAMIC, glm::vec4(1.0));
+void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z) {
+    init_chunk_box(parameters, chunk, X, Y, Z, glm::vec3(0.0), MaterialType::FLUID_DYNAMIC, glm::vec4(1.0));
 }
 
 /////////
 
+*/
 
 
 float s_coor(const Simulation* simulation, float rl) {
@@ -186,9 +252,9 @@ void simulate(Simulation* simulation, float dt) {
     std::vector<glm::vec3>& positions = simulation->positions;
     std::vector<glm::vec3>& positions_star = simulation->positions_star;
     std::vector<glm::vec3>& velocities = simulation->velocities;
-    std::vector<glm::vec3>& pressures_forces = simulation->pressures_forces;
+    //std::vector<glm::vec3>& pressures_forces = simulation->pressures_forces;
 
-    std::vector<float>& densities = simulation->densities;
+    //std::vector<float>& densities = simulation->densities;
     std::vector<float>& lambdas = simulation->lambdas;
     std::vector<std::vector<int>>& neighbors = simulation->neighbors;
     
@@ -196,7 +262,7 @@ void simulate(Simulation* simulation, float dt) {
     //float dt = simulation->time_step;
 
     //integration
-    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
         velocities[i] += simulation->gravity * simulation->mass * dt;
         positions_star[i] = positions[i] + velocities[i] * dt; //prediction
     }
@@ -206,7 +272,7 @@ void simulate(Simulation* simulation, float dt) {
     //find_neighbors_brute_force(simulation);
 
     //solve pressure
-    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
 
         float densitiy = 0.0;
         for (int j = 0; j < neighbors[i].size(); j++) {
@@ -238,19 +304,20 @@ void simulate(Simulation* simulation, float dt) {
 
     }
     
-    for (int i = simulation->ptr_fluid_dynamic_start; i < simulation->ptr_fluid_dynamic_end; i++) {
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
 
         //equation 13 (applying pressure force correction)
-        pressures_forces[i] = glm::vec3(0.0);
+        //pressures_forces[i] = glm::vec3(0.0);
+        glm::vec3 pressure_force = glm::vec3(0.0);
         for (int j = 0; j < neighbors[i].size(); j++) {
             glm::vec3 ij = positions_star[i] - positions_star[neighbors[i][j]];
-            pressures_forces[i] += (lambdas[i] + lambdas[j] + s_coor(simulation, glm::length(ij))) * simulation->gradW(simulation, ij);
+            pressure_force += (lambdas[i] + lambdas[j] + s_coor(simulation, glm::length(ij))) * simulation->gradW(simulation, ij);
         }
 
-        pressures_forces[i] /= simulation->rest_density;
+        pressure_force /= simulation->rest_density;
         
         //update prediction
-        positions_star[i] += pressures_forces[i];
+        positions_star[i] += pressure_force;
 
         //update velocity
         positions_star[i].x = resolve_collision(positions_star[i].x, simulation->particleRadius, X - simulation->particleRadius);
@@ -264,7 +331,8 @@ void simulate(Simulation* simulation, float dt) {
 
 }
 
-extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid, Chunk* chunk, ChunkType type) {
+/*
+extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type) {
 
     chunk->type = type;
     chunk->num_particles = grid->num_occupied_grid_cells;
@@ -273,8 +341,8 @@ extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid,
     chunk->positions = std::vector<glm::vec3>(chunk->num_particles, {0, 0, 0});
     chunk->colors = std::vector<glm::vec4>(chunk->num_particles, {0, 0, 0, 0});
 
-    const float diameter = simulation->particleDiameter;
-    const float radius = simulation->particleRadius;
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
     glm::vec3 offset = glm::vec3(radius, radius, radius);
 
     int counter = 0;
@@ -290,9 +358,9 @@ extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid,
 
                 glm::vec3& particle_position = chunk->positions[counter];
 
-                particle_position.x = x * diameter;
-                particle_position.y = y * diameter;
-                particle_position.z = z * diameter;
+                particle_position.x = x * diameter + position.x;
+                particle_position.y = y * diameter + position.y;
+                particle_position.z = z * diameter + position.z;
 
                 const glm::vec4& voxel_color = grid->colors[index];
                 glm::vec4& chunk_color = chunk->colors[counter];
@@ -314,7 +382,7 @@ extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid,
         } //end for y
     } //end for x
 
-}
+}*/
 /*
 void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
     init_grid_from_magika_voxel_dont_call_me(grid, path);

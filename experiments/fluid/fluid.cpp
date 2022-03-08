@@ -45,16 +45,23 @@ int main(void) {
     float particleScale = 1.0f;
 
     Lustrine::Simulation simulation;
-    Lustrine::Domain domain {30, 30, 30};
-    std::vector<Lustrine::Chunk> chunks (3);
-    Lustrine::Grid model_grid;
+    Lustrine::SimulationParameters parameters;
+    parameters.X = 30.0f;
+    parameters.Y = 25.0f;
+    parameters.Z = 30.0f;
 
-    Lustrine::init_grid_from_magika_voxel(&model_grid, LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox");
-    Lustrine::init_chunk_from_grid(&simulation, &model_grid, &chunks[2], Lustrine::FLUID_STATIC);
+    std::vector<Lustrine::Grid> grids (3);
+    std::vector<glm::vec3> grids_positions (3);
+    grids_positions[0] = {0, 0, 0};
+    grids_positions[1] = {0, 0, 0};
+    grids_positions[2] = {15, 0, 15};
 
-    Lustrine::init_chunk_box(&simulation, &chunks[0], 15, 20, 15, {0, 0, 0}, Lustrine::ChunkType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
-    Lustrine::init_chunk_box(&simulation, &chunks[1], 10, 10, 10, {15, 0, 15}, Lustrine::ChunkType::FLUID_STATIC, glm::vec4(1.0, 0.0, 0.0, 1.0));
-    Lustrine::init_sim(&simulation, &domain, chunks);
+    Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID_STATIC);
+    
+    Lustrine::init_grid_box(&parameters, &grids[1], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &grids[2], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(1.0, 0.2, 1.0, 1.0));
+
+    Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
 
     /*
     int num_particles = 1000;

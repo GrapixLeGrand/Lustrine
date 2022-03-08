@@ -41,7 +41,7 @@ const ogt_vox_scene* load_vox_scene(const char* filename, uint32_t scene_read_fl
 }
 
 
-void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
+void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type) {
     const ogt_vox_scene* scene = load_vox_scene(path.c_str());
 
     if (scene->num_models < 1) {
@@ -54,6 +54,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
     grid->Y = model->size_y;
     grid->Z = model->size_z;
 
+    grid->type = type;
     grid->num_grid_cells = model->size_x * model->size_y * model->size_z;
     grid->cells = std::vector<bool>(grid->num_grid_cells, false);
     grid->colors = std::vector<glm::vec4>(grid->num_grid_cells, {0, 0, 0, 0});

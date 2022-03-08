@@ -12,17 +12,60 @@
 namespace Lustrine {
 struct Simulation;
 
-extern void init_sim(Simulation* simulation, const Domain* domain, std::vector<Chunk>& grids);
+/**
+ * @brief Initialize the simulation from the parameters in Simulation parameters.
+ * 
+ * @param parameters 
+ * @param simulation 
+ * @param grids, the allocated grids
+ * @param the positions of the grids
+ */
+extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
 
-extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, ChunkType type, glm::vec4 color);
-extern void init_chunk_box(const Simulation* simulation, Chunk* chunk, int X, int Y, int Z);
-extern void init_chunk_from_grid(const Simulation* simulation, const Grid* grid, Chunk* chunk, ChunkType type);
+/**
+ * @brief 
+ * 
+ * @param parameters 
+ * @param chunk 
+ * @param grid 
+ * @param position 
+ * @param type 
+ */
+extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type);
 
-extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path);
+/**
+ * @brief Init a grid full of partlices. A box full of particles with X * Y * Z particles.
+ * 
+ * @param parameters 
+ * @param grid 
+ * @param X 
+ * @param Y 
+ * @param Z 
+ * @param type 
+ * @param color 
+ */
+extern void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color);
+
+/**
+ * @brief init a box 
+ * 
+ * @param parameters 
+ * @param chunk 
+ * @param X 
+ * @param Y 
+ * @param Z 
+ * @param position 
+ * @param type 
+ * @param color 
+ */
+//extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, MaterialType type, glm::vec4 color);
+//extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z);
+
+
+extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
-
-extern float s_coor(const Simulation* simulation, float rl);
+//extern float s_coor(const Simulation* simulation, float rl);
 
 extern void simulate(Simulation* simulation, float dt);
 
