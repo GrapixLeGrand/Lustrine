@@ -87,8 +87,13 @@ namespace Wrapper {
 
 	}
 
+	void allocate_grid_array(Grid** grids, int num_grids) {
+		std::cout << "init grids" << std::endl;
+		*grids = new Grid[num_grids];
+	}
+
 	//Simulation* simulation;
-	void init_simulation_wrapper(const SimulationParameters* parameters, const Grid* wrapped_grids, const Position* wrapped_positions, int num_grids) {
+	void init_simulation(const SimulationParameters* parameters, const Grid* wrapped_grids, const Position* wrapped_positions, int num_grids) {
 		
 		std::cout << "wrapper init called!" << std::endl;
 		
@@ -117,7 +122,7 @@ namespace Wrapper {
 
 	}
 
-	void init_grid_box_wrapper(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, int type, Color color) {
+	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, int type, Color color) {
 		
 		std::cout << "init called" << std::endl;
 		Lustrine::Grid original_grid;
@@ -176,6 +181,13 @@ namespace Wrapper {
 			grid->colors = nullptr;
 		}
 		
+	}
+
+	void free_grids(Grid* grids) {
+		std::cout << "freeing memory" << std::endl;
+		if (grids != nullptr) {
+			delete grids;
+		}
 	}
 
 	void cleanup_simulation() {
