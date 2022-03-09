@@ -47,6 +47,10 @@ namespace Wrapper {
 	extern "C" __declspec(dllexport) void allocate_grid_array(Grid** grid, int num_grids);
 	extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
 	extern "C" __declspec(dllexport) void free_grid(Grid* grid);
+	extern "C" __declspec(dllexport) void free_grids(Grid* grids);
+
+	extern "C" __declspec(dllexport) void simulation_bind_positions(float** position_ptr);
+
 	extern "C" __declspec(dllexport) void cleanup_simulation();
 
 	extern "C" __declspec(dllexport) void say_hello();

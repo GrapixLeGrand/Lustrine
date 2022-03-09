@@ -21,9 +21,12 @@ int main(void) {
 
 	std::cout << "simulate for 1000 steps !" << std::endl;
 
+	float* positions = nullptr;
 	float dt = 0.0;
 	for (int i = 0; i < 1000; i++) {
 		Lustrine::Wrapper::simulate(dt);
+		Lustrine::Wrapper::simulation_bind_positions(&positions);
+		std::cout << positions[0] << std::endl;
 		dt += 0.01;
 	}
 

@@ -195,6 +195,10 @@ namespace Wrapper {
 		delete simulation;
 	}
 
+	void simulation_bind_positions(float** position_ptr) {
+		*position_ptr = (float*) &simulation->positions.data()[0][0];
+	}
+
 	void say_hello() {
 		std::cout << "hello from cpp!" << std::endl;
 	}
