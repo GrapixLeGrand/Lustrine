@@ -4,7 +4,13 @@
 #include "Kernels.hpp"
 #include "Neighbors.hpp"
 #include <vector>
+#ifdef PLATFORM_WINDOWS
+#include "../thirdparty/glm-0.9.9.8/glm/glm.hpp"
+#endif
+#ifdef PLATFORM_UNIX
 #include "glm/glm.hpp"
+#endif
+
 #include <string>
 
 //https://on-demand.gputechconf.com/gtc/2014/presentations/S4117-fast-fixed-radius-nearest-neighbor-gpu.pdf

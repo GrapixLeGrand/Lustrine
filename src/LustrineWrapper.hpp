@@ -2,23 +2,16 @@
 
 #include "Lustrine.hpp"
 
+#pragma once
+
+#ifdef LUSTRINEWRAPPER_API
+#define MATHLIBRARY_API __declspec(dllexport)
+#else
+#define LUSTRINEWRAPPER_API __declspec(dllimport)
+#endif
+
 namespace Lustrine {
 namespace Wrapper {
-	/*
-	Wrapping
-	struct Grid {
-		std::vector<bool> cells;
-		std::vector<glm::vec4> colors;
-		glm::vec4 color;
-		bool has_one_color_per_cell;
-		int X;
-		int Y;
-		int Z;
-		int num_grid_cells;
-		int num_occupied_grid_cells;
-		MaterialType type;
-	};
-	*/
 
 	struct Color {
 		float r;
@@ -46,9 +39,16 @@ namespace Wrapper {
 		int type;
 	};
 
-	static Simulation* simulation;
-	extern void init_simulation_wrapper(const SimulationParameters* parameters, Grid* grids, Position* positions);
-	extern void init_grid_box_wrapper(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
-	extern void simulate_wrapper(float dt);
+	static Simulation* simulation = nullptr;
+	extern "C" __declspec(dllexport) void init_simulation_wrapper(const SimulationParameters* parameters, const Grid* grids, const Position* positions, int num_grids);
+	extern "C" __declspec(dllexport) void init_grid_box_wrapper(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
+	extern "C" __declspec(dllexport) void simulate(float dt);
+
+	extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
+	extern "C" __declspec(dllexport) void free_grid(Grid* grid);
+	extern "C" __declspec(dllexport) void cleanup_simulation();
+
+	extern "C" __declspec(dllexport) void say_hello();
+
 } //Wrapper
 } //Lustrine

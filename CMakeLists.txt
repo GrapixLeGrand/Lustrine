@@ -8,6 +8,11 @@ if (UNIX)
     add_compile_definitions(PLATFORM_UNIX)
 endif()
 
+if (WIN32)
+    add_compile_definitions(PLATFORM_WINDOWS)
+endif()
+
+
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} "Include paths to external GLM library" ON)
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} OFF)
 #option(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8/glm/glm.hpp")
@@ -36,20 +41,29 @@ set(LUSTRINEWRAPPER_SOURCES
 
 add_library(Lustrine STATIC ${LUSTRINE_SOURCES})
 add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
+#add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
+set_target_properties(
+    LustrineWrapper PROPERTIES
+    PUBLIC_HEADER src/LustrineWrapper.hpp
+)
 
 target_link_libraries(Lustrine LevekGL)
 
 set(LUSTRINE_TARGET_INCLUDE_DIRS
     PUBLIC "src"
-    PRIVATE "thirdparty/glm-0.9.9.8"
+    PRIVATE "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8"#"thirdparty/glm-0.9.9.8"
     PUBLIC "thirdparty/LevekGL"   
 )
 
+set(LUSTRINEWRAPPER_TARGET_INCLUDE_DIRS
+    PUBLIC "src"
+    PRIVATE "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8"#"thirdparty/glm-0.9.9.8"   
+)
+
 target_include_directories(Lustrine ${LUSTRINE_TARGET_INCLUDE_DIRS})
-target_include_directories(LustrineWrapper ${LUSTRINE_TARGET_INCLUDE_DIRS})
+target_include_directories(LustrineWrapper ${LUSTRINEWRAPPER_TARGET_INCLUDE_DIRS})
 
 add_compile_definitions(LUSTRINE_EXPERIMENTS_DIRECTORY="${Lustrine_SOURCE_DIR}/experiments")
-
 
 add_subdirectory(experiments)
 
