@@ -12,6 +12,24 @@ namespace Wrapper {
 		std::cout << "Lustrine::Debug" << " " << msg << std::endl;
 	}
 
+
+	void allocate_simulation_data(SimulationData** data) {
+		*data = new SimulationData();
+		(*data)->start_dynamic = 0xBEEF;
+	}
+
+	void allocate_simulation_parameters(SimulationParameters** parameters) {
+		*parameters = new SimulationParameters();
+	}
+
+	void free_simulation_data(SimulationData* data) {
+		delete data;
+	}
+
+	void free_simulation_parameters(SimulationParameters* parameters) {
+		delete parameters;
+	}
+
 	glm::vec4 wrapper_to_glm(const Color& color) {
 		glm::vec4 result (0.0);
 		result.r = color.r;
@@ -96,7 +114,7 @@ namespace Wrapper {
 
 	}
 
-	void allocate_grid_array(Grid** grids, int num_grids) {
+	void allocate_grids(Grid** grids, int num_grids) {
 		__debug_msg("allocated an array of grids");
 		*grids = new Grid[num_grids];
 	}
@@ -151,6 +169,7 @@ namespace Wrapper {
 		Lustrine::simulate(simulation, dt);
 	}
 
+	/*
 	void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color) {
 		__debug_msg("allocating a grid");
 		grid->X = X;
@@ -177,8 +196,8 @@ namespace Wrapper {
 		
 		grid->num_occupied_grid_cells = 0;
 		
-	}
-
+	}*/
+	/*
 	void free_grid(Grid* grid) {
 
 		std::cout << "freeing memory" << std::endl;
@@ -195,7 +214,7 @@ namespace Wrapper {
 			grid->colors = nullptr;
 		}
 		
-	}
+	}*/
 
 	void free_grids(Grid* grids) {
 		std::cout << "freeing memory" << std::endl;

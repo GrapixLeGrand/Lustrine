@@ -62,11 +62,23 @@ namespace Wrapper {
 	extern "C" __declspec(dllexport) void cleanup_simulation();
 	extern "C" __declspec(dllexport) void say_hello();
 
-	extern "C" __declspec(dllexport) void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
-	extern "C" __declspec(dllexport) void allocate_grid_array(Grid** grid, int num_grids);
-	extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
-	extern "C" __declspec(dllexport) void free_grid(Grid* grid);
+	//extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
+	//extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** parameters);
+	//extern "C" __declspec(dllexport) void allocate_grids(Grid** grid, int num_grids);
+
+	extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
+	extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** params);
+	extern "C" __declspec(dllexport) void allocate_grids(Grid**, int num_grids);
+
+	extern "C" __declspec(dllexport) void free_simulation_data(SimulationData* data);
+	extern "C" __declspec(dllexport) void free_simulation_parameters(SimulationParameters* parameters);
 	extern "C" __declspec(dllexport) void free_grids(Grid* grids);
+
+	extern "C" __declspec(dllexport) void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
+	
+	//extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
+	//extern "C" __declspec(dllexport) void free_grid(Grid* grid);
+	
 
 	
 
