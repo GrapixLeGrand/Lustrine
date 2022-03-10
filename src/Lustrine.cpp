@@ -14,6 +14,10 @@ constexpr double pi = 3.14159265358979323846;
 
 void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
 
+    simulation->domainX = parameters->X;
+    simulation->domainY = parameters->Y;
+    simulation->domainZ = parameters->Z;
+
     simulation->chunks.reserve(grids.size());
     for (int i = 0; i < grids.size(); i++) {
         Chunk chunk;
@@ -96,7 +100,7 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
 
     if (simulation->ptr_static_start == -1) { //no static particles
         simulation->ptr_fluid_end = simulation->num_particles - 1;
-        simulation->ptr_fluid_start = simulation->ptr_static_end;
+        simulation->ptr_static_start = simulation->ptr_static_end;
     }
 }
 

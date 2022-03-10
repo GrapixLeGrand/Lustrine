@@ -3,9 +3,14 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <string>
 
 namespace Lustrine {
 namespace Wrapper {
+
+	void __debug_msg(const std::string& msg) {
+		std::cout << "Lustrine::Debug" << " " << msg << std::endl;
+	}
 
 	glm::vec4 wrapper_to_glm(const Color& color) {
 		glm::vec4 result (0.0);
@@ -52,6 +57,10 @@ namespace Wrapper {
 		original->color = wrapper_to_glm(wrapped->color);
 		original->num_occupied_grid_cells = wrapped->num_occupied_grid_cells;
 		original->num_grid_cells = wrapped->num_grid_cells;
+		
+		for (int i = 0; i < original->num_grid_cells; i++) {
+			original->cells[i] = wrapped->cells[i];
+		}
 
 		if (original->has_one_color_per_cell) {
 			original->colors = std::vector<glm::vec4>(original->num_grid_cells);
@@ -88,12 +97,12 @@ namespace Wrapper {
 	}
 
 	void allocate_grid_array(Grid** grids, int num_grids) {
-		std::cout << "init grids" << std::endl;
+		__debug_msg("allocated an array of grids");
 		*grids = new Grid[num_grids];
 	}
 
 	//Simulation* simulation;
-	void init_simulation(const SimulationParameters* parameters, const Grid* wrapped_grids, const Position* wrapped_positions, int num_grids) {
+	void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* wrapped_grids, const Position* wrapped_positions, int num_grids) {
 		
 		std::cout << "wrapper init called!" << std::endl;
 		
@@ -118,6 +127,13 @@ namespace Wrapper {
 
 		init_simulation(parameters, simulation, original_grids, original_positions);
 
+		data->num_particles = simulation->num_particles;
+		data->start_dynamic = simulation->ptr_fluid_start;
+		data->end_dynamic = simulation->ptr_fluid_end;
+		
+		data->start_static = simulation->ptr_static_start;
+		data->end_static = simulation->ptr_static_end;
+
 		std::cout << "end init" << std::endl;
 
 	}
@@ -132,13 +148,11 @@ namespace Wrapper {
 	}
 
 	void simulate(float dt) {
-		std::cout << "dt is " << dt << std::endl;
 		Lustrine::simulate(simulation, dt);
 	}
 
 	void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color) {
-		
-		std::cout << "allocating memory" << std::endl;
+		__debug_msg("allocating a grid");
 		grid->X = X;
 		grid->Y = Y;
 		grid->Z = Z;
@@ -155,10 +169,10 @@ namespace Wrapper {
 		
 		if (grid->has_one_color_per_cell == true) {
 			grid->colors = new Color[grid->num_grid_cells];
-			std::memset(grid->colors, 0, 4 * 4 * grid->num_grid_cells);
+			std::memset(grid->colors, 0, sizeof(Color) * grid->num_grid_cells);
 		}
 
-		grid->color = { 0, 0, 0, 0 };
+		grid->color = { 0.0f, 0.0f, 0.0f, 0.0f };
 		grid->type = 0;
 		
 		grid->num_occupied_grid_cells = 0;
@@ -196,7 +210,7 @@ namespace Wrapper {
 	}
 
 	void simulation_bind_positions(float** position_ptr) {
-		*position_ptr = (float*) &simulation->positions.data()[0][0];
+		*position_ptr = (float*) simulation->positions.data();
 	}
 
 	void say_hello() {
