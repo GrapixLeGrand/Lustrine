@@ -15,8 +15,7 @@ set(GLFW3_INCLUDE_DIRS "../../thridparty/LevekGL/thirdparty/windows/glfw-3.3.6/i
 #set(GLFW3_LIBRARIES "${LevekGL_SOURCE_DIR}/thirdparty/windows/glfw-3.3.6/lib-vc2022/glfw3.lib")
 include_directories(GLEW_INCLUDE_DIRS)
 include_directories(GLFW3_INCLUDE_DIRS)
-#target_include_directories(fluid ${GLEW_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIRS})
-
+#target_include_directories(fluid ${GLEW_INCLUDE_DIRS} ${GLFW3_INCLUDE_DIR
 endif(WIN32)
 
 add_executable(fluid fluid.cpp ../Utils.cpp)

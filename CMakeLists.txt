@@ -29,6 +29,7 @@ set(LUSTRINE_SOURCES
     "src/Kernels.cpp"
     "src/Neighbors.cpp"
     "src/VoxelLoader.cpp"
+    "src/BulletPhysics.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
@@ -36,10 +37,11 @@ set(LUSTRINEWRAPPER_SOURCES
     "src/Kernels.cpp"
     "src/Neighbors.cpp"
     "src/LustrineWrapper.cpp"
+    "src/BulletPhysics.cpp"
 )
 
 
-add_library(Lustrine STATIC ${LUSTRINE_SOURCES})
+add_library(Lustrine SHARED ${LUSTRINE_SOURCES})
 add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
 #add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
 set_target_properties(
@@ -48,6 +50,73 @@ set_target_properties(
 )
 
 target_link_libraries(Lustrine LevekGL)
+
+
+set(Bullet3IncludeDirs 
+    PUBLIC "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/bullet3/src"
+)
+if (WIN32)
+#thirdparty\Bullet3\windows
+ 
+#    BulletDynamics
+#    BulletInverseDynamics
+#    BulletCollision
+#    BulletSoftBody
+
+set(Bullet3LinearMathLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/LinearMath.lib")
+set(Bullet3CommonLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/Bullet3Common.lib")
+set(BulletDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/Bullet3Dynamics.lib")
+set(BulletInverseDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletInverseDynamics.lib")
+set(BulletCollisionLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletCollision.lib")
+set(BulletSoftBodyLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletSoftBody.lib")
+
+endif()
+
+if (UNIX)
+#TODO set the static lib for bullet here for unix
+endif()
+
+target_include_directories(
+    Lustrine
+    ${Bullet3IncludeDirs}
+)
+
+target_include_directories(
+    LustrineWrapper
+    ${Bullet3IncludeDirs}
+)
+#include_directories(${Bullet3IncludeDirs})
+
+add_library(Bullet3LinearMath STATIC IMPORTED)
+set_property(TARGET Bullet3LinearMath PROPERTY IMPORTED_LOCATION ${Bullet3LinearMathLibPath})
+target_link_libraries(Lustrine Bullet3LinearMath)
+target_link_libraries(LustrineWrapper Bullet3LinearMath)
+
+add_library(Bullet3Common STATIC IMPORTED)
+set_property(TARGET Bullet3Common PROPERTY IMPORTED_LOCATION ${Bullet3CommonLibPath})
+target_link_libraries(Lustrine Bullet3Common)
+target_link_libraries(LustrineWrapper Bullet3Common)
+
+add_library(Bullet3InverseDynamics STATIC IMPORTED)
+set_property(TARGET Bullet3InverseDynamics PROPERTY IMPORTED_LOCATION ${BulletInverseDynamicsLibPath})
+#target_link_libraries(Lustrine Bullet3InverseDynamics)
+#target_link_libraries(LustrineWrapper Bullet3InverseDynamics)
+
+add_library(BulletDynamics STATIC IMPORTED)
+set_property(TARGET BulletDynamics PROPERTY IMPORTED_LOCATION ${BulletDynamicsLibPath})
+target_link_libraries(Lustrine BulletDynamics)
+target_link_libraries(LustrineWrapper BulletDynamics)
+
+add_library(BulletCollision STATIC IMPORTED)
+set_property(TARGET BulletCollision PROPERTY IMPORTED_LOCATION ${BulletCollisionLibPath})
+target_link_libraries(Lustrine BulletCollision)
+target_link_libraries(LustrineWrapper BulletCollision)
+
+add_library(Bullet3SoftBody STATIC IMPORTED)
+set_property(TARGET Bullet3SoftBody PROPERTY IMPORTED_LOCATION ${BulletSoftBodyLibPath})
+#target_link_libraries(Lustrine Bullet3SoftBody)
+#target_link_libraries(LustrineWrapper Bullet3SoftBody)
+
 
 set(LUSTRINE_TARGET_INCLUDE_DIRS
     PUBLIC "src"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BulletPhysics.hpp"
 #include "Simulation.hpp"
 #include "Kernels.hpp"
 #include "Neighbors.hpp"
