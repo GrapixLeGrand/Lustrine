@@ -228,12 +228,23 @@ namespace Wrapper {
 		delete simulation;
 	}
 
-	void simulation_bind_positions(float** position_ptr) {
+	void simulation_bind_positions(float** position_ptr, int num_positions) {
 		*position_ptr = (float*) simulation->positions.data();
 	}
 
 	void say_hello() {
 		std::cout << "hello from cpp!" << std::endl;
 	}
+
+	void simulation_bind_positions_copy(float* position_ptr, int num_positions) {
+
+		for (int i = 0; i < simulation->num_particles; i++) {
+			position_ptr[i + 0] = simulation->positions[i].x;
+			position_ptr[i + 1] = simulation->positions[i].y;
+			position_ptr[i + 2] = simulation->positions[i].z;
+		}
+
+	}
+
 }
 }

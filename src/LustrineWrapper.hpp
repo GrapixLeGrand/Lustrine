@@ -3,6 +3,7 @@
 #include "Lustrine.hpp"
 
 #pragma once
+#pragma pack(push, 1)
 
 #ifdef LUSTRINEWRAPPER_API
 #define MATHLIBRARY_API __declspec(dllexport)
@@ -42,6 +43,7 @@ namespace Wrapper {
 		float z;
 	};
 
+	
 	struct Grid {
 		bool* cells;
 		Color* colors;
@@ -58,13 +60,17 @@ namespace Wrapper {
 	static Simulation* simulation = nullptr;
 	extern "C" __declspec(dllexport) void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* grids, const Position* positions, int num_grids);
 	extern "C" __declspec(dllexport) void simulate(float dt);
-	extern "C" __declspec(dllexport) void simulation_bind_positions(float** position_ptr);
+	extern "C" __declspec(dllexport) void simulation_bind_positions(float** position_ptr, int num_positions);
+
+	extern "C" __declspec(dllexport) void simulation_bind_positions_copy(float* position_ptr, int num_positions);
+
 	extern "C" __declspec(dllexport) void cleanup_simulation();
 	extern "C" __declspec(dllexport) void say_hello();
 
 	//extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
 	//extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** parameters);
 	//extern "C" __declspec(dllexport) void allocate_grids(Grid** grid, int num_grids);
+
 
 	extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
 	extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** params);
@@ -88,3 +94,5 @@ namespace Wrapper {
 
 } //Wrapper
 } //Lustrine
+
+#pragma pack(pop, 1)
