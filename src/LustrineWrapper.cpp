@@ -218,9 +218,7 @@ namespace Wrapper {
 
 	void free_grids(Grid* grids) {
 		std::cout << "freeing memory" << std::endl;
-		if (grids != nullptr) {
-			delete grids;
-		}
+		delete grids;
 	}
 
 	void cleanup_simulation() {
@@ -236,14 +234,8 @@ namespace Wrapper {
 		std::cout << "hello from cpp!" << std::endl;
 	}
 
-	void simulation_bind_positions_copy(float* position_ptr, int num_positions) {
-
-		for (int i = 0; i < simulation->num_particles; i++) {
-			position_ptr[i + 0] = simulation->positions[i].x;
-			position_ptr[i + 1] = simulation->positions[i].y;
-			position_ptr[i + 2] = simulation->positions[i].z;
-		}
-
+	void simulation_bind_positions_copy(float* position_ptr) {
+        std::memcpy(position_ptr, simulation->positions.data(), sizeof(float) * 3 * simulation->num_particles);
 	}
 
 }

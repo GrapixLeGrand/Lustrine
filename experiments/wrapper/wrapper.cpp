@@ -29,7 +29,7 @@ int main(void) {
 	Lustrine::Wrapper::simulation_bind_positions(&particles_positions, p);
 	const int size = 3 * data.num_particles;
 	float* test = new float[size];
-	Lustrine::Wrapper::simulation_bind_positions_copy(test, size);
+	Lustrine::Wrapper::simulation_bind_positions_copy(test);
 
 	for (int i = 0; i < 2000; i++) {
 		std::cout << particles_positions[3 * i + 0] << particles_positions[3 * i + 1] << particles_positions[3 * i + 2]  << std::endl;

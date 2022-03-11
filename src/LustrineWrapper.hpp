@@ -3,7 +3,6 @@
 #include "Lustrine.hpp"
 
 #pragma once
-#pragma pack(push, 1)
 
 #ifdef LUSTRINEWRAPPER_API
 #define MATHLIBRARY_API __declspec(dllexport)
@@ -43,7 +42,6 @@ namespace Wrapper {
 		float z;
 	};
 
-	
 	struct Grid {
 		bool* cells;
 		Color* colors;
@@ -62,7 +60,7 @@ namespace Wrapper {
 	extern "C" __declspec(dllexport) void simulate(float dt);
 	extern "C" __declspec(dllexport) void simulation_bind_positions(float** position_ptr, int num_positions);
 
-	extern "C" __declspec(dllexport) void simulation_bind_positions_copy(float* position_ptr, int num_positions);
+	extern "C" __declspec(dllexport) void simulation_bind_positions_copy(float* position_ptr);
 
 	extern "C" __declspec(dllexport) void cleanup_simulation();
 	extern "C" __declspec(dllexport) void say_hello();
@@ -94,5 +92,3 @@ namespace Wrapper {
 
 } //Wrapper
 } //Lustrine
-
-#pragma pack(pop, 1)
