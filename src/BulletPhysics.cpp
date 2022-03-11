@@ -11,8 +11,8 @@ namespace Lustrine {
 		simulation->broadPhase = new btDbvtBroadphase();
 		btGImpactCollisionAlgorithm::registerAlgorithm(simulation->dispatcher);
 
-		//simulation->solver = new btSequentialImpulseConstraintSolver();
-		//simulation->dynamicWorld = new btDiscreteDynamicsWorld(simulation->dispatcher, simulation->broadPhase, simulation->solver, simulation->collisionConfiguration);
+		simulation->solver = new btSequentialImpulseConstraintSolver();
+		simulation->dynamicWorld = new btDiscreteDynamicsWorld(simulation->dispatcher, simulation->broadPhase, simulation->solver, simulation->collisionConfiguration);
 		btVector3 gravity(0, -10, 0);
 		simulation->dynamicWorld->setGravity(gravity);
 
