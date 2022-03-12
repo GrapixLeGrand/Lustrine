@@ -26,6 +26,7 @@ link_directories(${Lustrine_SOURCE_DIR}/src)
 
 set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
+    "src/JsonWriter.cpp"
     "src/Kernels.cpp"
     "src/Neighbors.cpp"
     "src/VoxelLoader.cpp"
@@ -34,10 +35,12 @@ set(LUSTRINE_SOURCES
 
 set(LUSTRINEWRAPPER_SOURCES
     "src/Lustrine.cpp"
+    "src/JsonWriter.cpp"
     "src/Kernels.cpp"
     "src/Neighbors.cpp"
     "src/LustrineWrapper.cpp"
     "src/BulletPhysics.cpp"
+    "src/VoxelLoader.cpp"
 )
 
 

@@ -113,7 +113,7 @@ struct Simulation {
     float mass = 5.0; //mass of each particle
 
     glm::vec3 gravity = glm::vec3(0, -10.0, 0.0);
-    float time_step = 0.01;
+    float time_step = 0.01f;
 
     float relaxation_epsilon = 10.0f;
 
@@ -122,8 +122,8 @@ struct Simulation {
     float s_corr_k = 1.0;
     float s_corr_n = 4;
 
-    float c_xsph = 0.1;
-    float epsilon_vorticity = 0.1;
+    float c_xsph = 0.1f;
+    float epsilon_vorticity = 0.1f;
     
     std::vector<glm::vec3> positions; //array containing positions of the particles
     std::vector<glm::vec3> positions_star; //array containing the prediction of the positions of the particles

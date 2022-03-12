@@ -1,4 +1,5 @@
 #include "LustrineWrapper.hpp"
+#include "VoxelLoader.hpp"
 
 #include <iostream>
 #include <vector>
@@ -238,5 +239,18 @@ namespace Wrapper {
         std::memcpy(position_ptr, simulation->positions.data(), sizeof(float) * 3 * simulation->num_particles);
 	}
 
+    void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size) {
+        std::string s{read_vox_scene_json(buffer, 0)};
+        data->length = s.size();
+        data->data = new char[s.size() + 1];
+        memcpy(data->data, s.c_str(), s.size());
+        data->data[s.size()] = 0;
+	}
+
+	void free_string(BindingString* data) {
+	    delete data->data;
+	    data->length = 0;
+	    data->data = nullptr;
+	}
 }
 }
