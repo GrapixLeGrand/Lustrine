@@ -29,6 +29,7 @@ JsonWriter &JsonWriter::value(int32_t v) {
     return *this;
 }
 JsonWriter &JsonWriter::value(const char *v) {
+    if (v == nullptr) return null();
     item();
     os << '"';
     for (const char *c = v; *c != '\0'; ++c) {

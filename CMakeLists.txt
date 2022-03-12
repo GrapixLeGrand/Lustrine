@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(Lustrine VERSION 0.1.0)
 cmake_policy(SET CMP0079 NEW)
+cmake_policy(SET CMP0111 NEW)  # error on missing imported targets
 include(CTest)
 include(GenerateExportHeader)
 enable_testing()
@@ -72,90 +73,58 @@ target_include_directories(LustrineWrapper PUBLIC ${CMAKE_BINARY_DIR}/exports)
 target_link_libraries(Lustrine LevekGL)
 
 
-set(Bullet3IncludeDirs 
-    PUBLIC "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/bullet3/src"
-)
 if (WIN32)
-#thirdparty\Bullet3\windows
- 
-#    BulletDynamics
-#    BulletInverseDynamics
-#    BulletCollision
-#    BulletSoftBody
+    set(BULLET_INCLUDE_DIR
+            "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/bullet3/src"
+            )
+    set(Bullet3LinearMathLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/LinearMath.lib")
+    set(Bullet3CommonLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/Bullet3Common.lib")
+    set(BulletDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletDynamics.lib")
+    set(BulletInverseDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletInverseDynamics.lib")
+    set(BulletCollisionLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletCollision.lib")
+    set(BulletSoftBodyLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletSoftBody.lib")
 
-set(Bullet3LinearMathLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/LinearMath.lib")
-set(Bullet3CommonLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/Bullet3Common.lib")
-set(BulletDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletDynamics.lib")
-set(BulletInverseDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletInverseDynamics.lib")
-set(BulletCollisionLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletCollision.lib")
-set(BulletSoftBodyLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletSoftBody.lib")
+    add_library(Bullet3LinearMath STATIC IMPORTED)
+    set_property(TARGET Bullet3LinearMath PROPERTY IMPORTED_LOCATION ${Bullet3LinearMathLibPath})
+    list (APPEND BULLET_LIBRARIES LinearMath)
 
+    add_library(Bullet3Common STATIC IMPORTED)
+    set_property(TARGET Bullet3Common PROPERTY IMPORTED_LOCATION ${Bullet3CommonLibPath})
+    list (APPEND BULLET_LIBRARIES Bullet3Common)
+
+    add_library(Bullet3InverseDynamics STATIC IMPORTED)
+    set_property(TARGET Bullet3InverseDynamics PROPERTY IMPORTED_LOCATION ${BulletInverseDynamicsLibPath})
+    list (APPEND BULLET_LIBRARIES BulletInverseDynamics)
+
+    add_library(BulletCollision STATIC IMPORTED)
+    set_property(TARGET BulletCollision PROPERTY IMPORTED_LOCATION ${BulletCollisionLibPath})
+    list (APPEND BULLET_LIBRARIES BulletCollision)
+
+    add_library(BulletDynamics STATIC IMPORTED)
+    set_property(TARGET BulletDynamics PROPERTY IMPORTED_LOCATION ${BulletDynamicsLibPath})
+    list (APPEND BULLET_LIBRARIES BulletDynamics)
+
+    add_library(BulletSoftBody STATIC IMPORTED)
+    set_property(TARGET BulletSoftBody PROPERTY IMPORTED_LOCATION ${BulletSoftBodyLibPath})
+    list (APPEND BULLET_LIBRARIES BulletSoftBody)
+
+    message("linear math ${Bullet3LinearMathLibPath}")
+    message("common ${Bullet3CommonLibPath}")
+    message("Bullet3InverseDynamics ${BulletInverseDynamicsLibPath}")
+    message("BulletCollision ${BulletCollisionLibPath}")
+    message("BulletDynamics ${BulletDynamicsLibPath}")
+    message("Bullet3SoftBody ${BulletSoftBodyLibPath}")
+else()
+    find_package(Bullet REQUIRED)
+
+    message("bullet libraries: ${BULLET_LIBRARIES}")
+    message("bullet include dir: ${BULLET_INCLUDE_DIR}")
 endif()
 
-if (UNIX)
-#TODO set the static lib for bullet here for unix
-endif()
-
-target_include_directories(
-    Lustrine
-    ${Bullet3IncludeDirs}
-)
-
-target_include_directories(
-    LustrineWrapper
-    ${Bullet3IncludeDirs}
-)
-#include_directories(${Bullet3IncludeDirs})
-
-
-
-
-add_library(Bullet3LinearMath STATIC IMPORTED)
-set_property(TARGET Bullet3LinearMath PROPERTY IMPORTED_LOCATION ${Bullet3LinearMathLibPath})
-target_link_libraries(Lustrine Bullet3LinearMath)
-target_link_libraries(LustrineWrapper Bullet3LinearMath)
-
-add_library(Bullet3Common STATIC IMPORTED)
-set_property(TARGET Bullet3Common PROPERTY IMPORTED_LOCATION ${Bullet3CommonLibPath})
-target_link_libraries(Lustrine Bullet3Common)
-target_link_libraries(LustrineWrapper Bullet3Common)
-
-add_library(Bullet3InverseDynamics STATIC IMPORTED)
-set_property(TARGET Bullet3InverseDynamics PROPERTY IMPORTED_LOCATION ${BulletInverseDynamicsLibPath})
-target_link_libraries(Lustrine Bullet3InverseDynamics)
-target_link_libraries(LustrineWrapper Bullet3InverseDynamics)
-
-add_library(BulletCollision STATIC IMPORTED)
-set_property(TARGET BulletCollision PROPERTY IMPORTED_LOCATION ${BulletCollisionLibPath})
-target_link_libraries(Lustrine BulletCollision)
-target_link_libraries(LustrineWrapper BulletCollision)
-
-add_library(BulletDynamics STATIC IMPORTED)
-set_property(TARGET BulletDynamics PROPERTY IMPORTED_LOCATION ${BulletDynamicsLibPath})
-target_link_libraries(Lustrine BulletDynamics)
-target_link_libraries(LustrineWrapper BulletDynamics)
-
-
-add_library(Bullet3SoftBody STATIC IMPORTED)
-set_property(TARGET Bullet3SoftBody PROPERTY IMPORTED_LOCATION ${BulletSoftBodyLibPath})
-target_link_libraries(Lustrine Bullet3SoftBody)
-target_link_libraries(LustrineWrapper Bullet3SoftBody)
-
-
-message("linear math ${Bullet3LinearMathLibPath}")
-message("common ${Bullet3CommonLibPath}")
-message("Bullet3InverseDynamics ${BulletInverseDynamicsLibPath}")
-message("BulletCollision ${BulletCollisionLibPath}")
-message("BulletDynamics ${BulletDynamicsLibPath}")
-message("Bullet3SoftBody ${BulletSoftBodyLibPath}")
-
-#list (APPEND BULLET_DEFINITIONS ${BULLET_DOUBLE_DEF})
-#list (APPEND BULLET_LIBRARIES LinearMath)
-#list (APPEND BULLET_LIBRARIES Bullet3Common)
-#list (APPEND BULLET_LIBRARIES BulletInverseDynamics)
-#list (APPEND BULLET_LIBRARIES BulletCollision)
-#list (APPEND BULLET_LIBRARIES BulletDynamics)
-#list (APPEND BULLET_LIBRARIES BulletSoftBody)
+target_link_libraries(Lustrine ${BULLET_LIBRARIES})
+target_link_libraries(LustrineWrapper ${BULLET_LIBRARIES})
+target_include_directories(Lustrine PUBLIC ${BULLET_INCLUDE_DIR})
+target_include_directories(LustrineWrapper PUBLIC ${BULLET_INCLUDE_DIR})
 
 set(LUSTRINE_TARGET_INCLUDE_DIRS
     PUBLIC "src"
