@@ -4,6 +4,7 @@
 
 namespace Lustrine {
 
-	void init_bullet(BulletPhyicsSimulation* simulation);
+	extern void init_bullet(BulletPhyicsSimulation* simulation);
+	extern void clean_bullet(BulletPhyicsSimulation* simulation);
 
 }

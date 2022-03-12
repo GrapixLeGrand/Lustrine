@@ -14,6 +14,8 @@ constexpr double pi = 3.14159265358979323846;
 
 void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
 
+    init_bullet(&simulation->bullet_physics_simulation);
+
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
     simulation->domainZ = parameters->Z;
@@ -102,6 +104,11 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
         simulation->ptr_fluid_end = simulation->num_particles - 1;
         simulation->ptr_static_start = simulation->ptr_static_end;
     }
+}
+
+
+void clean_simulation(Simulation* simulation) {
+    clean_bullet(&simulation->bullet_physics_simulation);
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color) {

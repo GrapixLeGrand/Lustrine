@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BulletPhysics.hpp"
+
 #include "Simulation.hpp"
 #include "Kernels.hpp"
 #include "Neighbors.hpp"
@@ -28,6 +28,13 @@ struct Simulation;
  * @param the positions of the grids
  */
 extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
+
+/**
+ * @brief Clean any allocated and unmanaged memory.
+ *
+ * @param simulation
+ */
+extern void clean_simulation(Simulation* simulation);
 
 /**
  * @brief 

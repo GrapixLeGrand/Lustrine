@@ -9,6 +9,7 @@
 
 //#include "glm/glm.hpp"
 #include <vector> 
+#include "BulletPhysics.hpp"
 
 namespace Lustrine {
 
@@ -79,6 +80,8 @@ struct SimulationParameters {
 };
 
 struct Simulation {
+
+    BulletPhyicsSimulation bullet_physics_simulation;
 
     std::vector<Chunk> chunks;
 

@@ -17,4 +17,12 @@ namespace Lustrine {
 		simulation->dynamicWorld->setGravity(gravity);
 
 	}
+
+	void clean_bullet(BulletPhyicsSimulation* simulation) {
+		delete simulation->dynamicWorld;
+		delete simulation->solver;
+		delete simulation->broadPhase;
+		delete simulation->dispatcher;
+		delete simulation->collisionConfiguration;
+	}
 }

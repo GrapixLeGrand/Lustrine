@@ -230,6 +230,8 @@ int main(void) {
         windowController->swapBuffers();
     }
 
+
+    //Lustrine::clean_simulation(&simulation);
     delete engine;
 
     return 0;
