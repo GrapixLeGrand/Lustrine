@@ -2,8 +2,6 @@
 
 #include "Lustrine.hpp"
 
-#pragma once
-
 #ifdef LUSTRINEWRAPPER_API
 #define MATHLIBRARY_API __declspec(dllexport)
 #else
@@ -55,6 +53,11 @@ namespace Wrapper {
 		int type;
 	};
 
+	struct BindingString {
+	    int64_t length;
+	    char* data;
+	};
+
 	static Simulation* simulation = nullptr;
 	extern "C" __declspec(dllexport) void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* grids, const Position* positions, int num_grids);
 	extern "C" __declspec(dllexport) void simulate(float dt);
@@ -82,13 +85,9 @@ namespace Wrapper {
 	
 	//extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
 	//extern "C" __declspec(dllexport) void free_grid(Grid* grid);
-	
 
-	
-
-	
-
-	
+	extern "C" __declspec(dllexport) void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size);
+	extern "C" __declspec(dllexport) void free_string(BindingString* data);
 
 } //Wrapper
 } //Lustrine
