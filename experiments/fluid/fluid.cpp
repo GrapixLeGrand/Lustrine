@@ -4,11 +4,11 @@
 
 #include <string>
 
-/*
+#ifdef PLATFORM_UNIX
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
-*/
+#endif
 
 #include "Lustrine.hpp"
 #include "../Utils.hpp"

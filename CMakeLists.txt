@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(Lustrine VERSION 0.1.0)
 cmake_policy(SET CMP0079 NEW)
-cmake_policy(SET CMP0111 NEW)  # error on missing imported targets
+if (${CMAKE_VERSION} VERSION_GREATER "3.19.0")
+    cmake_policy(SET CMP0111 NEW)  # error on missing imported targets
+endif()
 include(CTest)
 include(GenerateExportHeader)
 enable_testing()

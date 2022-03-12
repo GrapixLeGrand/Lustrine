@@ -53,12 +53,14 @@ JsonWriter &JsonWriter::null() {
 JsonWriter &JsonWriter::safeKey(const char *v) {
     item();
     os << '"' << v << "\":";
+    first = true;
     return *this;
 }
 JsonWriter &JsonWriter::unsafeKey(const char *v) {
     item();
     value(v);
     os << ':';
+    first = true;
     return *this;
 }
 JsonWriter &JsonWriter::bObject() {
