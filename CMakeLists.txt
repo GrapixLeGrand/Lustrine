@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(Lustrine VERSION 0.1.0)
 cmake_policy(SET CMP0079 NEW)
 include(CTest)
+include(GenerateExportHeader)
 enable_testing()
 
 if (UNIX)
@@ -45,12 +46,28 @@ set(LUSTRINEWRAPPER_SOURCES
 
 
 add_library(Lustrine SHARED ${LUSTRINE_SOURCES})
+generate_export_header(Lustrine
+        BASE_NAME Lustrine
+        EXPORT_MACRO_NAME LUSTRINE_EXPORT
+        EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/Lustrine_Export.h
+        STATIC_DEFINE LUSTRINE_BUILT_AS_STATIC
+)
+target_include_directories(Lustrine PUBLIC ${CMAKE_BINARY_DIR}/exports)
+
 add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
 #add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
-set_target_properties(
-    LustrineWrapper PROPERTIES
-    PUBLIC_HEADER src/LustrineWrapper.hpp
+generate_export_header(LustrineWrapper
+        BASE_NAME LustrineWrapper
+        EXPORT_MACRO_NAME LUSTRINE_WRAPPER_EXPORT
+        EXPORT_FILE_NAME ${CMAKE_BINARY_DIR}/exports/LustrineWrapper_Export.h
+        STATIC_DEFINE LUSTRINE_WRAPPER_BUILT_AS_STATIC
 )
+set_target_properties(
+        LustrineWrapper PROPERTIES
+        PUBLIC_HEADER src/LustrineWrapper.hpp
+)
+target_include_directories(LustrineWrapper PUBLIC ${CMAKE_BINARY_DIR}/exports)
+
 
 target_link_libraries(Lustrine LevekGL)
 

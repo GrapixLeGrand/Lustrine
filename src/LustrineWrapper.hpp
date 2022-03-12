@@ -1,5 +1,6 @@
 #pragma once
 
+#include "LustrineWrapper_Export.h"
 #include "Lustrine.hpp"
 
 #ifdef LUSTRINEWRAPPER_API
@@ -59,35 +60,34 @@ namespace Wrapper {
 	};
 
 	static Simulation* simulation = nullptr;
-	extern "C" __declspec(dllexport) void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* grids, const Position* positions, int num_grids);
-	extern "C" __declspec(dllexport) void simulate(float dt);
-	extern "C" __declspec(dllexport) void simulation_bind_positions(float** position_ptr, int num_positions);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* grids, const Position* positions, int num_grids);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate(float dt);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions(float** position_ptr, int num_positions);
 
-	extern "C" __declspec(dllexport) void simulation_bind_positions_copy(float* position_ptr);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions_copy(float* position_ptr);
 
-	extern "C" __declspec(dllexport) void cleanup_simulation();
-	extern "C" __declspec(dllexport) void say_hello();
+	extern "C" LUSTRINE_WRAPPER_EXPORT void cleanup_simulation();
+	extern "C" LUSTRINE_WRAPPER_EXPORT void say_hello();
 
-	//extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
-	//extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** parameters);
-	//extern "C" __declspec(dllexport) void allocate_grids(Grid** grid, int num_grids);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_data(SimulationData** data);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_parameters(SimulationParameters** parameters);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grids(Grid** grid, int num_grids);
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_data(SimulationData** data);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_parameters(SimulationParameters** params);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grids(Grid**, int num_grids);
 
-	extern "C" __declspec(dllexport) void allocate_simulation_data(SimulationData** data);
-	extern "C" __declspec(dllexport) void allocate_simulation_parameters(SimulationParameters** params);
-	extern "C" __declspec(dllexport) void allocate_grids(Grid**, int num_grids);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void free_simulation_data(SimulationData* data);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void free_simulation_parameters(SimulationParameters* parameters);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void free_grids(Grid* grids);
 
-	extern "C" __declspec(dllexport) void free_simulation_data(SimulationData* data);
-	extern "C" __declspec(dllexport) void free_simulation_parameters(SimulationParameters* parameters);
-	extern "C" __declspec(dllexport) void free_grids(Grid* grids);
-
-	extern "C" __declspec(dllexport) void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
 	
-	//extern "C" __declspec(dllexport) void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
-	//extern "C" __declspec(dllexport) void free_grid(Grid* grid);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void free_grid(Grid* grid);
 
-	extern "C" __declspec(dllexport) void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size);
-	extern "C" __declspec(dllexport) void free_string(BindingString* data);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
 
 } //Wrapper
 } //Lustrine

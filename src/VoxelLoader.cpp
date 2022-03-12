@@ -1,7 +1,8 @@
-
-#include "Lustrine.hpp"
 #include <iostream>
 #include <sstream>
+
+#include "VoxelLoader.hpp"
+#include "Lustrine.hpp"
 
 #define OGT_VOX_IMPLEMENTATION
 #include "../thirdparty/opengametools/ogt_vox.h"

@@ -10,14 +10,16 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::ifstream fh(argv[1]);
+    std::ifstream fh(argv[1], std::ios::binary | std::ios::ate);
     if (fh) {
-        fh.seekg(std::ios_base::end);
         int64_t size = fh.tellg();
         fh.seekg(std::ios_base::beg);
+        std::cerr << "Reading file (" << size << " bytes)" << std::endl;
         std::vector<uint8_t> data(size);
         fh.read((char*) data.data(), size);
-        std::cout << Lustrine::read_vox_scene_json(data.data(), size);
+        std::string json = Lustrine::read_vox_scene_json(data.data(), size);
+        std::cerr << "Writing to console..." << std::endl;
+        std::cout << json;
         return 0;
     } else {
         std::cerr << "Failed to open the file!\n";
