@@ -14,7 +14,7 @@ constexpr double pi = 3.14159265358979323846;
 
 void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
 
-    init_bullet(&simulation->bullet_physics_simulation);
+    //init_bullet(&simulation->bullet_physics_simulation);
 
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
