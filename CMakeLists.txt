@@ -76,9 +76,7 @@ target_link_libraries(Lustrine LevekGL)
 
 
 if (WIN32)
-    set(BULLET_INCLUDE_DIR
-            "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/bullet3/src"
-            )
+    set(BULLET_INCLUDE_DIR "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/bullet3/src")
     set(Bullet3LinearMathLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/LinearMath.lib")
     set(Bullet3CommonLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/Bullet3Common.lib")
     set(BulletDynamicsLibPath "${Lustrine_SOURCE_DIR}/thirdparty/Bullet3/windows/MD/BulletDynamics.lib")
@@ -88,7 +86,7 @@ if (WIN32)
 
     add_library(Bullet3LinearMath STATIC IMPORTED)
     set_property(TARGET Bullet3LinearMath PROPERTY IMPORTED_LOCATION ${Bullet3LinearMathLibPath})
-    list (APPEND BULLET_LIBRARIES LinearMath)
+    list (APPEND BULLET_LIBRARIES Bullet3LinearMath)
 
     add_library(Bullet3Common STATIC IMPORTED)
     set_property(TARGET Bullet3Common PROPERTY IMPORTED_LOCATION ${Bullet3CommonLibPath})
@@ -96,7 +94,7 @@ if (WIN32)
 
     add_library(Bullet3InverseDynamics STATIC IMPORTED)
     set_property(TARGET Bullet3InverseDynamics PROPERTY IMPORTED_LOCATION ${BulletInverseDynamicsLibPath})
-    list (APPEND BULLET_LIBRARIES BulletInverseDynamics)
+    list (APPEND BULLET_LIBRARIES Bullet3InverseDynamics)
 
     add_library(BulletCollision STATIC IMPORTED)
     set_property(TARGET BulletCollision PROPERTY IMPORTED_LOCATION ${BulletCollisionLibPath})
