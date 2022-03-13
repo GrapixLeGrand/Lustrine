@@ -12,9 +12,30 @@ namespace Lustrine {
 
 constexpr double pi = 3.14159265358979323846;
 
+
+void add_physics_grid(Simulation* simulation, const Grid* grid) {
+
+    for (int x = 0; x < grid->X; x++) {
+        for (int y = 0; y < grid->Y; y++) {
+            for (int z = 0; z < grid->Z; z++) {
+                int index = grid->Y * grid->Z * x + grid->Z * y + z;
+                if (grid->cells[index] == true) {
+                    glm::vec3 position = {x, y, z};
+                    if (grid->has_one_color_per_cell) {
+                       add_box(&simulation->bullet_physics_simulation, position, false, grid->color);     
+                    } else {
+                        add_box(&simulation->bullet_physics_simulation, position, false, grid->colors[index]);
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
 
-    //init_bullet(&simulation->bullet_physics_simulation);
+    init_bullet(&simulation->bullet_physics_simulation);
 
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
@@ -252,6 +273,8 @@ float resolve_collision(float value, float min, float max) {
 
 void simulate(Simulation* simulation, float dt) {
 
+    simulate_bullet(&simulation->bullet_physics_simulation, dt);
+
     dt = glm::clamp(dt, 0.001f, 0.01f);
     simulation->time_step = dt;
 
@@ -394,5 +417,9 @@ extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* 
 void init_grid_from_magika_voxel(Grid* grid, const std::string& path) {
     init_grid_from_magika_voxel_dont_call_me(grid, path);
 }*/
+
+
+
+
 
 };

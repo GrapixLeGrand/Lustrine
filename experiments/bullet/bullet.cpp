@@ -4,11 +4,11 @@
 
 #include <string>
 
-/*
+
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
-*/
+
 
 #include "Lustrine.hpp"
 #include "../Utils.hpp"
@@ -116,6 +116,32 @@ int main(void) {
     //glm::mat4 planeModel = glm::mat4(1.0f);
     float factor = 1.0f;
 
+    ////////////////////////////////////////////////////////////////////////////////
+    /*
+    Levek::Model* cubeModel = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/cube.dae");
+    const Levek::Mesh* cubeMesh = model->getMesh(0);
+
+    Levek::VertexBuffer voxelsPositionsVBO = Levek::VertexBuffer(simulation.bullet_physics_simulation.positions.data(), simulation.bullet_physics_simulation.positions.size() * 3 * 4);
+    Levek::VertexBuffer voxelsColorsVBO = Levek::VertexBuffer(simulation.bullet_physics_simulation.colors.data(), simulation.bullet_physics_simulation.colors.size() * 4 * 4);
+
+    Levek::VertexBuffer cubeVBO = Levek::VertexBuffer(cubeMesh);
+    Levek::IndexBuffer cubeIBO = Levek::IndexBuffer(cubeMesh);
+    Levek::VertexBufferLayout cubeLayout = Levek::VertexBufferLayout();
+    Levek::VertexBufferLayout instanceCubeLayout = Levek::VertexBufferLayout(); 
+    Levek::VertexBufferLayout colorCubeLayout = Levek::VertexBufferLayout();
+    cubeLayout.push<glm::vec3>(1); //sphere position
+    cubeLayout.push<glm::vec2>(1); //sphere textures
+    cubeLayout.push<glm::vec3>(1); //sphere normal
+    instanceCubeLayout.push<glm::vec3>(1, 1); //instance offset (per instance)
+    colorCubeLayout.push<glm::vec4>(1, 1);
+
+    Levek::VertexArray voxelsVA;
+    voxelsVA.addBuffer(cubeVBO, cubeLayout);
+    voxelsVA.addBuffer(voxelsPositionsVBO, instanceCubeLayout);
+    voxelsVA.addBuffer(voxelsColorsVBO, colorCubeLayout);*/
+
+    /////////////////////////////////////////////////////////////////////////////////
+
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {            
 
         //simulation.time_step = windowController->getDeltaTime();
@@ -146,7 +172,8 @@ int main(void) {
         vp = camera.getProjection() * glm::mat4(glm::mat3(camera.getView()));
         skybox.draw(renderer, vp);
         renderer->drawInstances(&particlesVA, &sphereIBO, &shaderInstances, simulation.num_particles);
-        
+        //renderer->drawInstances(&voxelsVA, &sphereIBO, &shaderInstances, simulation.num_particles);
+
         //render plane
         planeShader.bind();
         unitTexture.activateAndBind(0);
@@ -231,7 +258,7 @@ int main(void) {
     }
 
 
-    //Lustrine::clean_simulation(&simulation);
+    Lustrine::clean_simulation(&simulation);
     delete engine;
 
     return 0;

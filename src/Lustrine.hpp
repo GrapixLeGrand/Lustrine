@@ -83,4 +83,13 @@ extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path, Mat
 
 extern void simulate(Simulation* simulation, float dt);
 
+/**
+	 * @brief 
+	 * 
+	 * @param simulation 
+	 * @param grid 
+	 * @return int the index of the body in the main body array
+	 */
+//extern void add_physics_grid(Simulation* simulation, const Grid* grid);
+
 };
