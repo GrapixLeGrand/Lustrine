@@ -82,5 +82,6 @@ extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path, Mat
 //extern float s_coor(const Simulation* simulation, float rl);
 
 extern void simulate(Simulation* simulation, float dt);
+extern void simulate_sand(Simulation* simulation, float dt);
 
 };

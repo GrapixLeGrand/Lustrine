@@ -120,7 +120,7 @@ int main(void) {
 
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
-        Lustrine::simulate(&simulation, windowController->getDeltaTime());
+        Lustrine::simulate_sand(&simulation, windowController->getDeltaTime());
 
         particlesPositionsVBO.Update(simulation.positions.data(), simulation.positions.size() * 3 * 4);
         renderer->clear();

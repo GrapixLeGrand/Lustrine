@@ -338,6 +338,156 @@ void simulate(Simulation* simulation, float dt) {
 
 }
 
+void simulate_sand(Simulation* simulation, float dt) {
+
+    dt = glm::clamp(dt, 0.001f, 0.01f);
+    simulation->time_step = dt;
+
+    int n = simulation->num_particles;
+    int X = simulation->domainX;
+    int Y = simulation->domainY;
+    int Z = simulation->domainZ;
+
+    std::vector<glm::vec3>& positions = simulation->positions;
+    std::vector<glm::vec3>& positions_star = simulation->positions_star;
+    std::vector<glm::vec3>& velocities = simulation->velocities;
+
+    std::vector<glm::vec3> positions_tmp = std::vector<glm::vec3>(positions.size());
+    std::vector<float>& lambdas = simulation->lambdas;
+    std::vector<std::vector<int>>& neighbors = simulation->neighbors;
+    
+    float kernelRadius = simulation->kernelRadius;
+
+    //integration
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+        velocities[i] += simulation->gravity * simulation->mass * dt;
+        positions_star[i] = positions[i] + velocities[i] * dt; // update both
+    }
+
+
+    std::copy(positions_star.begin(), positions_star.end(), positions_tmp.begin());
+    //find_neighbors_counting_sort(simulation);
+    find_neighbors_uniform_grid_sand(simulation);
+    //find_neighbors_brute_force(simulation);
+
+
+    //substep
+
+    for (int substep = 0; substep < 1; ++substep) {
+
+        for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+            for (int j : neighbors[i]) {
+                glm::vec3 ij = positions_tmp[i] - positions_tmp[j];
+
+                if (i == j)
+                    continue;
+                float len = glm::length(ij);
+
+                if (len > simulation->particleDiameter) {
+                    continue;
+                }
+                
+                glm::vec3 delta_pi = -0.5f * (len - simulation->particleDiameter) * ij / (len + 1e-9f );
+                glm::vec3 delta_pj = -delta_pi;
+
+                float collision_coeff = 0.5f;
+
+                positions_star[i] += collision_coeff * delta_pi;
+                positions_star[j] += collision_coeff * delta_pj;
+
+
+            }
+        }
+
+        // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+        //     positions_tmp[i] = positions_star[i];
+        // }
+
+
+        std::copy(positions_star.begin(), positions_star.end(), positions_tmp.begin());
+
+    }
+    
+
+
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+        //update velocity
+        positions_star[i].x = resolve_collision(positions_star[i].x, simulation->particleRadius, X - simulation->particleRadius);
+        positions_star[i].y = resolve_collision(positions_star[i].y, simulation->particleRadius, Y - simulation->particleRadius);
+        positions_star[i].z = resolve_collision(positions_star[i].z, simulation->particleRadius, Z - simulation->particleRadius);
+
+        velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
+        positions[i] = positions_star[i];
+
+    }
+
+
+
+
+
+
+    // //solve pressure
+    // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+
+    //     float densitiy = 0.0;
+    //     for (int j = 0; j < neighbors[i].size(); j++) {
+    //         glm::vec3 ij = positions_star[i] - positions_star[neighbors[i][j]];
+    //         float len = glm::length(ij);
+    //         densitiy += simulation->mass * simulation->W(simulation, len);
+    //     }
+    //     densitiy += simulation->mass * simulation->W(simulation, 0.0);
+
+    //     //equation 1
+    //     float constraint_i = (densitiy / simulation->rest_density) - 1.0;
+    //     float constraint_gradient_sum = 0.0;
+    //     glm::vec3 grad_current_p = glm::vec3(0.0);
+
+    //     //equation 8
+    //     for (int j = 0; j < neighbors[i].size(); j++) {
+    //         glm::vec3 temp = positions_star[i] - positions_star[neighbors[i][j]];
+    //         glm::vec3 neighbor_grad = - (simulation->mass / simulation->rest_density) * simulation->gradW(simulation, temp);
+    //         constraint_gradient_sum += glm::dot(neighbor_grad, neighbor_grad);
+    //         grad_current_p -= neighbor_grad;
+    //     }
+
+    //     constraint_gradient_sum += glm::dot(grad_current_p, grad_current_p);
+
+    //     lambdas[i] = 0.0;
+    //     if (constraint_gradient_sum > 0.0) {
+    //         lambdas[i] = - constraint_i / (constraint_gradient_sum + simulation->relaxation_epsilon);
+    //     }
+
+    // }
+    
+    // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+
+    //     //equation 13 (applying pressure force correction)
+    //     //pressures_forces[i] = glm::vec3(0.0);
+    //     glm::vec3 pressure_force = glm::vec3(0.0);
+    //     for (int j = 0; j < neighbors[i].size(); j++) {
+    //         glm::vec3 ij = positions_star[i] - positions_star[neighbors[i][j]];
+    //         pressure_force += (lambdas[i] + lambdas[j] + s_coor(simulation, glm::length(ij))) * simulation->gradW(simulation, ij);
+    //     }
+
+    //     pressure_force /= simulation->rest_density;
+        
+    //     //update prediction
+    //     positions_star[i] += pressure_force;
+
+    //     //update velocity
+    //     positions_star[i].x = resolve_collision(positions_star[i].x, simulation->particleRadius, X - simulation->particleRadius);
+    //     positions_star[i].y = resolve_collision(positions_star[i].y, simulation->particleRadius, Y - simulation->particleRadius);
+    //     positions_star[i].z = resolve_collision(positions_star[i].z, simulation->particleRadius, Z - simulation->particleRadius);
+
+    //     velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
+    //     positions[i] = positions_star[i];
+
+    // }
+
+}
+
+
+
 /*
 extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type) {
 
