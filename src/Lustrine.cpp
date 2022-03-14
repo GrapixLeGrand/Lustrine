@@ -133,7 +133,7 @@ void clean_simulation(Simulation* simulation) {
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color) {
-    
+
     grid->type = type;
     grid->num_grid_cells = X * Y * Z;
     grid->num_occupied_grid_cells = grid->num_grid_cells;

@@ -4,6 +4,7 @@
 #include "Simulation.hpp"
 #include "Kernels.hpp"
 #include "Neighbors.hpp"
+#include "Lustrine_Export.h"
 #include <vector>
 #ifdef PLATFORM_WINDOWS
 #include "../thirdparty/glm-0.9.9.8/glm/glm.hpp"
@@ -27,7 +28,7 @@ struct Simulation;
  * @param grids, the allocated grids
  * @param the positions of the grids
  */
-extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
+extern void LUSTRINE_EXPORT init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
 
 /**
  * @brief Clean any allocated and unmanaged memory.
@@ -58,7 +59,7 @@ extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* 
  * @param type 
  * @param color 
  */
-extern void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color);
+extern LUSTRINE_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color);
 
 /**
  * @brief init a box 
@@ -76,12 +77,12 @@ extern void init_grid_box(const SimulationParameters* parameters, Grid* grid, in
 //extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z);
 
 
-extern void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type);
+extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);
 
-extern void simulate(Simulation* simulation, float dt);
+extern LUSTRINE_EXPORT void simulate(Simulation* simulation, float dt);
 
 /**
 	 * @brief 
