@@ -26,16 +26,15 @@ namespace Lustrine {
 		btBoxShape* unit_box_shape; //unit box shape
 		
 		int num_bodies = 0;
-		int ptr_dynamic_start = 0;
-		int ptr_dynamic_end = 0;
-		int ptr_static_start = 0;
-		int ptr_static_end = 0;
+		//int ptr_dynamic_start = 0;
+		//int ptr_dynamic_end = 0;
+		//int ptr_static_start = 0;
+		//int ptr_static_end = 0;
 
 		std::vector<btTransform> transforms;
 		std::vector<btRigidBody*> rigidbodies; //store all registered bodies
-		std::vector<glm::vec3> positions; //stores the positions of ALL boxes
-		std::vector<glm::vec4> colors;
-
+		//std::vector<glm::vec3> positions; //stores the positions of ALL boxes
+		//std::vector<glm::vec4> colors;
 
 		float box_mass = 1.0f;
 

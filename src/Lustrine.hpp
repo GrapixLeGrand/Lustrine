@@ -30,6 +30,17 @@ struct Simulation;
 extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
 
 /**
+ * @brief init simulation with player box shape
+ * 
+ * @param parameters 
+ * @param simulation 
+ * @param grids 
+ * @param positions 
+ * @param player_grid 
+ * @param player_position 
+ */
+extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions, Grid* player_grid, glm::vec3 player_position);
+/**
  * @brief Clean any allocated and unmanaged memory.
  *
  * @param simulation

@@ -33,8 +33,6 @@ namespace Lustrine {
 			shape->calculateLocalInertia(mass, localInertia);
 			//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 
-        #define USE_MOTIONSTATE 1
-        #ifdef USE_MOTIONSTATE
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 
 		btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
@@ -42,13 +40,12 @@ namespace Lustrine {
 		btRigidBody* body = new btRigidBody(cInfo);
 		//body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
 		
-		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT); //warning was dynamic object before.
+		//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT); //warning was dynamic object before.
 		//body->activate(true);
 
-        #else
-		btRigidBody* body = new btRigidBody(mass, 0, shape, localInertia);
-		body->setWorldTransform(startTransform);
-        #endif  //
+		//btRigidBody* body = new btRigidBody(mass, 0, shape, localInertia);
+		//body->setWorldTransform(startTransform);
+        //
 
 		body->setUserIndex(-1);
 		simulation->dynamicWorld->addRigidBody(body);
@@ -90,7 +87,8 @@ namespace Lustrine {
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
-	int add_box(BulletPhyicsSimulation* simulation, glm::vec3& position, bool is_dynamic, glm::vec4 color = glm::vec4 {1.0, 0.0, 0.0, 1.0}) {
+
+	int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec4 color = glm::vec4 {1.0, 0.0, 0.0, 1.0}) {
 		btTransform tmpTransform;
 		tmpTransform.setIdentity();
 		btVector3 pos = glmToBullet(position);
@@ -98,12 +96,34 @@ namespace Lustrine {
 		float mass = is_dynamic ? simulation->box_mass : 0.0f;
 		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, simulation->unit_box_shape);
 		simulation->rigidbodies.push_back(newBody);
-		simulation->positions.push_back(position);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
-		simulation->colors.push_back(color);
 		return result;
 	}
 
+	int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec4 color, glm::vec3 half_dims) {
+		
+		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
+		simulation->collisionShapes.push_back(new_box_shape);
+		
+		btTransform tmpTransform;
+		tmpTransform.setIdentity();
+		btVector3 pos = glmToBullet(position);
+		tmpTransform.setOrigin(pos);
+		float mass = is_dynamic ? simulation->box_mass : 0.0f;
+		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, new_box_shape);
+		simulation->rigidbodies.push_back(newBody);
+		simulation->transforms.push_back(tmpTransform);
+		int result = simulation->num_bodies;
+		simulation->num_bodies++;
+		return result;
+
+	}
+
+	void print_resume(const BulletPhyicsSimulation* simulation) {
+		std::cout << "Lustrine::Bullet " << "\n" 
+			<< "\tnum registered bodies: " << simulation->num_bodies << "\n"
+			<< "\tnum registered shapes: " << simulation->collisionShapes.size() << std::endl;
+	}
 }

@@ -13,7 +13,7 @@ namespace Lustrine {
 constexpr double pi = 3.14159265358979323846;
 
 
-void add_physics_grid(Simulation* simulation, const Grid* grid) {
+void add_physics_static_grid(Simulation* simulation, const Grid* grid) {
 
     for (int x = 0; x < grid->X; x++) {
         for (int y = 0; y < grid->Y; y++) {
@@ -33,7 +33,12 @@ void add_physics_grid(Simulation* simulation, const Grid* grid) {
 
 }
 
+
 void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions) {
+    init_simulation(parameters, simulation, grids, positions, nullptr, {0, 0, 0});
+}
+
+void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions, Grid* player_grid, glm::vec3 player_position) {
 
     init_bullet(&simulation->bullet_physics_simulation);
 
@@ -45,6 +50,11 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
     for (int i = 0; i < grids.size(); i++) {
         Chunk chunk;
         init_chunk_from_grid(parameters, &chunk, &grids[i], positions[i], grids[i].type);
+
+        if (grids[i].type == SOLID_STATIC) {
+            //add_physics_static_grid(simulation, &grids[i]); //add static boxes on all static grids
+        }
+
         simulation->chunks.push_back(chunk);
     }
 
@@ -60,6 +70,11 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
     for (int i = 0; i < simulation->chunks.size(); i++) {
         num_particles += simulation->chunks[i].num_particles;
     }
+
+    /*
+    if (player_grid != nullptr) { //added for the physics simulation
+        num_particles += player_grid->num_occupied_grid_cells;
+    }*/
 
     simulation->num_particles = num_particles;
 
@@ -123,8 +138,43 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
 
     if (simulation->ptr_static_start == -1) { //no static particles
         simulation->ptr_fluid_end = simulation->num_particles - 1;
-        simulation->ptr_static_start = simulation->ptr_static_end;
+        simulation->ptr_static_start = simulation->ptr_fluid_end;
+        simulation->ptr_static_end = simulation->ptr_static_start;
     }
+
+    /*
+    if (player_grid != nullptr) { //if provided, add players static particles to the set of positions
+
+        Chunk player_chunk;
+        init_chunk_from_grid(parameters, &player_chunk, player_grid, player_position, SOLID_STATIC);
+
+        simulation->ptr_player_static_start = offset;
+        int offset = simulation->num_particles;
+        for (int i = 0; i < player_chunk.num_particles; i++) {
+            simulation->positions[i + offset] = player_chunk.positions[i];
+            simulation->positions_star[i + offset] = player_chunk.positions[i];
+            if (player_chunk.has_one_color_per_particles) {
+                simulation->colors[i + offset] = player_chunk.colors[i];
+            } else {
+                simulation->colors[i + offset] = player_chunk.color;
+            }
+        }
+        
+        simulation->ptr_static_end += player_chunk.num_particles;
+        simulation->ptr_player_static_end = simulation->ptr_static_end;
+
+        //register the new shape
+        int x = ((int) player_grid->X) / 2;
+        int y = ((int) player_grid->Y) / 2;
+        int z = ((int) player_grid->Z) / 2;
+
+        glm::vec3 half_dims = {x, y, z};
+        add_box(&simulation->bullet_physics_simulation, player_position, true, {1.0, 0.0, 0.0, 1.0}, half_dims);
+
+    }*/
+
+    print_resume(&simulation->bullet_physics_simulation);
+
 }
 
 

@@ -40,9 +40,9 @@ struct Chunk {
     bool has_one_color_per_particles = false;
 
     int num_particles;
-    int particlesX;
-    int particlesY;
-    int particlesZ;
+    //int particlesX;
+    //int particlesY;
+    //int particlesZ;
     MaterialType type;
 };
 
@@ -92,6 +92,9 @@ struct Simulation {
     int ptr_static_start = 0; //start position of solid particles
     int ptr_static_end = 0;   //end position of soldid particles
     
+    int ptr_player_static_start = 0;
+    int ptr_player_static_end = 0;
+
     W_fun W = nullptr; //pointer to function representing the kernel
     gradW_fun gradW = nullptr; //pointer to function representing the gradient of the kernel
 
