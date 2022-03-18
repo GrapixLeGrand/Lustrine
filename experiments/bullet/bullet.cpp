@@ -208,7 +208,6 @@ int main(void) {
 
     btTransform transformGround;
 
-
     glm::mat4 boxModel(0.0);
     glm::mat4 box2Model(0.0);
     glm::mat4 box3Model(0.0);
