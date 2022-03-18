@@ -38,11 +38,26 @@ namespace Lustrine {
 
 	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec4 color, glm::vec3 half_dims);
 
+	/**
+	 * @brief Body will move but not rotate (main player)
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	extern void set_body_no_rotation(BulletPhyicsSimulation* simulation, int body_index);
+	
+	/**
+	 * @brief Set the velocity of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param velocity 
+	 */
+	extern void set_body_velocity(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 velocity);
+
 	//TODO
 	extern void apply_force(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 force);
 	
-	//TODO
-	extern void set_velocity(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 velocity);
 
 	extern void print_resume(const BulletPhyicsSimulation* simulation);
 

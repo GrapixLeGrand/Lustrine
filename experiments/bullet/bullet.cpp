@@ -192,6 +192,8 @@ int main(void) {
     int box_index_2 = Lustrine::add_box(bulletPhysics, {16, 15, 16}, true, {0, 1, 0, 1});
     int box_index_3 = Lustrine::add_box(bulletPhysics, {14, 15, 14}, true, {0, 0, 1, 1});
 
+    Lustrine::set_body_no_rotation(bulletPhysics, box_index);
+
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
     int box_index_4 = Lustrine::add_box(bulletPhysics, {10, 2, 10}, true, {0, 0, 1, 1}, half_dims_box_4);
 
@@ -304,37 +306,41 @@ int main(void) {
             UpdateCameraPositionWASD(inputController, camera, windowController->getDeltaTime(), 10.f);
         } else {
             
-            btVector3 velocity (0.0, 0.0, 0.0);
+            //btVector3 velocity (0.0, 0.0, 0.0);
             float speed = 5.0f;
+            glm::vec3 velocity (0.0);
 
             if (inputController->isKeyPressed(Levek::LEVEK_KEY_W) == true) {
-                velocity.setX(-speed);
-                bulletPhysics->rigidbodies[box_index]->activate(true);
-                bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+                //velocity.setX(-speed);
+                velocity.x -= speed;
+                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                //bulletPhysics->rigidbodies[box_index]->activate(true);
+                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
             }
 
             if (inputController->isKeyPressed(Levek::LEVEK_KEY_S) == true) {
-                velocity.setX(speed);
-                bulletPhysics->rigidbodies[box_index]->activate(true);
-                bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+                //velocity.setX(speed)
+                velocity.x += speed;;
+                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                //bulletPhysics->rigidbodies[box_index]->activate(true);
+                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
             }
 
             if (inputController->isKeyPressed(Levek::LEVEK_KEY_A) == true) {
-                velocity.setZ(speed);
-                bulletPhysics->rigidbodies[box_index]->activate(true);
-                bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+                velocity.z += speed;
+                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                //bulletPhysics->rigidbodies[box_index]->activate(true);
+                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
             }
 
             if (inputController->isKeyPressed(Levek::LEVEK_KEY_D) == true) {
-                velocity.setZ(-speed);
-                bulletPhysics->rigidbodies[box_index]->activate(true);
-                bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+                //velocity.setZ(-speed);
+                velocity.z -= speed;
+                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                //bulletPhysics->rigidbodies[box_index]->activate(true);
+                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
             }
 
-            btVector3 linFact (0.0, 0.0, 0.0);
-            bulletPhysics->rigidbodies[box_index]->setFriction(1.0f);
-            bulletPhysics->rigidbodies[box_index]->setAngularFactor(linFact);
-            bulletPhysics->rigidbodies[ground_index]->setFriction(1.0f);
         }
 
         UpdateCameraWithMouseOnDrag(inputController, camera, 0.2f);

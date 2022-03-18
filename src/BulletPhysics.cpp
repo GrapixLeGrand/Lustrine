@@ -113,12 +113,23 @@ namespace Lustrine {
 		tmpTransform.setOrigin(pos);
 		float mass = is_dynamic ? simulation->box_mass : 0.0f;
 		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, new_box_shape);
+		newBody->setFriction(1.0f);
 		simulation->rigidbodies.push_back(newBody);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
 		return result;
 
+	}
+
+	void set_body_no_rotation(BulletPhyicsSimulation* simulation, int body_index) {
+		btVector3 linFact (0.0, 0.0, 0.0);
+        simulation->rigidbodies[body_index]->setAngularFactor(linFact);
+	}
+
+	void set_body_velocity(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 velocity) {
+		simulation->rigidbodies[body_index]->activate(true);
+        simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
 	void print_resume(const BulletPhyicsSimulation* simulation) {
