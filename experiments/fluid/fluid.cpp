@@ -61,8 +61,8 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID_STATIC);
     
-    Lustrine::init_grid_box(&parameters, &grids[1], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
-    Lustrine::init_grid_box(&parameters, &grids[2], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(1.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &grids[1], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.761, 0.698, 0.502, 1.0));
+    Lustrine::init_grid_box(&parameters, &grids[2], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.761, 0.698, 0.502, 1.0));
 
     Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
 
