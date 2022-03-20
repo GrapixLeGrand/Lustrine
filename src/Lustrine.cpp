@@ -394,19 +394,19 @@ void simulate_sand(Simulation* simulation, float dt) {
 
                 if (i == j) continue;
                 float len = glm::length(ij);
+                if (len > simulation->particleDiameter) continue;
 
-                if (len > simulation->particleDiameter) {
-                    continue;
-                }
-                
+                if (j >= simulation->ptr_fluid_start && j < simulation->ptr_fluid_end){
+                    // j is fluid particle
                     glm::vec3 delta_pi = -0.5f * (len - simulation->particleDiameter) * ij / (len + 1e-9f );
                     glm::vec3 delta_pj = -delta_pi;
-
-                float collision_coeff = 0.5f;
-
                     positions_star[i] += collision_coeff * delta_pi;
                     positions_star[j] += collision_coeff * delta_pj;
-
+                } else {
+                    // j is static
+                    glm::vec3 delta_pi = -(len - simulation->particleDiameter) * ij / (len + 1e-9f );
+                    positions_star[i] += collision_coeff * delta_pi;
+                }
 
             }
         }
