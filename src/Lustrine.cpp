@@ -240,7 +240,7 @@ float epsilon_collision = 0.01;
 float resolve_collision(float value, float min, float max) {
     
     if (value <= min) {
-        return epsilon_collision;
+        return min + epsilon_collision;
     }
 
     if (value > max) {
@@ -338,6 +338,23 @@ void simulate(Simulation* simulation, float dt) {
 
 }
 
+
+glm::vec3 solve_boundary_collision_constraint(glm::vec3 n, glm::vec3 x0, glm::vec3 x, float d) {
+    float C = glm::dot(n, (x-x0)) - d;
+    if (C >= 0) {
+        return glm::vec3(0.0);
+    } 
+
+
+    // https://matthias-research.github.io/pages/publications/posBasedDyn.pdf Eq(9)
+    glm::vec3 dC = n;
+    float s = C / glm::dot(dC, dC); 
+    glm::vec3 dp = -s * dC;
+
+    return dp;
+}
+
+
 void simulate_sand(Simulation* simulation, float dt) {
 
     dt = glm::clamp(dt, 0.001f, 0.01f);
@@ -364,125 +381,68 @@ void simulate_sand(Simulation* simulation, float dt) {
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
 
-
     std::copy(positions_star.begin(), positions_star.end(), positions_tmp.begin());
     //find_neighbors_counting_sort(simulation);
     find_neighbors_uniform_grid_sand(simulation);
     //find_neighbors_brute_force(simulation);
 
-
-    //substep
-
-    for (int substep = 0; substep < 1; ++substep) {
-
+    float collision_coeff = 0.6f;
+    for (int substep = 0; substep < 5; ++substep) {
         for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
             for (int j : neighbors[i]) {
                 glm::vec3 ij = positions_tmp[i] - positions_tmp[j];
 
-                if (i == j)
-                    continue;
+                if (i == j) continue;
                 float len = glm::length(ij);
 
                 if (len > simulation->particleDiameter) {
                     continue;
                 }
                 
-                glm::vec3 delta_pi = -0.5f * (len - simulation->particleDiameter) * ij / (len + 1e-9f );
-                glm::vec3 delta_pj = -delta_pi;
+                    glm::vec3 delta_pi = -0.5f * (len - simulation->particleDiameter) * ij / (len + 1e-9f );
+                    glm::vec3 delta_pj = -delta_pi;
 
                 float collision_coeff = 0.5f;
 
-                positions_star[i] += collision_coeff * delta_pi;
-                positions_star[j] += collision_coeff * delta_pj;
+                    positions_star[i] += collision_coeff * delta_pi;
+                    positions_star[j] += collision_coeff * delta_pj;
 
 
             }
         }
 
-        // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
-        //     positions_tmp[i] = positions_star[i];
-        // }
-
-
-        std::copy(positions_star.begin(), positions_star.end(), positions_tmp.begin());
-
+        std::copy(positions_star.begin() + simulation->ptr_fluid_start, positions_star.begin() + simulation->ptr_fluid_end, positions_tmp.begin());
     }
-    
 
-
+    // particle-bounadry collision
+    float boundary_collision_coeff = 0.99f;
     for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
-        //update velocity
-        positions_star[i].x = resolve_collision(positions_star[i].x, simulation->particleRadius, X - simulation->particleRadius);
-        positions_star[i].y = resolve_collision(positions_star[i].y, simulation->particleRadius, Y - simulation->particleRadius);
-        positions_star[i].z = resolve_collision(positions_star[i].z, simulation->particleRadius, Z - simulation->particleRadius);
+        glm::vec3 p = positions_star[i];
+        float r = simulation->particleRadius;
 
+        glm::vec3 dp = glm::vec3(0.0);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), p, r);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(-1, 0, 0), glm::vec3(X, 0, 0), p, r);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0), p, r);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, -1, 0), glm::vec3(0, Y, 0), p, r);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), p, r);
+        dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z), p, r);
+        positions_star[i] += dp;
+    }
+
+
+    //update velocities and sync positions
+    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
         velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
         positions[i] = positions_star[i];
-
     }
 
-
-
-
-
-
-    // //solve pressure
-    // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
-
-    //     float densitiy = 0.0;
-    //     for (int j = 0; j < neighbors[i].size(); j++) {
-    //         glm::vec3 ij = positions_star[i] - positions_star[neighbors[i][j]];
-    //         float len = glm::length(ij);
-    //         densitiy += simulation->mass * simulation->W(simulation, len);
-    //     }
-    //     densitiy += simulation->mass * simulation->W(simulation, 0.0);
-
-    //     //equation 1
-    //     float constraint_i = (densitiy / simulation->rest_density) - 1.0;
-    //     float constraint_gradient_sum = 0.0;
-    //     glm::vec3 grad_current_p = glm::vec3(0.0);
-
-    //     //equation 8
-    //     for (int j = 0; j < neighbors[i].size(); j++) {
-    //         glm::vec3 temp = positions_star[i] - positions_star[neighbors[i][j]];
-    //         glm::vec3 neighbor_grad = - (simulation->mass / simulation->rest_density) * simulation->gradW(simulation, temp);
-    //         constraint_gradient_sum += glm::dot(neighbor_grad, neighbor_grad);
-    //         grad_current_p -= neighbor_grad;
-    //     }
-
-    //     constraint_gradient_sum += glm::dot(grad_current_p, grad_current_p);
-
-    //     lambdas[i] = 0.0;
-    //     if (constraint_gradient_sum > 0.0) {
-    //         lambdas[i] = - constraint_i / (constraint_gradient_sum + simulation->relaxation_epsilon);
-    //     }
-
-    // }
-    
-    // for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
-
-    //     //equation 13 (applying pressure force correction)
-    //     //pressures_forces[i] = glm::vec3(0.0);
-    //     glm::vec3 pressure_force = glm::vec3(0.0);
-    //     for (int j = 0; j < neighbors[i].size(); j++) {
-    //         glm::vec3 ij = positions_star[i] - positions_star[neighbors[i][j]];
-    //         pressure_force += (lambdas[i] + lambdas[j] + s_coor(simulation, glm::length(ij))) * simulation->gradW(simulation, ij);
-    //     }
-
-    //     pressure_force /= simulation->rest_density;
-        
-    //     //update prediction
-    //     positions_star[i] += pressure_force;
-
-    //     //update velocity
-    //     positions_star[i].x = resolve_collision(positions_star[i].x, simulation->particleRadius, X - simulation->particleRadius);
-    //     positions_star[i].y = resolve_collision(positions_star[i].y, simulation->particleRadius, Y - simulation->particleRadius);
-    //     positions_star[i].z = resolve_collision(positions_star[i].z, simulation->particleRadius, Z - simulation->particleRadius);
-
-    //     velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
-    //     positions[i] = positions_star[i];
-
-    // }
+    //TODO: this perturbation is for test, remove this in the future
+    static bool perturbation = true;
+    if (perturbation) {
+        velocities[simulation->ptr_fluid_start] += glm::vec3(0.01, 0.01, 0.01);
+        perturbation = false;
+    }
 
 }
 
