@@ -27,28 +27,13 @@ glm::vec3 get_cell_id_comp(const Simulation* simulation, glm::vec3 position, int
 
 int get_cell_id(const Simulation* simulation, glm::vec3 position) {
 
-    //glm::vec3 position = simulation->positions_star[i];
     position = glm::clamp(position, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
     position /= simulation->cell_size;
-    //position += 1;
-    /*
-    int cell_id =
-            simulation->gridY * simulation->gridZ + 
-            ((int) position.x) * simulation->gridY * simulation->gridZ +
-            simulation->gridZ + 
-            ((int) position.y) * simulation->gridZ +
-            1 +
-            ((int) position.z);*/
     int cell_id =
             (std::floor(position.y)) * simulation->gridX * simulation->gridZ +
             (std::floor(position.x)) * simulation->gridZ +
             (std::floor(position.z));
-
-    //cell_id = glm::clamp(cell_id, 0, simulation->num_grid_cells - 1);
-    //if (cell_id < 0 || cell_id >= simulation->num_grid_cells) {
-    //    std::cout << "no" << std::endl;
-    //}
-
+            
     return cell_id;
 }
 
@@ -56,7 +41,12 @@ int get_cell_id(const Simulation* simulation, glm::vec3 position) {
 void assign_particles_to_cells(Simulation* simulation) {
     simulation->particle_cell_index_to_index.clear();
     //std::fill(particle_cell_index_to_index.begin(), particle_cell_index_to_index.end(), std::make_pair(0, 0));
-    for (int i = 0; i < simulation->num_particles; i++) {
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
+        simulation->particle_cell_index_to_index.push_back(std::make_pair(cell_id, i));
+    }
+
+    for (int i = simulation->ptr_solid_start; i < simulation->ptr_solid_end; i++) {
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         simulation->particle_cell_index_to_index.push_back(std::make_pair(cell_id, i));
     }
@@ -89,29 +79,31 @@ void counting_sort(Simulation* simulation) {
 }
 
 void clear_neighbors(Simulation* simulation) {
-    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         simulation->neighbors[i].clear();
     }
 }
 
 void find_neighbors_brute_force(Simulation* simulation) {
 
+    assert(false); std::cout << "this function does not work\n" << std::endl;
+    /*
     clear_neighbors(simulation);
 
-    for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         glm::vec3& self = simulation->positions_star[i];
         for (int j = i + 1; j < simulation->num_particles; j++) {
             glm::vec3& other = simulation->positions_star[j];
             glm::vec3 tmp = self - other;
             if (glm::dot(tmp, tmp) <= simulation->kernelRadius * simulation->kernelRadius) {
                 simulation->neighbors[i].push_back(j);
-                if (j < simulation->ptr_fluid_end) {
+                if (j < simulation->ptr_sand_end) {
                     simulation->neighbors[j].push_back(i);
                 }
             }
         } //for 2
     } // for 1
-
+    */
 }
 
 void find_neighbors_uniform_grid(Simulation* simulation) {
@@ -122,12 +114,17 @@ void find_neighbors_uniform_grid(Simulation* simulation) {
         simulation->uniform_gird_cells[i].clear();
     }
 
-    for (int i = 0; i < simulation->num_particles; i++) {
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         glm::vec3& position = simulation->positions_star[i];
         simulation->uniform_gird_cells[cell_id].push_back(i);
     }
 
+    for (int i = simulation->ptr_solid_start; i < simulation->ptr_solid_end; i++) {
+        int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
+        glm::vec3& position = simulation->positions_star[i];
+        simulation->uniform_gird_cells[cell_id].push_back(i);
+    }
 
     for (int yy = 0; yy < simulation->gridY; yy++) {
         for (int xx = 0; xx < simulation->gridX; xx++) {
@@ -170,7 +167,7 @@ void find_neighbors_uniform_grid(Simulation* simulation) {
 
                             for (int i = 0; i < current_cell_indices.size(); i++) {
                                 const int current_index = current_cell_indices[i];
-                                if (current_index >= simulation->ptr_static_start) {
+                                if (current_index >= simulation->ptr_solid_start) {
                                     continue;
                                 }
                                 const glm::vec3& self = simulation->positions_star[current_index];
@@ -207,6 +204,7 @@ void find_neighbors_counting_sort(Simulation* simulation) {
         }
     );*/
 
+    /*
     auto start = std::chrono::high_resolution_clock::now();
 
     simulation->positions_star_copy = simulation->positions_star;
@@ -293,7 +291,7 @@ void find_neighbors_counting_sort(Simulation* simulation) {
         }
     }
 
-    
+    */
 
     /*
     for (int i = 0; i < simulation->num_particles; i++) {

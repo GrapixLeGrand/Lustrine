@@ -23,9 +23,9 @@ typedef glm::vec3 (*gradW_fun)(const Simulation*, const glm::vec3&);
  * 
  */
 enum MaterialType {
-    FLUID_DYNAMIC = 0,
-    SOLID_STATIC = 1,
-    SAND_DYNAMIC = 2
+    SOLID = 0,
+    SAND = 1
+    
 };
 
 /*
@@ -84,16 +84,11 @@ struct Simulation {
 
     BulletPhyicsSimulation bullet_physics_simulation;
 
-    std::vector<Chunk> chunks;
+    //int ptr_fluid_start = 0; //start positions of fluid particles
+    //int ptr_fluid_end = 0;  //end positions of fluid particles
 
-    int ptr_fluid_start = 0; //start positions of fluid particles
-    int ptr_fluid_end = 0;  //end positions of fluid particles
-
-    int ptr_static_start = 0; //start position of solid particles
-    int ptr_static_end = 0;   //end position of soldid particles
-    
-    int ptr_player_static_start = 0;
-    int ptr_player_static_end = 0;
+    //int ptr_static_start = 0; //start position of solid particles
+    //int ptr_static_end = 0;   //end position of soldid particles
 
     W_fun W = nullptr; //pointer to function representing the kernel
     gradW_fun gradW = nullptr; //pointer to function representing the gradient of the kernel
@@ -106,8 +101,6 @@ struct Simulation {
     //stuff for the kernel
     float cubic_kernel_k; //intra parameters to the kernel
     float cubic_kernel_l;
-
-    int num_particles; //the total amount of particles
 
     float domainX = 30.0f; //sizes of the domain
     float domainY = 35.0f;
@@ -129,15 +122,15 @@ struct Simulation {
     float c_xsph = 0.1f;
     float epsilon_vorticity = 0.1f;
     
-    std::vector<glm::vec3> positions; //array containing positions of the particles
-    std::vector<glm::vec3> positions_star; //array containing the prediction of the positions of the particles
-    std::vector<glm::vec3> velocities; //array containing the velocities of each particles
+    //std::vector<glm::vec3> positions; 
+    //std::vector<glm::vec3> positions_star; //array containing the prediction of the positions of the particles (all)
+    
+    std::vector<glm::vec3> velocities;//array containing the velocities of each particles (sand only)
 
     std::vector<float> lambdas;
     //std::vector<glm::vec3> vorticities; unused for now
     std::vector<std::vector<int>> neighbors; //arrays of neighbor indices
-    std::vector<glm::vec4> colors; //per particle colors
-
+    //std::vector<glm::vec4> colors; //per particle colors
     
     int gridX, gridY, gridZ; //sizes of the grid
     float cell_size; //size of side length of a single grid cell
@@ -155,8 +148,35 @@ struct Simulation {
     std::vector<int> counts;
     std::vector<int> counting_sort_sorted_indices;
 
-    // TODO Everything for the sand goes bellow
-    
+    // TODO Everything for the sand goes bellow /////////////////////////////7
+    int num_particles = 0; // total amount of particles in the system
+
+    size_t total_allocated = 0;//total (in float) allocated 
+    size_t leftover_allocated = 0;//leftover (in float) allocated
+
+    //double list
+    glm::vec3* positions = nullptr;//array containing positions of the particles (all)
+    glm::vec3* positions_star = nullptr;
+    glm::vec4* colors = nullptr;
+
+    int ptr_sand_start = -1;
+    int ptr_sand_end = -1;
+
+    int ptr_solid_start = -1;
+    int ptr_solid_end = -1;
+
+    //We are going to store solid and sand particles not in the same place
+    int num_solid_particles;//total amount of particles of solid
+    std::vector<Grid> grids_solid;
+    std::vector<glm::vec3> grids_initial_positions_solid;
+    std::vector<std::pair<int, int>> solid_grid_to_body;//grid index to body index in bullet (WARNING can be -1 bullet index)
+    std::vector<Chunk> chunks_solid;//all the chunks of solids
+
+    int num_sand_particles;//the total amount of particles of sand
+    std::vector<Grid> grids_sand;
+    std::vector<glm::vec3> grids_initial_positions_sand;
+    std::vector<Chunk> chunks_sand;//all the chunks of sands
+
 };
 
 

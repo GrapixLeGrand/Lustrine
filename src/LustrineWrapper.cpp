@@ -144,6 +144,8 @@ namespace Wrapper {
 			original_positions[i] = wrapper_to_glm(wrapped_positions[i]);
 		}
 
+		assert(false); std::cout << "dont call me now!" << std::endl;
+		/*
 		init_simulation(parameters, simulation, original_grids, original_positions);
 
 		data->num_particles = simulation->num_particles;
@@ -151,7 +153,7 @@ namespace Wrapper {
 		data->end_dynamic = simulation->ptr_fluid_end;
 		
 		data->start_static = simulation->ptr_static_start;
-		data->end_static = simulation->ptr_static_end;
+		data->end_static = simulation->ptr_static_end;*/
 
 		std::cout << "end init" << std::endl;
 
@@ -228,7 +230,7 @@ namespace Wrapper {
 	}
 
 	void simulation_bind_positions(float** position_ptr, int num_positions) {
-		*position_ptr = (float*) simulation->positions.data();
+		*position_ptr = (float*) simulation->positions;
 	}
 
 	void say_hello() {
@@ -236,7 +238,7 @@ namespace Wrapper {
 	}
 
 	void simulation_bind_positions_copy(float* position_ptr) {
-        std::memcpy(position_ptr, simulation->positions.data(), sizeof(float) * 3 * simulation->num_particles);
+        std::memcpy(position_ptr, simulation->positions, sizeof(float) * 3 * simulation->num_sand_particles);
 	}
 
     void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size) {

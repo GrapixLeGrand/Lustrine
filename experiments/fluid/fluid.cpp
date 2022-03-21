@@ -53,23 +53,35 @@ int main(void) {
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
 
-    std::vector<Lustrine::Grid> grids (3);
-    std::vector<glm::vec3> grids_positions (3);
-    grids_positions[0] = {0, 0, 0};
-    grids_positions[1] = {0, 0, 0};
-    grids_positions[2] = {15, 0, 15};
-
-    Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID_STATIC);
+    std::vector<Lustrine::Grid> sand_grids (2);
+    std::vector<glm::vec3> sand_grids_positions (2);
+    sand_grids_positions[0] = {0, 0, 0};
+    sand_grids_positions[1] = {0, 0, 0};
     
-    Lustrine::init_grid_box(&parameters, &grids[1], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.0, 0.2, 1.0, 1.0));
-    Lustrine::init_grid_box(&parameters, &grids[2], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(1.0, 0.2, 1.0, 1.0));
 
-    Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
+    std::vector<Lustrine::Grid> solid_grids (1);
+    std::vector<glm::vec3> solid_grids_positions (1);
+    solid_grids_positions[0] = {15, 0, 15};
+
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID);
+    
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
+
+    Lustrine::init_simulation(
+        &parameters,
+        &simulation,
+        sand_grids,
+        sand_grids_positions,
+        solid_grids,
+        solid_grids_positions
+    );
+    //Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
-    Levek::VertexBuffer particlesPositionsVBO = Levek::VertexBuffer(simulation.positions.data(), simulation.positions.size() * 3 * 4);
-    Levek::VertexBuffer particlesColorsVBO = Levek::VertexBuffer(simulation.colors.data(), simulation.colors.size() * 4 * 4);
+    Levek::VertexBuffer particlesPositionsVBO = Levek::VertexBuffer((void*) simulation.positions, (size_t) simulation.num_sand_particles * 3 * 4);
+    Levek::VertexBuffer particlesColorsVBO = Levek::VertexBuffer((void*) simulation.colors, (size_t) simulation.num_sand_particles * 4 * 4);
 
     Levek::VertexBuffer sphereVBO = Levek::VertexBuffer(sphere);
     Levek::IndexBuffer sphereIBO = Levek::IndexBuffer(sphere);
@@ -122,7 +134,7 @@ int main(void) {
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
 
-        particlesPositionsVBO.Update(simulation.positions.data(), simulation.positions.size() * 3 * 4);
+        particlesPositionsVBO.Update((void*) simulation.positions, (size_t) simulation.num_sand_particles * 3 * 4);
         renderer->clear();
 
         UpdateCameraPositionWASD(inputController, camera, windowController->getDeltaTime(), 10.f);
@@ -193,11 +205,10 @@ int main(void) {
 
             ImGui::Text("# grid cells: %d", simulation.num_grid_cells);
 
-
-
             if (ImGui::Button("reset")) {
                 //Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
-                Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
+                //Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
+                std::cout << "no reset for now" << std::endl;
             }
             ImGui::EndTabItem();
             simulation.cubic_kernel_k *= factor;

@@ -28,7 +28,7 @@ struct Simulation;
  * @param grids, the allocated grids
  * @param the positions of the grids
  */
-extern void LUSTRINE_EXPORT init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
+//extern void LUSTRINE_EXPORT init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions);
 
 /**
  * @brief init simulation with player box shape
@@ -40,7 +40,14 @@ extern void LUSTRINE_EXPORT init_simulation(const SimulationParameters* paramete
  * @param player_grid 
  * @param player_position 
  */
-extern void init_simulation(const SimulationParameters* parameters, Simulation* simulation, std::vector<Grid> grids, std::vector<glm::vec3> positions, Grid* player_grid, glm::vec3 player_position);
+extern void LUSTRINE_EXPORT init_simulation(
+    const SimulationParameters* parameters, 
+    Simulation* simulation, 
+    const std::vector<Grid>& grids_sand_arg, 
+    const std::vector<glm::vec3>& grids_sand_positions_arg, 
+    const std::vector<Grid>& grids_solid_arg, 
+    const std::vector<glm::vec3>& grids_solid_positions_arg);
+
 /**
  * @brief Clean any allocated and unmanaged memory.
  *
