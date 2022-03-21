@@ -358,8 +358,8 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
-    float mu_s = 0.9f;
-    float mu_k = 0.9f;
+    float mu_s = 0.5f;
+    float mu_k = 0.8f;
 
     dt = glm::clamp(dt, 0.001f, 0.01f);
     simulation->time_step = dt;
@@ -373,7 +373,7 @@ void simulate_sand(Simulation* simulation, float dt) {
     std::vector<glm::vec3>& positions_star = simulation->positions_star;
     std::vector<glm::vec3>& velocities = simulation->velocities;
 
-    std::vector<glm::vec3> positions_tmp = std::vector<glm::vec3>(positions.size());
+
     std::vector<float>& lambdas = simulation->lambdas;
     std::vector<std::vector<int>>& neighbors = simulation->neighbors;
     
@@ -384,8 +384,8 @@ void simulate_sand(Simulation* simulation, float dt) {
         velocities[i] += simulation->gravity * simulation->mass * dt;
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
+    std::vector<glm::vec3> positions_tmp = std::vector<glm::vec3>(positions_star);
 
-    std::copy(positions_star.begin(), positions_star.end(), positions_tmp.begin());
     //find_neighbors_counting_sort(simulation);
     find_neighbors_uniform_grid_sand(simulation);
     //find_neighbors_brute_force(simulation);
@@ -413,47 +413,33 @@ void simulate_sand(Simulation* simulation, float dt) {
             if (j >= simulation->ptr_fluid_start && j < simulation->ptr_fluid_end){ // j is dynamic particle
                 glm::vec3 delta_pi = -0.5f * (len - simulation->particleDiameter) * ij / (len + 1e-9f );
                 glm::vec3 delta_pj = -delta_pi;
-                positions_star[i] += collision_coeff * delta_pi;
-                positions_star[j] += collision_coeff * delta_pj;
+                glm::vec3 positions_star_i = positions_tmp[i] + collision_coeff * delta_pi;
+                glm::vec3 positions_star_j = positions_tmp[j] + collision_coeff * delta_pj;
+
+                float d = glm::length(delta_pi);
+                glm::vec3 n = glm::normalize(positions_star_i - positions_star_j);
+                glm::vec3 delta_x_star_ij = (positions_star_i - positions_tmp[i]) - (positions_star_j - positions_tmp[j]);
+                glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
+                // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
+                if (glm::length(delta_x_tangent) < mu_s * d) {
+                    delta_pi = 0.5f * delta_x_tangent;
+                } else {
+                    delta_pi = 0.5f * delta_x_tangent * std::min(mu_k * d / (glm::length(delta_x_tangent) + 1e-9f), 1.0f);
+                }
+                delta_pj = -delta_pi;
+                positions_star_i += delta_pi;
+                positions_star_j += delta_pj;
+
+                positions_star[i] += positions_star_i - positions_tmp[i];
+                positions_star[j] += positions_star_j - positions_tmp[j];
+
             } else { // j is static particle
                 glm::vec3 delta_pi = -(len - simulation->particleDiameter) * ij / (len + 1e-9f );
                 positions_star[i] += collision_coeff * delta_pi;
+                // TODO: add friction
             }
 
         }
-
-        std::vector<glm::vec3> positions_tmp2 = std::vector<glm::vec3>(positions_star);
-        //friction
-        for (auto &contact: contacts) {
-            int i = contact.first, j = contact.second;
-            if (j >= simulation->ptr_fluid_start && j < simulation->ptr_fluid_end){ // j is dynamic particle
-                // friction
-                glm::vec3 n = glm::normalize(positions_tmp2[i] - positions_tmp2[j]);
-//                glm::vec3 delta_x_star_ij = (collision_coeff * delta_pi) - (collision_coeff * delta_pj);
-                glm::vec3 delta_x_star_ij = (positions_tmp2[i] - positions_tmp[i]) - (positions_tmp2[j] - positions_tmp[j]);
-
-                glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
-
-                glm::vec3 delta_pi;
-                glm::vec3 delta_pj;
-                // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
-                if (glm::length(delta_x_tangent) < mu_s * simulation->particleDiameter) {
-                    delta_pi = 0.5f * delta_x_tangent;
-                } else {
-                    delta_pi = 0.5f * delta_x_tangent * std::min(mu_k * simulation->particleDiameter / (glm::length(delta_x_tangent) + 1e-9f), 1.0f);
-                }
-
-                delta_pj = -delta_pi;
-                positions_star[i] += delta_pi;
-                positions_star[j] += delta_pj;
-
-            } else { // j is static particle
-                // TODO:
-            }
-
-        }
-
-
 
         std::copy(positions_star.begin() + simulation->ptr_fluid_start, positions_star.begin() + simulation->ptr_fluid_end, positions_tmp.begin());
     }
