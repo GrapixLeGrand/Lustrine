@@ -32,11 +32,21 @@ namespace Lustrine {
 	 * @param simulation 
 	 * @param position 
 	 * @param is_dynamic 
-	 * @return int the index of the body in the main body array
+	 * @return int 
 	 */
-	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec4 color);
+	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic);
+	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
+	extern int add_box(BulletPhyicsSimulation* simulation, btBoxShape* box_shape, glm::vec3 position, bool is_dynamic, int group, int mask);
+	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
+	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims, int group, int mask);
 
-	extern int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec4 color, glm::vec3 half_dims);
+	/**
+	 * @brief Allocates a pool of bodies that could collide with the rest of the world
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	extern void allocate_particles_colliders(BulletPhyicsSimulation* simulation, int num_particles);
 
 	/**
 	 * @brief Body will move but not rotate (main player)
@@ -54,6 +64,43 @@ namespace Lustrine {
 	 * @param velocity 
 	 */
 	extern void set_body_velocity(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 velocity);
+
+	/**
+	 * @brief Apply an impulse on the center of mass of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param force 
+	 */
+	extern void apply_impulse(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 relative_position);
+
+
+	/**
+	 * @brief Clear and fill the collisions for all the bodies that collided (this function is called in the simulate bullet)
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	extern void gather_collisions(BulletPhyicsSimulation* simulation);
+
+	/**
+	 * @brief returns true if the body considered do collides (are touching in the current frame), false otw.
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	extern bool check_collision(BulletPhyicsSimulation* simulation, int body1, int body2);
+
+
+	/**
+	 * @brief helper to print the collisions
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	extern void print_collisions(BulletPhyicsSimulation* simulation);
+
+	extern void set_particles_positions(BulletPhyicsSimulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius);
 
 	//TODO
 	extern void apply_force(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 force);

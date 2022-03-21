@@ -22,9 +22,9 @@ void add_physics_static_grid(Simulation* simulation, const Grid* grid) {
                 if (grid->cells[index] == true) {
                     glm::vec3 position = {x, y, z};
                     if (grid->has_one_color_per_cell) {
-                       add_box(&simulation->bullet_physics_simulation, position, false, grid->color);     
+                       add_box(&simulation->bullet_physics_simulation, position, false);     
                     } else {
-                        add_box(&simulation->bullet_physics_simulation, position, false, grid->colors[index]);
+                        add_box(&simulation->bullet_physics_simulation, position, false);
                     }
                 }
             }

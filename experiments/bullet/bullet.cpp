@@ -165,7 +165,8 @@ int main(void) {
 
     bool particles_shown = false;
     bool keysMovingBody = true;
-    
+    bool playerLeftGround = true;
+
     std::vector<Lustrine::Grid> grids (3);
     Lustrine::Grid player_grid;
     std::vector<glm::vec3> grids_positions (3);
@@ -188,16 +189,16 @@ int main(void) {
     //btTransform
 
     
-    int box_index = Lustrine::add_box(bulletPhysics, {15, 15, 15}, true, {1, 0, 0, 1});
-    int box_index_2 = Lustrine::add_box(bulletPhysics, {16, 15, 16}, true, {0, 1, 0, 1});
-    int box_index_3 = Lustrine::add_box(bulletPhysics, {14, 15, 14}, true, {0, 0, 1, 1});
+    int box_index = Lustrine::add_box(bulletPhysics, {15, 15, 15}, true, bulletPhysics->collision_group_0, INT32_MAX);
+    int box_index_2 = Lustrine::add_box(bulletPhysics, {16, 15, 16}, true);
+    int box_index_3 = Lustrine::add_box(bulletPhysics, {14, 15, 14}, true);
 
     Lustrine::set_body_no_rotation(bulletPhysics, box_index);
 
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
-    int box_index_4 = Lustrine::add_box(bulletPhysics, {10, 2, 10}, true, {0, 0, 1, 1}, half_dims_box_4);
+    int box_index_4 = Lustrine::add_box(bulletPhysics, {10, 2, 10}, true, half_dims_box_4, bulletPhysics->collision_group_1, INT32_MAX);
 
-    int ground_index = Lustrine::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {1, 0, 0, 1}, {parameters.X / 2, 1, parameters.Z / 2});
+    int ground_index = Lustrine::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {parameters.X / 2, 1, parameters.Z / 2}, bulletPhysics->collision_group_0 | bulletPhysics->collision_group_1, INT32_MAX);
 
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
 
@@ -309,35 +310,36 @@ int main(void) {
             float speed = 5.0f;
             glm::vec3 velocity (0.0);
 
-            if (inputController->isKeyPressed(Levek::LEVEK_KEY_W) == true) {
-                //velocity.setX(-speed);
-                velocity.x -= speed;
-                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
-                //bulletPhysics->rigidbodies[box_index]->activate(true);
-                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+            if (Lustrine::check_collision(bulletPhysics, box_index, ground_index) == true) {
+                playerLeftGround = false;
+            } else {
+                playerLeftGround = true;
             }
 
-            if (inputController->isKeyPressed(Levek::LEVEK_KEY_S) == true) {
-                //velocity.setX(speed)
-                velocity.x += speed;;
-                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
-                //bulletPhysics->rigidbodies[box_index]->activate(true);
-                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+            if (playerLeftGround == false) {
+                if (inputController->isKeyPressed(Levek::LEVEK_KEY_W) == true) {
+                    velocity.x -= speed;
+                    Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                }
+
+                if (inputController->isKeyPressed(Levek::LEVEK_KEY_S) == true) {
+                    velocity.x += speed;;
+                    Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                }
+
+                if (inputController->isKeyPressed(Levek::LEVEK_KEY_A) == true) {
+                    velocity.z += speed;
+                    Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                }
+
+                if (inputController->isKeyPressed(Levek::LEVEK_KEY_D) == true) {
+                    velocity.z -= speed;
+                    Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
+                }
             }
 
-            if (inputController->isKeyPressed(Levek::LEVEK_KEY_A) == true) {
-                velocity.z += speed;
-                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
-                //bulletPhysics->rigidbodies[box_index]->activate(true);
-                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
-            }
-
-            if (inputController->isKeyPressed(Levek::LEVEK_KEY_D) == true) {
-                //velocity.setZ(-speed);
-                velocity.z -= speed;
-                Lustrine::set_body_velocity(bulletPhysics, box_index, velocity);
-                //bulletPhysics->rigidbodies[box_index]->activate(true);
-                //bulletPhysics->rigidbodies[box_index]->setLinearVelocity(velocity);
+            if (playerLeftGround == false && inputController->isKeyPressed(Levek::LEVEK_KEY_X) == true) {
+                Lustrine::apply_impulse(bulletPhysics, box_index, {0, 0.2, 0}, {0, 0, 0});
             }
 
         }

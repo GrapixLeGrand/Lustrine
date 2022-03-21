@@ -26,16 +26,23 @@ namespace Lustrine {
 		btBoxShape* unit_box_shape; //unit box shape
 		
 		int num_bodies = 0;
-		//int ptr_dynamic_start = 0;
-		//int ptr_dynamic_end = 0;
-		//int ptr_static_start = 0;
-		//int ptr_static_end = 0;
 
 		std::vector<btTransform> transforms;
 		std::vector<btRigidBody*> rigidbodies; //store all registered bodies
-		//std::vector<glm::vec3> positions; //stores the positions of ALL boxes
-		//std::vector<glm::vec4> colors;
+		std::vector<std::vector<int>> bodies_collisions;
 
+		std::vector<btRigidBody*> sand_particles_colliders;
+
+		//attention this is work in progress and this group thing does not work for now
+		int collision_group_0 = (1 << 11);
+		int collision_mask_0 = (1 << 11); //player + objects
+		int collision_group_1 = (1 << 12); //particles (and optionally player)
+		int collision_mask_1 = (1 << 12);
+		int collision_group_2 = (1 << 13); //particles (and optionally player)
+		int collision_mask_2 = (1 << 13);
+
+		//nt collision_mask_0 = ;
+		float default_body_friction = 5.0f;
 		float box_mass = 1.0f;
 
 	};
