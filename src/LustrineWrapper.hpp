@@ -86,7 +86,7 @@ namespace Wrapper {
 	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
 	//extern "C" LUSTRINE_WRAPPER_EXPORT void free_grid(Grid* grid);
 
-	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, int64_t size);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
 
 } //Wrapper

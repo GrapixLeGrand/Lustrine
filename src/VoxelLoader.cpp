@@ -108,22 +108,38 @@ JsonWriter &operator<<(JsonWriter &j, const ogt_vox_transform &t) {
     return j;
 }
 
+JsonWriter &operator<<(JsonWriter &j, const ogt_vox_rgba &c) {
+    j.bObject();
+    j.safeKey("r") << c.r;
+    j.safeKey("g") << c.g;
+    j.safeKey("b") << c.b;
+    j.safeKey("a") << c.a;
+    j.eObject();
+    return j;
+}
+
 std::string read_vox_scene_json(const uint8_t *buffer, int64_t size) {
     std::stringstream s;
     const ogt_vox_scene *scene = ogt_vox_read_scene(buffer, size);
     JsonWriter j{s};
     j.bObject();
     j.safeKey("models").bArray();
+    int maxMat = 0;
     for (int m = 0; m < scene->num_models; ++m) {
         const ogt_vox_model *model = scene->models[m];
+        j.bObject();
         j.safeKey("id") << m;
-        j.safeKey("size_x") << model->size_x;
-        j.safeKey("size_y") << model->size_y;
-        j.safeKey("size_z") << model->size_z;
+        j.safeKey("sizeX") << model->size_x;
+        j.safeKey("sizeY") << model->size_y;
+        j.safeKey("sizeZ") << model->size_z;
         j.safeKey("data").bArray();
         uint32_t model_size = model->size_x * model->size_y * model->size_z;
-        for (int i = 0; i < model_size; ++i) j << model->voxel_data[i];
+        for (int i = 0; i < model_size; ++i) {
+            j << model->voxel_data[i];
+            maxMat = std::max<int>(maxMat, model->voxel_data[i]);
+        }
         j.eArray();
+        j.eObject();
     }
     j.eArray();
     j.safeKey("instances").bArray();
@@ -156,9 +172,37 @@ std::string read_vox_scene_json(const uint8_t *buffer, int64_t size) {
         j.bObject();
         j.safeKey("id") << g;
         j.safeKey("transform") << group.transform;
-        j.safeKey("parent_group") << group.parent_group_index;
+        j.safeKey("parentGroup") << group.parent_group_index;
         j.safeKey("layer") << group.layer_index;
         j.safeKey("hidden") << group.hidden;
+        j.eObject();
+    }
+    j.eArray();
+    j.safeKey("palette").bArray();
+    for (int p = 0; p <= maxMat; ++p) {
+        j << scene->palette.color[p];
+    }
+    j.eArray();
+    j.safeKey("materials").bArray();
+    for (int m = 0; m <= maxMat; ++m) {
+        const auto &mat = scene->materials.matl[m];
+        j.bObject();
+        j.safeKey("contentFlags") << mat.content_flags;
+        j.safeKey("type") << mat.type;
+        if (mat.content_flags & k_ogt_vox_matl_have_metal) j.safeKey("metal") << mat.metal;
+        if (mat.content_flags & k_ogt_vox_matl_have_rough) j.safeKey("rough") << mat.rough;
+        if (mat.content_flags & k_ogt_vox_matl_have_spec) j.safeKey("spec") << mat.spec;
+        if (mat.content_flags & k_ogt_vox_matl_have_ior) j.safeKey("ior") << mat.ior;
+        if (mat.content_flags & k_ogt_vox_matl_have_att) j.safeKey("att") << mat.att;
+        if (mat.content_flags & k_ogt_vox_matl_have_flux) j.safeKey("flux") << mat.flux;
+        if (mat.content_flags & k_ogt_vox_matl_have_emit) j.safeKey("emit") << mat.emit;
+        if (mat.content_flags & k_ogt_vox_matl_have_ldr) j.safeKey("ldr") << mat.ldr;
+        if (mat.content_flags & k_ogt_vox_matl_have_trans) j.safeKey("trans") << mat.trans;
+        if (mat.content_flags & k_ogt_vox_matl_have_alpha) j.safeKey("alpha") << mat.alpha;
+        if (mat.content_flags & k_ogt_vox_matl_have_d) j.safeKey("d") << mat.d;
+        if (mat.content_flags & k_ogt_vox_matl_have_sp) j.safeKey("sp") << mat.sp;
+        if (mat.content_flags & k_ogt_vox_matl_have_g) j.safeKey("g") << mat.g;
+        if (mat.content_flags & k_ogt_vox_matl_have_media) j.safeKey("media") << mat.media;
         j.eObject();
     }
     j.eArray();
