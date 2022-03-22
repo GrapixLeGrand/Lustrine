@@ -54,6 +54,7 @@ void init_simulation(
     simulation->domainZ = parameters->Z;
 
     int first_guess_allocation = simulation->domainX * simulation->domainY * simulation->domainZ;
+    assert(first_guess_allocation > 0);
     int initial_allocated_particles_num = 0;
 
     for (int i = 0; i < grids_sand_arg.size(); i++) {
@@ -75,8 +76,9 @@ void init_simulation(
     simulation->positions_star = new glm::vec3[simulation->total_allocated];
     simulation->colors = new glm::vec4[simulation->total_allocated];
 
-    memset(simulation->positions, 0, simulation->total_allocated * 3);
-    memset(simulation->positions_star, 0, simulation->total_allocated * 3);
+    memset(simulation->positions, 0, simulation->total_allocated * 4 * 3);
+    memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
+    memset(simulation->colors, 0, simulation->total_allocated * 4 * 4);
 
 
     { //sand
@@ -86,7 +88,7 @@ void init_simulation(
 
         simulation->grids_sand = grids_sand_arg;
         simulation->grids_initial_positions_sand = grids_sand_positions_arg;
-        simulation->chunks_sand.reserve(simulation->num_sand_particles);
+        simulation->chunks_sand.reserve(simulation->grids_sand.size());
 
         for (int i = 0; i < simulation->grids_sand.size(); i++) {
             Chunk chunk;
@@ -110,45 +112,47 @@ void init_simulation(
 
     {  //solids
         
-        simulation->ptr_solid_start = simulation->total_allocated; //head is going down so list is in order
-        simulation->ptr_solid_end = simulation->total_allocated;
+        simulation->ptr_solid_start = simulation->total_allocated - simulation->num_solid_particles; //simulation->total_allocated - 1; //head is going down so list is in order
+        simulation->ptr_solid_end = simulation->ptr_solid_start;
 
         simulation->grids_solid = grids_solid_arg;
         simulation->grids_initial_positions_solid = grids_solid_positions_arg;
-        simulation->chunks_solid.reserve(simulation->num_solid_particles);
+        simulation->chunks_solid.reserve(simulation->grids_solid.size());
 
         for (int i = 0; i < simulation->grids_solid.size(); i++) {
             Chunk chunk;
             assert(simulation->grids_solid[i].type == SOLID);
             init_chunk_from_grid(parameters, &chunk, &simulation->grids_solid[i], simulation->grids_initial_positions_solid[i], SOLID);
-            simulation->chunks_sand.push_back(chunk);
+            simulation->chunks_solid.push_back(chunk);
 
             for (int j = 0; j < chunk.num_particles; j++) {
-                simulation->positions[simulation->ptr_solid_start] = chunk.positions[j];
-                simulation->positions_star[simulation->ptr_solid_start] = chunk.positions[j];
+                simulation->positions[simulation->ptr_solid_end] = chunk.positions[j];
+                simulation->positions_star[simulation->ptr_solid_end] = chunk.positions[j];
                 if (chunk.has_one_color_per_particles == true) {
-                    simulation->colors[simulation->ptr_solid_start] = chunk.colors[j];
+                    simulation->colors[simulation->ptr_solid_end] = chunk.colors[j];
                 } else {
-                    simulation->colors[simulation->ptr_solid_start] = chunk.color;
+                    simulation->colors[simulation->ptr_solid_end] = chunk.color;
                 }
-                simulation->ptr_solid_start--;
+                simulation->ptr_solid_end++;
             }
 
         }
 
+        assert(simulation->ptr_solid_end == simulation->total_allocated);
+
     } // end solids
 
-    simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
-    simulation->lambdas = std::vector<float>(simulation->num_sand_particles, 0);
-    simulation->neighbors = std::vector<std::vector<int>>(simulation->num_sand_particles);
+    simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
+    simulation->lambdas = std::vector<float>(simulation->num_sand_particles, 0.0f);
+    simulation->neighbors = std::vector<std::vector<int>>(simulation->num_sand_particles, std::vector<int>{});
 
     simulation->W = cubic_kernel;
     simulation->gradW = cubic_kernel_grad;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);
-    simulation->cubic_kernel_k = 8.0 / (pi * h3);
-    simulation->cubic_kernel_l = 48.0 / (pi * h3);
+    simulation->cubic_kernel_k = 8.0f / (pi * h3);
+    simulation->cubic_kernel_l = 48.0f / (pi * h3);
 
     //sorting neighbor strategy with grid
     simulation->cell_size = 1.0f * simulation->kernelRadius;

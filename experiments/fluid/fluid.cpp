@@ -33,16 +33,17 @@ int main(void) {
     #endif
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
-    Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
-    const Levek::Mesh* sphere = model->getMesh(0);
+    //Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
+    //const Levek::Mesh* sphere = model->getMesh(0);
 
     Levek::PerspectiveCamera camera({20, 20, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
     glm::mat4 projection = camera.getProjection();
 
+    /*
     Levek::Shader shaderInstances = Levek::ShaderFactory::makeFromFile(
         LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/sphere_inst.vert",
         LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/sphere_inst.frag"
-    );
+    );*/
     
     float particleScale = 1.0f;
 
@@ -76,10 +77,15 @@ int main(void) {
         solid_grids,
         solid_grids_positions
     );
+
+    ParticlesPipelineSate sandParticlesPipeline(engine, simulation.positions, simulation.colors, simulation.num_sand_particles);
+
+
     //Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
 
     //////////////////////////////////////////////////////////////////////////////////////////
 
+    /*
     Levek::VertexBuffer particlesPositionsVBO = Levek::VertexBuffer((void*) simulation.positions, (size_t) simulation.num_sand_particles * 3 * 4);
     Levek::VertexBuffer particlesColorsVBO = Levek::VertexBuffer((void*) simulation.colors, (size_t) simulation.num_sand_particles * 4 * 4);
 
@@ -98,6 +104,7 @@ int main(void) {
     particlesVA.addBuffer(sphereVBO, sphereLayout);
     particlesVA.addBuffer(particlesPositionsVBO, instanceLayout);
     particlesVA.addBuffer(particlesColorsVBO, colorLayout);
+    */
 
     SkyBoxPipelineState skybox (getSkyBoxPaths());
 
@@ -134,10 +141,11 @@ int main(void) {
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
 
-        particlesPositionsVBO.Update((void*) simulation.positions, (size_t) simulation.num_sand_particles * 3 * 4);
+        sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
+        //particlesPositionsVBO.Update((void*) simulation.positions, (unsigned int) simulation.num_sand_particles * 3 * 4);
         renderer->clear();
 
-        UpdateCameraPositionWASD(inputController, camera, windowController->getDeltaTime(), 10.f);
+        UpdateCameraPositionWASD(inputController, camera, windowController->getDeltaTime(), 10.0f);
         UpdateCameraWithMouseOnDrag(inputController, camera, 0.2f);
 
         glm::mat4 view = camera.getView();
@@ -146,6 +154,7 @@ int main(void) {
         glm::vec3 lightDirection = glm::vec3(0, -1, 0); //glm::vec3(glm::normalize(view * glm::vec4(0, -1, 0, 0)));
 
         //render instances
+        /*
         shaderInstances.bind();
         shaderInstances.setUniformMat4f("vp", vp);
         shaderInstances.setUniformMat4f("p", camera.getProjection());
@@ -154,11 +163,20 @@ int main(void) {
         shaderInstances.setUniform3f("light_direction", lightDirection);
         //shaderInstances.setUniform4f("palette", palette.data(), 256);
         shaderInstances.setUniform1f("scale", particleScale);
-
+        */
+        sandParticlesPipeline.setUniforms(
+            vp,
+            camera.getProjection(),
+            camera.getView(),
+            view_inv,
+            lightDirection,
+            particleScale
+        );
         vp = camera.getProjection() * glm::mat4(glm::mat3(camera.getView()));
         skybox.draw(renderer, vp);
-        renderer->drawInstances(&particlesVA, &sphereIBO, &shaderInstances, simulation.num_particles);
-        
+        //renderer->drawInstances(&particlesVA, &sphereIBO, &shaderInstances, simulation.num_sand_particles);
+        sandParticlesPipeline.draw(renderer);
+
         //render plane
         planeShader.bind();
         unitTexture.activateAndBind(0);
