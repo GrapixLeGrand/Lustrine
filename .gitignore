@@ -13,3 +13,11 @@ build
 .vs
 /cmake-*
 /.idea
+
+# Keep compiled LustrineWrapper.dll
+/out/*
+!/out/build
+/out/build/*
+!/out/build/x64-Release
+/out/build/x64-Release/*
+!/out/build/x64-Release/LustrineWrapper.dll
