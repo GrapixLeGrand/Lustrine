@@ -167,6 +167,8 @@ namespace Bullet {
 			simulation->sand_particles_colliders = std::vector<btRigidBody*>(num_particles, nullptr);
 		}
 
+		simulation->bodies_collisions.resize(simulation->num_bodies + num_particles, std::vector<int>{});
+
 		for (old_size; old_size < num_particles; old_size++) {
 			btTransform tmpTransform;
 			tmpTransform.setIdentity();
@@ -239,9 +241,17 @@ namespace Bullet {
 			simulation->bodies_collisions[indexA].push_back(indexB);
 			simulation->bodies_collisions[indexB].push_back(indexA);	
 
-			//std::cout << "ptr A: " <<  << " ptr B: " << obC->getUserIndex() << std::endl;
-
     	}
+
+	}
+
+	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {
+		
+		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+			btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
+			t.setOrigin(glmToBullet(particles[i]));
+        	simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
+		}
 
 	}
 

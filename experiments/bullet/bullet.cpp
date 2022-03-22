@@ -77,7 +77,7 @@ int main(void) {
 
     std::vector<Lustrine::Grid> sand_grids (1);
     std::vector<glm::vec3> sand_grids_positions (1);
-    sand_grids_positions[0] = {20.0f, 5.0f, 20.0f};
+    sand_grids_positions[0] = {20.0f, 5.0f, 0.0f};
     //sand_grids_positions[1] = {15, 0, 15};
 
     std::vector<Lustrine::Grid> solid_grids (1);
@@ -86,7 +86,7 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/little_level.vox", Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 10, 10, 10, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
 
     Lustrine::init_simulation(
@@ -102,7 +102,7 @@ int main(void) {
     
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
-    float basic_speed = 1000.0f;
+    float basic_speed = 400.0f;
     float basic_impulse = 100.0f;
 
     int box_index = Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
@@ -112,7 +112,11 @@ int main(void) {
     int ground_index = Lustrine::Bullet::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {parameters.X / 2, 1, parameters.Z / 2}, bulletPhysics->collision_group_0 | bulletPhysics->collision_group_1, INT32_MAX);
 
     Lustrine::Bullet::set_body_no_rotation(bulletPhysics, box_index);
-    
+
+    Lustrine::Bullet::allocate_particles_colliders(bulletPhysics, simulation.num_sand_particles);
+
+    //bulletPhysics->rigidbodies[box_index]->setActivationState(DISABLE_DEACTIVATION);
+
     btTransform transformBox1;
     btTransform transformBox2;
     btTransform transformBox3;
@@ -140,7 +144,7 @@ int main(void) {
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
-
+        Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions, 0, simulation.ptr_sand_end);
         //Lustrine::Bullet::simulate_bullet(bulletPhysics, windowController->getDeltaTime());
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
         renderer->clear();
@@ -153,11 +157,21 @@ int main(void) {
             float speed = windowController->getDeltaTime() * basic_speed;
             glm::vec3 velocity (0.0);
 
-            if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, ground_index) == true) {
+            bool playerLeftGround = true;
+            for (int i = 0; i < bulletPhysics->num_bodies; i++) {
+                if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, i) == true) {
+                    playerLeftGround = false;
+                    break;
+                } else {
+                    playerLeftGround = true;
+                }
+            }
+
+            /*if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, ground_index) == true) {
                 playerLeftGround = false;
             } else {
                 playerLeftGround = true;
-            }
+            }*/
 
             if (playerLeftGround == false) {
                 if (inputController->isKeyPressed(Levek::LEVEK_KEY_W) == true) {
@@ -180,7 +194,7 @@ int main(void) {
                     Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
                 }
             }
-
+            //playerLeftGround == false &&
             if (playerLeftGround == false && inputController->isKeyPressed(Levek::LEVEK_KEY_X) == true) {
                 float impulse_mag = windowController->getDeltaTime() * basic_impulse;
                 Lustrine::Bullet::apply_impulse(bulletPhysics, box_index, {0, impulse_mag, 0}, {0, 0, 0});

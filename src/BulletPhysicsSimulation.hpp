@@ -42,9 +42,8 @@ namespace Bullet {
 		int collision_group_2 = (1 << 13); //particles (and optionally player)
 		int collision_mask_2 = (1 << 13);
 
-		//nt collision_mask_0 = ;
 		float default_body_friction = 5.0f;
-		float box_mass = 1.5f;
+		float box_mass = 1.0f;
 
 	};
 

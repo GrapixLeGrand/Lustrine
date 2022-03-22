@@ -92,7 +92,16 @@ namespace Bullet {
 	 */
 	extern bool check_collision(Simulation* simulation, int body1, int body2);
 
-
+	/**
+	 * @brief Set the particles box colliders positions object
+	 * 
+	 * @param simulation 
+	 * @param particles 
+	 * @param start 
+	 * @param end 
+	 */
+	extern void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end);
+	
 	/**
 	 * @brief helper to print the collisions
 	 * 
