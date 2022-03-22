@@ -139,7 +139,8 @@ void init_simulation(
         }
 
         assert(simulation->ptr_solid_end == simulation->total_allocated);
-
+        simulation->positions_solid = simulation->positions + simulation->ptr_solid_start;
+        simulation->colors_solid = simulation->colors + simulation->ptr_solid_start;
     } // end solids
 
     simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});

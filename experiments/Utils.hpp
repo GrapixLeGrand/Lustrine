@@ -100,6 +100,56 @@ struct ParticlesPipelineSate {
 
 };
 
+struct GroundPipelineState {
+
+	Levek::Shader planeShader = Levek::ShaderFactory::makeFromFile(
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/ground.vert",
+        LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/shaders/ground.frag"
+    );
+
+    Levek::Model* planeModel;
+    const Levek::Mesh* planeMesh;
+    Levek::VertexBuffer* planeVBO;
+    Levek::IndexBuffer* planeIBO;
+    Levek::VertexBufferLayout planeLayout;
+    Levek::VertexArray* planeVA;
+    Levek::Texture* unitTexture;
+
+	GroundPipelineState(Levek::RenderingEngine* engine): unitTexture(new Levek::Texture(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/unit.png")) {
+
+		Levek::ModelLoader* meshLoader = engine->getModelLoader();
+		planeModel = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/plane.obj");
+		planeMesh = planeModel->getMesh(0);
+
+		planeVBO = new Levek::VertexBuffer(planeMesh);
+    	planeIBO = new Levek::IndexBuffer(planeMesh);
+		planeIBO->bind();
+		planeIBO->unbind();
+		planeLayout.push<glm::vec3>(1);
+    	planeLayout.push<glm::vec2>(1);
+    	planeLayout.push<glm::vec3>(1);
+
+		planeVA = new Levek::VertexArray();
+		planeVA->addBuffer(planeVBO, &planeLayout);
+
+		//Levek::Texture* unitTexture = new Levek::Texture(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/unit.png");
+    	unitTexture->set(Levek::TextureParameters::TextureWrapMode::REPEAT);
+    	unitTexture->set(Levek::TextureParameters::TextureLODFunction::LINEAR, Levek::TextureParameters::TextureLODFunction::LINEAR);
+	}
+
+	void setUniforms(const glm::mat4& vp) {
+		planeShader.bind();
+		unitTexture->activateAndBind(0);
+		planeShader.setUniformMat4f("mvp", vp);
+        planeShader.setUniform1i("tex", 0);
+	}
+
+	void draw(Levek::Renderer* renderer) {
+		renderer->draw(planeVA, planeIBO, &planeShader);
+	}
+
+};
+
 //from https://learnopengl.com/code_viewer.php?code=advanced/cubemaps_skybox_data
 extern float skyboxVertices[108];
 

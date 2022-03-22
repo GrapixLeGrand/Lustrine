@@ -83,13 +83,6 @@ struct SimulationParameters {
 struct Simulation {
 
     BulletPhyicsSimulation bullet_physics_simulation;
-
-    //int ptr_fluid_start = 0; //start positions of fluid particles
-    //int ptr_fluid_end = 0;  //end positions of fluid particles
-
-    //int ptr_static_start = 0; //start position of solid particles
-    //int ptr_static_end = 0;   //end position of soldid particles
-
     W_fun W = nullptr; //pointer to function representing the kernel
     gradW_fun gradW = nullptr; //pointer to function representing the gradient of the kernel
 
@@ -122,16 +115,9 @@ struct Simulation {
     float c_xsph = 0.1f;
     float epsilon_vorticity = 0.1f;
     
-    //std::vector<glm::vec3> positions; 
-    //std::vector<glm::vec3> positions_star; //array containing the prediction of the positions of the particles (all)
-    
     std::vector<glm::vec3> velocities;//array containing the velocities of each particles (sand only)
-
     std::vector<float> lambdas;
-    //std::vector<glm::vec3> vorticities; unused for now
     std::vector<std::vector<int>> neighbors; //arrays of neighbor indices
-    //std::vector<glm::vec4> colors; //per particle colors
-    
     int gridX, gridY, gridZ; //sizes of the grid
     float cell_size; //size of side length of a single grid cell
     int num_grid_cells; //total amount of grid cells
@@ -155,9 +141,12 @@ struct Simulation {
     size_t leftover_allocated = 0;//leftover (in float) allocated
 
     //double list
-    glm::vec3* positions = nullptr;//array containing positions of the particles (all)
+    glm::vec3* positions = nullptr;//array containing positions of the particles of sand and then space and then solid
     glm::vec3* positions_star = nullptr;
+    glm::vec3* positions_solid = nullptr;//array containing positions of the particles (all)
+
     glm::vec4* colors = nullptr;
+    glm::vec4* colors_solid = nullptr;
 
     int ptr_sand_start = -1;
     int ptr_sand_end = -1;
