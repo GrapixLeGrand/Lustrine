@@ -44,7 +44,7 @@ namespace Bullet {
 
 		//nt collision_mask_0 = ;
 		float default_body_friction = 5.0f;
-		float box_mass = 1.0f;
+		float box_mass = 1.5f;
 
 	};
 

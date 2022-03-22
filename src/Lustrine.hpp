@@ -87,6 +87,13 @@ extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::s
 
 extern LUSTRINE_EXPORT void simulate(Simulation* simulation, float dt);
 
+/**
+ * @brief This function will add a solid chunk to the sim
+ * 
+ * @param simulation 
+ * @return LUSTRINE_EXPORT 
+ */
+//extern LUSTRINE_EXPORT int add_box(Simulation* simulation, );
 
 //extern LUSTRINE_EXPORT int add_physics_grid_sparse_body();
 

@@ -160,11 +160,15 @@ struct Simulation {
     int ptr_solid_start = -1;
     int ptr_solid_end = -1;
 
+    int ptr_solid_ordered_start = -1;
+    int ptr_solid_ordered_end = -1;
+
     //We are going to store solid and sand particles not in the same place
     int num_solid_particles;//total amount of particles of solid
     std::vector<Grid> grids_solid;
     std::vector<glm::vec3> grids_initial_positions_solid;
     std::vector<std::pair<int, int>> solid_grid_to_body;//grid index to body index in bullet (WARNING can be -1 bullet index)
+    std::vector<std::pair<int, int>> grids_solid_chunk_ptrs;
     std::vector<Chunk> chunks_solid;//all the chunks of solids
 
     int num_sand_particles;//the total amount of particles of sand
