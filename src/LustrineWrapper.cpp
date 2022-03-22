@@ -234,19 +234,19 @@ namespace Wrapper {
 	}
 
 	void say_hello() {
-		std::cout << "hello from cpp!" << std::endl;
+		std::cout << "Hello from cpp!" << std::endl;
 	}
 
 	void simulation_bind_positions_copy(float* position_ptr) {
         std::memcpy(position_ptr, simulation->positions, sizeof(float) * 3 * simulation->num_sand_particles);
 	}
 
-    void read_vox_scene(BindingString *data, const uint8_t *buffer, uint32_t size) {
-        std::string s{read_vox_scene_json(buffer, 0)};
-        data->length = s.size();
-        data->data = new char[s.size() + 1];
-        memcpy(data->data, s.c_str(), s.size());
-        data->data[s.size()] = 0;
+    void read_vox_scene(BindingString *data, const uint8_t *buffer, int64_t size) {
+        std::string json{read_vox_scene_json(buffer, size)};
+        data->length = json.size();
+        data->data = new char[json.size() + 1];
+        memcpy(data->data, json.c_str(), json.size());
+        data->data[json.size()] = 0;
 	}
 
 	void free_string(BindingString* data) {
