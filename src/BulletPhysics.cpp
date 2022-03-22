@@ -6,6 +6,7 @@
 
 
 namespace Lustrine {
+namespace Bullet {
 
 	btVector3 glmToBullet(glm::vec3& v) {
 		btVector3 result;
@@ -32,7 +33,7 @@ namespace Lustrine {
 	 * @param shape 
 	 * @return btRigidBody* 
 	 */
-	 btRigidBody* bullet_create_rigidbody(BulletPhyicsSimulation* simulation, float mass, const btTransform& startTransform, btCollisionShape* shape, int index) {
+	 btRigidBody* bullet_create_rigidbody(Simulation* simulation, float mass, const btTransform& startTransform, btCollisionShape* shape, int index) {
 
 		btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 		//rigidbody is dynamic if and only if mass is non zero, otherwise static
@@ -66,7 +67,7 @@ namespace Lustrine {
 		return body;
 	}
 
-	void init_bullet(BulletPhyicsSimulation* simulation) {
+	void init_bullet(Simulation* simulation) {
 		
 		std::cout << "Lustrine::info Initializing bullet" << std::endl;
 
@@ -87,7 +88,7 @@ namespace Lustrine {
 		simulation->bodies_collisions = std::vector<std::vector<int>>({});
 	}
 
-	void clean_bullet(BulletPhyicsSimulation* simulation) {
+	void clean_bullet(Simulation* simulation) {
 
 		std::cout << "Lustrine::info Exiting bullet" << std::endl;
 
@@ -98,21 +99,21 @@ namespace Lustrine {
 		delete simulation->collisionConfiguration;
 	}
 
-	void simulate_bullet(BulletPhyicsSimulation* simulation, float dt) {
+	void simulate_bullet(Simulation* simulation, float dt) {
 		gather_collisions(simulation);
 		//print_collisions(simulation);
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
-	int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic) {
+	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic) {
 		return add_box(simulation, simulation->unit_box_shape, position, is_dynamic, btBroadphaseProxy::AllFilter, INT32_MAX);
 	}
 
-	int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask) {
+	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask) {
 		return add_box(simulation, simulation->unit_box_shape, position, is_dynamic, group, mask);
 	}
 
-	int add_box(BulletPhyicsSimulation* simulation, btBoxShape* box_shape, glm::vec3 position, bool is_dynamic, int group, int mask) {
+	int add_box(Simulation* simulation, btBoxShape* box_shape, glm::vec3 position, bool is_dynamic, int group, int mask) {
 		btTransform tmpTransform;
 		tmpTransform.setIdentity();
 		btVector3 pos = glmToBullet(position);
@@ -129,7 +130,7 @@ namespace Lustrine {
 		return result;
 	}
 
-	int add_box(BulletPhyicsSimulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims, int group, int mask) {
+	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims, int group, int mask) {
 		
 		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
 		simulation->collisionShapes.push_back(new_box_shape);
@@ -152,7 +153,7 @@ namespace Lustrine {
 		return result;*/
 	}
 
-	void allocate_particles_colliders(BulletPhyicsSimulation* simulation, int num_particles) {
+	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
 		
 		if (num_particles < simulation->sand_particles_colliders.size()) {
 			return;
@@ -178,28 +179,28 @@ namespace Lustrine {
 		}
 	}
 
-	void set_body_no_rotation(BulletPhyicsSimulation* simulation, int body_index) {
+	void set_body_no_rotation(Simulation* simulation, int body_index) {
 		btVector3 linFact (0.0, 0.0, 0.0);
         simulation->rigidbodies[body_index]->setAngularFactor(linFact);
 	}
 
-	void set_body_velocity(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 velocity) {
+	void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
 		simulation->rigidbodies[body_index]->activate(true);
         simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
-	void print_resume(const BulletPhyicsSimulation* simulation) {
+	void print_resume(const Simulation* simulation) {
 		std::cout << "Lustrine::Bullet " << "\n" 
 			<< "\tnum registered bodies: " << simulation->num_bodies << "\n"
 			<< "\tnum registered shapes: " << simulation->collisionShapes.size() << std::endl;
 	}
 
-	void apply_impulse(BulletPhyicsSimulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 position) {
+	void apply_impulse(Simulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 position) {
 		simulation->rigidbodies[body_index]->applyImpulse(glmToBullet(impulse), glmToBullet(position));
 		
 	}
 
-	void print_collisions(BulletPhyicsSimulation* simulation) {
+	void print_collisions(Simulation* simulation) {
 		for (int i = 0; i < simulation->bodies_collisions.size(); i++) {
 			std::cout << i << " -> " << std::endl;
 			for (int j = 0; j < simulation->bodies_collisions[i].size(); j++) {
@@ -209,7 +210,7 @@ namespace Lustrine {
 		}
 	}
 
-	bool check_collision(BulletPhyicsSimulation* simulation, int body1, int body2) {
+	bool check_collision(Simulation* simulation, int body1, int body2) {
 		for (int i = 0; i < simulation->bodies_collisions[body1].size(); i++) {
 			if (simulation->bodies_collisions[body1][i] == body2) {
 				return true;
@@ -218,7 +219,7 @@ namespace Lustrine {
 		return false;
 	}
 
-	void gather_collisions(BulletPhyicsSimulation* simulation) {
+	void gather_collisions(Simulation* simulation) {
 
 		for (int i = 0; i < simulation->bodies_collisions.size(); i++) {
 			simulation->bodies_collisions[i].clear();
@@ -244,7 +245,7 @@ namespace Lustrine {
 
 	}
 
-	void set_particles_positions(BulletPhyicsSimulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius) {
+	void set_particles_positions(Simulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius) {
 		
 		btTransform& t = simulation->rigidbodies[body]->getWorldTransform();
 		glm::mat4 m (0.0f);
@@ -272,5 +273,5 @@ namespace Lustrine {
 
 
 	}
-
+}
 }

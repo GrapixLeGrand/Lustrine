@@ -3,6 +3,20 @@
 #include <vector>
 #include <string>
 
+/**
+ * @brief Draw box with lineRenderer
+ * 
+ * @param lineRenderer 
+ * @param model 
+ * @param half 
+ * @param color 
+ */
+extern void addLineBox(Levek::LineRenderer* lineRenderer, const glm::mat4& model, const glm::vec3& half, glm::vec4 color);
+
+
+
+
+
 struct ParticlesPipelineSate {
 
 	Levek::Model* billboardModel = nullptr;

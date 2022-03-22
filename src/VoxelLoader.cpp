@@ -92,6 +92,10 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialTy
 
     grid->num_occupied_grid_cells = counter;
     ogt_vox_destroy_scene(scene);
+
+    grid->sparse_solid = true;
+    grid->dynamic_solid = true;
+
 }
 
 JsonWriter &operator<<(JsonWriter &j, const ogt_vox_transform &t) {

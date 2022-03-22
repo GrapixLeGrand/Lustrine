@@ -80,7 +80,6 @@ void init_simulation(
     memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->colors, 0, simulation->total_allocated * 4 * 4);
 
-
     { //sand
         
         simulation->ptr_sand_start = 0;
@@ -177,9 +176,11 @@ void init_simulation(
 
 }
 
-
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
+    delete simulation->positions;
+    delete simulation->positions_star;
+    delete simulation->colors;
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color) {
@@ -197,6 +198,9 @@ void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, in
 
     const float diameter = parameters->particleDiameter;
     const float radius = parameters->particleRadius;
+
+    grid->sparse_solid = true;
+    grid->dynamic_solid = false;
 
 }
 

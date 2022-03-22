@@ -46,7 +46,8 @@ extern void LUSTRINE_EXPORT init_simulation(
     const std::vector<Grid>& grids_sand_arg, 
     const std::vector<glm::vec3>& grids_sand_positions_arg, 
     const std::vector<Grid>& grids_solid_arg, 
-    const std::vector<glm::vec3>& grids_solid_positions_arg);
+    const std::vector<glm::vec3>& grids_solid_positions_arg
+);
 
 /**
  * @brief Clean any allocated and unmanaged memory.
@@ -79,22 +80,6 @@ extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* 
  */
 extern LUSTRINE_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color);
 
-/**
- * @brief init a box 
- * 
- * @param parameters 
- * @param chunk 
- * @param X 
- * @param Y 
- * @param Z 
- * @param position 
- * @param type 
- * @param color 
- */
-//extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z, glm::vec3 position, MaterialType type, glm::vec4 color);
-//extern void init_chunk_box(const SimulationParameters* parameters, Chunk* chunk, int X, int Y, int Z);
-
-
 extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
@@ -102,13 +87,9 @@ extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::s
 
 extern LUSTRINE_EXPORT void simulate(Simulation* simulation, float dt);
 
-/**
-	 * @brief 
-	 * 
-	 * @param simulation 
-	 * @param grid 
-	 * @return int the index of the body in the main body array
-	 */
-//extern void add_physics_grid(Simulation* simulation, const Grid* grid);
+
+//extern LUSTRINE_EXPORT int add_physics_grid_sparse_body();
+
+
 
 };

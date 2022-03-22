@@ -52,6 +52,7 @@ that can contain (or not) a particle. It is
 similar to a voxel grid but with particles
 */
 struct Grid {
+
     std::vector<bool> cells;
     std::vector<glm::vec4> colors;
     glm::vec4 color;
@@ -62,6 +63,11 @@ struct Grid {
     int num_grid_cells;
     int num_occupied_grid_cells;
     MaterialType type;
+
+    //bellow are to be used to parametrise bullet
+    bool sparse_solid;//true imply a box per occupied cell, false imply a single box (ignored if gridtype is not solid)
+    bool dynamic_solid;//true imply that the collider will be either dynamic or static (ignore if gridtype is not SOLID and if sparse solid is true)
+
 };
 
 /*
@@ -82,9 +88,9 @@ struct SimulationParameters {
 
 struct Simulation {
 
-    BulletPhyicsSimulation bullet_physics_simulation;
-    W_fun W = nullptr; //pointer to function representing the kernel
-    gradW_fun gradW = nullptr; //pointer to function representing the gradient of the kernel
+    Bullet::Simulation bullet_physics_simulation;
+    W_fun W = nullptr;//pointer to function representing the kernel
+    gradW_fun gradW = nullptr;//pointer to function representing the gradient of the kernel
 
     float particleRadius = 0.5;
     float particleDiameter = 2 * particleRadius;

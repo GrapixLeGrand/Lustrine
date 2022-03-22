@@ -12,8 +12,9 @@
 #include <vector>
 
 namespace Lustrine {
+namespace Bullet {
 
-	struct BulletPhyicsSimulation {
+	struct Simulation {
 
 		btBroadphaseInterface* broadPhase;
 		btCollisionDispatcher* dispatcher;
@@ -47,4 +48,5 @@ namespace Lustrine {
 
 	};
 
+}
 }
