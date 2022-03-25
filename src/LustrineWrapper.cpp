@@ -13,10 +13,10 @@ namespace Wrapper {
 		std::cout << "Lustrine::Debug" << " " << msg << std::endl;
 	}
 
-
+	/*
 	void allocate_simulation_data(SimulationData** data) {
 		*data = new SimulationData();
-		(*data)->start_dynamic = 0xBEEF;
+		(*data)->start_sand_index = 0xBEEF;
 	}
 
 	void allocate_simulation_parameters(SimulationParameters** parameters) {
@@ -26,10 +26,10 @@ namespace Wrapper {
 	void free_simulation_data(SimulationData* data) {
 		delete data;
 	}
-
+	
 	void free_simulation_parameters(SimulationParameters* parameters) {
 		delete parameters;
-	}
+	}*/
 
 	glm::vec4 wrapper_to_glm(const Color& color) {
 		glm::vec4 result (0.0);
@@ -40,7 +40,7 @@ namespace Wrapper {
 		return result;
 	}
 
-	glm::vec3 wrapper_to_glm(const Position& position) {
+	glm::vec3 wrapper_to_glm(const Vec3& position) {
 		glm::vec3 result(0.0);
 		result.x = position.x;
 		result.y = position.y;
@@ -48,8 +48,8 @@ namespace Wrapper {
 		return result;
 	}
 
-	Position glm_to_wrapper(const glm::vec3& position) {
-		Position result{ 0.0f, 0.0f, 0.0f };
+	Vec3 glm_to_wrapper(const glm::vec3& position) {
+		Vec3 result{ 0.0f, 0.0f, 0.0f };
 		result.x = position.x;
 		result.y = position.y;
 		result.z = position.z;
@@ -115,126 +115,96 @@ namespace Wrapper {
 
 	}
 
+	/*
 	void allocate_grids(Grid** grids, int num_grids) {
 		__debug_msg("allocated an array of grids");
 		*grids = new Grid[num_grids];
-	}
+	}*/
 
-	//Simulation* simulation;
-	void init_simulation(const SimulationParameters* parameters, SimulationData* data, const Grid* wrapped_grids, const Position* wrapped_positions, int num_grids) {
+	void init_simulation(
+		const SimulationParameters* parameters,
+		SimulationData* data,
+		const Grid* sand_grids, 
+		const Vec3* sand_grids_positions, 
+		int num_sand_grids,
+		const Grid* solid_grids, 
+		const Vec3* solid_grids_positions,
+		int num_solid_grids
+	) {
 		
-		std::cout << "wrapper init called!" << std::endl;
+		std::cout << "Lustrine::wrapper init called!" << std::endl;
 		
-		if (num_grids <= 0) {
+		if (num_sand_grids < 0 || num_solid_grids < 0) {
+			std::cout << "Lustrine bad arguments..." << std::endl;
 			return;
 		}
 
 		simulation = new Simulation();
 
-		std::vector<Lustrine::Grid> original_grids (num_grids);
-		std::vector<glm::vec3> original_positions(num_grids);
+		std::vector<Lustrine::Grid> original_sand_grids(num_sand_grids);
+		std::vector<glm::vec3> original_sand_positions(num_sand_grids);
 		
 		//init the converted grids
-		for (int i = 0; i < num_grids; i++) {
-			grid_wrapper_to_grid(&wrapped_grids[i], &original_grids[i]);
+		for (int i = 0; i < num_sand_grids; i++) {
+			grid_wrapper_to_grid(&sand_grids[i], &original_sand_grids[i]);
 		}
 		
 		//convert the positions
-		for (int i = 0; i < num_grids; i++) {
-			original_positions[i] = wrapper_to_glm(wrapped_positions[i]);
+		for (int i = 0; i < num_sand_grids; i++) {
+			original_sand_positions[i] = wrapper_to_glm(sand_grids_positions[i]);
 		}
 
-		assert(false); std::cout << "dont call me now!" << std::endl;
-		/*
-		init_simulation(parameters, simulation, original_grids, original_positions);
-
-		data->num_particles = simulation->num_particles;
-		data->start_dynamic = simulation->ptr_fluid_start;
-		data->end_dynamic = simulation->ptr_fluid_end;
+		//solid
+		std::vector<Lustrine::Grid> original_solid_grids(num_solid_grids);
+		std::vector<glm::vec3> original_solid_positions(num_solid_grids);
 		
-		data->start_static = simulation->ptr_static_start;
-		data->end_static = simulation->ptr_static_end;*/
+		//init the converted grids
+		for (int i = 0; i < num_solid_grids; i++) {
+			grid_wrapper_to_grid(&solid_grids[i], &original_solid_grids[i]);
+		}
+		
+		//convert the positions
+		for (int i = 0; i < num_solid_grids; i++) {
+			original_solid_positions[i] = wrapper_to_glm(solid_grids_positions[i]);
+		}
 
-		std::cout << "end init" << std::endl;
+		Lustrine::init_simulation(
+			parameters,
+			simulation,
+			original_sand_grids,
+			original_sand_positions,
+			original_solid_grids,
+			original_solid_positions
+		);
+
+		data->start_sand_index = simulation->ptr_sand_start;
+		data->end_sand_index = simulation->ptr_sand_end;
+
+		data->start_solid_index = simulation->ptr_solid_start;
+		data->end_solid_index = simulation->ptr_solid_end;
+
+		data->num_sand_particles = simulation->num_sand_particles;
+		data->num_solid_particles = simulation->num_solid_particles;
+
+		std::cout << "Lustrine::wrapper: end init" << std::endl;
 
 	}
 
 	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, int type, Color color) {
-		
-		std::cout << "init called" << std::endl;
+		std::cout << "init grid called" << std::endl;
 		Lustrine::Grid original_grid;
 		Lustrine::init_grid_box(parameters, &original_grid, X, Y, Z, (Lustrine::MaterialType)type, wrapper_to_glm(color));
 		grid_to_grid_wrapper(&original_grid, wrapped);
-
 	}
 
 	void simulate(float dt) {
 		Lustrine::simulate(simulation, dt);
 	}
 
-	/*
-	void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color) {
-		__debug_msg("allocating a grid");
-		grid->X = X;
-		grid->Y = Y;
-		grid->Z = Z;
-
-		grid->num_grid_cells = X * Y * Z;
-
-		if (grid->num_grid_cells <= 0) {
-			return;
-		}
-
-		grid->has_one_color_per_cell = has_per_cell_color;
-		grid->cells = new bool[grid->num_grid_cells];
-		std::memset(grid->cells, 0, grid->num_grid_cells);
-		
-		if (grid->has_one_color_per_cell == true) {
-			grid->colors = new Color[grid->num_grid_cells];
-			std::memset(grid->colors, 0, sizeof(Color) * grid->num_grid_cells);
-		}
-
-		grid->color = { 0.0f, 0.0f, 0.0f, 0.0f };
-		grid->type = 0;
-		
-		grid->num_occupied_grid_cells = 0;
-		
-	}*/
-	/*
-	void free_grid(Grid* grid) {
-
-		std::cout << "freeing memory" << std::endl;
-		if (grid->num_grid_cells <= 0) {
-			return;
-		}
-		
-		if (grid->cells != nullptr) {
-			delete grid->cells;
-			grid->cells = nullptr;
-		}
-		if (grid->has_one_color_per_cell == true && grid->colors != nullptr) {
-			delete grid->colors;
-			grid->colors = nullptr;
-		}
-		
-	}*/
-
-	void free_grids(Grid* grids) {
-		std::cout << "freeing memory" << std::endl;
-		delete grids;
-	}
-
 	void cleanup_simulation() {
 		std::cout << "clean up simulation" << std::endl;
+		Lustrine::clean_simulation(simulation);
 		delete simulation;
-	}
-
-	void simulation_bind_positions(float** position_ptr, int num_positions) {
-		*position_ptr = (float*) simulation->positions;
-	}
-
-	void say_hello() {
-		std::cout << "Hello from cpp!" << std::endl;
 	}
 
 	void simulation_bind_positions_copy(float* position_ptr) {
@@ -254,5 +224,32 @@ namespace Wrapper {
 	    data->length = 0;
 	    data->data = nullptr;
 	}
-}
+
+
+	int add_box(Vec3 position, bool is_dynamic, int lenX, int lenY, int lenZ) {
+		glm::vec3 half = glm::vec3{ lenX, lenY, lenZ };
+		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, half, -1, INT32_MAX);
+	}
+
+	bool check_collision(int body1, int body2) {
+		return Lustrine::Bullet::check_collision(&simulation->bullet_physics_simulation, body1, body2);
+	}
+
+	void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos) {
+		Lustrine::Bullet::apply_impulse(&simulation->bullet_physics_simulation, body, wrapper_to_glm(impulse), wrapper_to_glm(relative_pos));
+	}
+
+	Vec3 get_position(int body) {
+		glm_to_wrapper(Lustrine::Bullet::get_body_position(&simulation->bullet_physics_simulation, body));
+	}
+
+	void set_velocity(int body, Vec3 velocity) {
+		Lustrine::Bullet::set_body_velocity(&simulation->bullet_physics_simulation, body, wrapper_to_glm(velocity));
+	}
+
+	void set_body_no_rotation(int body) {
+		Lustrine::Bullet::set_body_no_rotation(&simulation->bullet_physics_simulation, body);
+	}
+	
+}	
 }

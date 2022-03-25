@@ -199,7 +199,6 @@ namespace Bullet {
 
 	void apply_impulse(Simulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 position) {
 		simulation->rigidbodies[body_index]->applyImpulse(glmToBullet(impulse), glmToBullet(position));
-		
 	}
 
 	void print_collisions(Simulation* simulation) {
@@ -243,6 +242,11 @@ namespace Bullet {
 
     	}
 
+	}
+
+	glm::vec3 get_body_position(Simulation* simulation, int body) {
+		btTransform& t = simulation->rigidbodies[body]->getWorldTransform();
+		return bulletToGlm(t.getOrigin());
 	}
 
 	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {

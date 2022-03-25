@@ -102,6 +102,8 @@ namespace Bullet {
 	 */
 	extern void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end);
 	
+	extern glm::vec3 get_body_position(Simulation* simulation, int body);
+
 	/**
 	 * @brief helper to print the collisions
 	 * 
@@ -109,10 +111,7 @@ namespace Bullet {
 	 * @param body_index 
 	 */
 	extern void print_collisions(Simulation* simulation);
-
 	extern void set_particles_positions(Simulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius);
-
-	//TODO
 	extern void apply_force(Simulation* simulation, int body_index, glm::vec3 force);
 	
 
