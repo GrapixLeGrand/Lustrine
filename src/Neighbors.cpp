@@ -39,15 +39,19 @@ int get_cell_id(const Simulation* simulation, glm::vec3 position) {
             ((int) position.y) * simulation->gridZ +
             1 +
             ((int) position.z);*/
+
     int cell_id =
             (std::floor(position.y)) * simulation->gridX * simulation->gridZ +
             (std::floor(position.x)) * simulation->gridZ +
             (std::floor(position.z));
 
+    cell_id = glm::clamp(cell_id, 0, simulation->num_grid_cells - 1);
     //cell_id = glm::clamp(cell_id, 0, simulation->num_grid_cells - 1);
     //if (cell_id < 0 || cell_id >= simulation->num_grid_cells) {
     //    std::cout << "no" << std::endl;
     //}
+
+    assert(cell_id >= 0 && cell_id < simulation->num_grid_cells);
 
     return cell_id;
 }
