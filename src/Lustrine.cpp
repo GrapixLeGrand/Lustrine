@@ -358,6 +358,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
+    float friction_coeff = 0.5f;
     float mu_s = 0.5f;
     float mu_k = 0.8f;
 
@@ -405,7 +406,7 @@ void simulate_sand(Simulation* simulation, float dt) {
             }
         }
 
-        // collision
+        // collision and friction
         for (auto &contact: contacts) {
             int i = contact.first, j = contact.second;
             glm::vec3 ij = positions_tmp[i] - positions_tmp[j];
@@ -427,16 +428,32 @@ void simulate_sand(Simulation* simulation, float dt) {
                     delta_pi = 0.5f * delta_x_tangent * std::min(mu_k * d / (glm::length(delta_x_tangent) + 1e-9f), 1.0f);
                 }
                 delta_pj = -delta_pi;
-                positions_star_i += delta_pi;
-                positions_star_j += delta_pj;
+                positions_star_i += friction_coeff * delta_pi;
+                positions_star_j += friction_coeff * delta_pj;
 
                 positions_star[i] += positions_star_i - positions_tmp[i];
                 positions_star[j] += positions_star_j - positions_tmp[j];
 
             } else { // j is static particle
+                // TODO: remove unnecessary copies
                 glm::vec3 delta_pi = -(len - simulation->particleDiameter) * ij / (len + 1e-9f );
-                positions_star[i] += collision_coeff * delta_pi;
-                // TODO: add friction
+                glm::vec3 delta_pj = glm::vec3(0.0f);
+
+                glm::vec3 positions_star_i = positions_tmp[i] + collision_coeff * delta_pi;
+                glm::vec3 positions_star_j = positions_tmp[j] + collision_coeff * delta_pj;
+
+                float d = glm::length(delta_pi);
+                glm::vec3 n = glm::normalize(positions_star_i - positions_star_j);
+                glm::vec3 delta_x_star_ij = (positions_star_i - positions_tmp[i]) - (positions_star_j - positions_tmp[j]);
+                glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
+                // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
+                if (glm::length(delta_x_tangent) < mu_s * d) {
+                    delta_pi = delta_x_tangent;
+                } else {
+                    delta_pi = delta_x_tangent * std::min(mu_k * d / (glm::length(delta_x_tangent) + 1e-9f), 1.0f);
+                }
+                positions_star_i += friction_coeff * delta_pi;
+                positions_star[i] += positions_star_i - positions_tmp[i];
             }
 
         }
