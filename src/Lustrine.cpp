@@ -354,7 +354,7 @@ glm::vec3 solve_boundary_collision_constraint(glm::vec3 n, glm::vec3 x0, glm::ve
 }
 
 
-void simulate_sand(Simulation* simulation, float dt) {
+void simulate_sand(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag, bool blow_flag) {
 
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
@@ -383,6 +383,17 @@ void simulate_sand(Simulation* simulation, float dt) {
     //integration
     for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
         velocities[i] += simulation->gravity * simulation->mass * dt;
+        if (attract_flag) {
+            glm::vec3 p_to_cp = character_pos - positions[i];
+//        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
+            velocities[i] += glm::normalize(p_to_cp) * simulation->particleRadius * 100.0f * dt;
+        }
+        if (blow_flag) {
+            glm::vec3 p_to_cp = character_pos - positions[i];
+//        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
+            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 20.0f;
+        }
+
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
     std::vector<glm::vec3> positions_tmp = std::vector<glm::vec3>(positions_star);
@@ -392,7 +403,7 @@ void simulate_sand(Simulation* simulation, float dt) {
     //find_neighbors_brute_force(simulation);
 
     // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
-    for (int substep = 0; substep < 5; ++substep) {
+    for (int substep = 0; substep < 4; ++substep) {
 
         std::vector<std::pair<int, int>> contacts;
         for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
