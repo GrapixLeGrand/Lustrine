@@ -59,7 +59,8 @@ int main(void) {
     grids_positions[1] = {0, 0, 0};
     grids_positions[2] = {15, 0, 15};
 
-    Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID_STATIC);
+    // Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID_STATIC);
+    Lustrine::init_grid_from_magika_voxel(&grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/level1.vox", Lustrine::MaterialType::SOLID_STATIC);
     
     Lustrine::init_grid_box(&parameters, &grids[1], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.761, 0.698, 0.502, 1.0));
     Lustrine::init_grid_box(&parameters, &grids[2], 10, 20, 10, Lustrine::MaterialType::FLUID_DYNAMIC, glm::vec4(0.761, 0.698, 0.502, 1.0));
@@ -116,11 +117,27 @@ int main(void) {
     //glm::mat4 planeModel = glm::mat4(1.0f);
     float factor = 1.0f;
 
-    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {            
+    glm::vec3 gravity_source = glm::vec3(5, 5, 5);
+    bool attract_flag = false;
+    bool blow_flag = false;
 
-        //simulation.time_step = windowController->getDeltaTime();
+    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {            
+        if (inputController->isKeyPressed(Levek::LEVEK_KEY_V)) {
+            attract_flag = true;
+        }
+        if (inputController->isKeyReleased(Levek::LEVEK_KEY_V)) {
+            attract_flag = false;
+        }
+        if (inputController->isKeyPressed(Levek::LEVEK_KEY_B)) {
+            blow_flag = true;
+        }
+        if (inputController->isKeyReleased(Levek::LEVEK_KEY_B)) {
+            blow_flag = false;
+        }
+
+            //simulation.time_step = windowController->getDeltaTime();
         //sim here
-        Lustrine::simulate_sand(&simulation, windowController->getDeltaTime());
+        Lustrine::simulate_sand(&simulation, windowController->getDeltaTime(), gravity_source, attract_flag, blow_flag);
 
         particlesPositionsVBO.Update(simulation.positions.data(), simulation.positions.size() * 3 * 4);
         renderer->clear();
