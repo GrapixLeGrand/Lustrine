@@ -225,14 +225,24 @@ namespace Wrapper {
 	    data->data = nullptr;
 	}
 
+	void check_collisions(int body, int* indices, int* size) {
+		Lustrine::Bullet::check_collisions(&simulation->bullet_physics_simulation, body, indices, size);
+	}
 
-	int add_box(Vec3 position, bool is_dynamic, int lenX, int lenY, int lenZ) {
-		glm::vec3 half = glm::vec3{ lenX, lenY, lenZ };
-		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, half, -1, INT32_MAX);
+	int get_num_bodies() {
+		return Lustrine::Bullet::get_num_bodies(&simulation->bullet_physics_simulation);
+	}
+
+	int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions) {
+		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, wrapper_to_glm(half_dimensions), -1, INT32_MAX);
 	}
 
 	bool check_collision(int body1, int body2) {
 		return Lustrine::Bullet::check_collision(&simulation->bullet_physics_simulation, body1, body2);
+	}
+
+	bool do_collide(int body) {
+		return Lustrine::Bullet::do_collide(&simulation->bullet_physics_simulation, body);
 	}
 
 	void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos) {
@@ -240,7 +250,7 @@ namespace Wrapper {
 	}
 
 	Vec3 get_position(int body) {
-		glm_to_wrapper(Lustrine::Bullet::get_body_position(&simulation->bullet_physics_simulation, body));
+		return glm_to_wrapper(Lustrine::Bullet::get_body_position(&simulation->bullet_physics_simulation, body));
 	}
 
 	void set_velocity(int body, Vec3 velocity) {

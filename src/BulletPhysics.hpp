@@ -93,6 +93,35 @@ namespace Bullet {
 	extern bool check_collision(Simulation* simulation, int body1, int body2);
 
 	/**
+	 * @brief store in indices the indices of body colliding with body. Warning, the
+	 * pointer is assume to have at least num_bodies entries.
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @param indices 
+	 * @param size 
+	 */
+	extern void check_collisions(Simulation* simulation, int body, int* indices, int* size);
+
+	/**
+	 * @brief Get the num bodies object
+	 * 
+	 * @param simulation 
+	 * @return int 
+	 */
+	extern int get_num_bodies(Simulation* simulation);
+
+	/**
+	 * @brief 
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @return true 
+	 * @return false 
+	 */
+	extern bool do_collide(Simulation* simulation, int body);
+
+	/**
 	 * @brief Set the particles box colliders positions object
 	 * 
 	 * @param simulation 

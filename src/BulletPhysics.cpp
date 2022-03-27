@@ -100,6 +100,7 @@ namespace Bullet {
 	}
 
 	void simulate_bullet(Simulation* simulation, float dt) {
+		std::cout << "simulate bullet" << std::endl;
 		gather_collisions(simulation);
 		//print_collisions(simulation);
 		simulation->dynamicWorld->stepSimulation(dt);
@@ -211,6 +212,23 @@ namespace Bullet {
 		}
 	}
 
+	void check_collisions(Simulation* simulation, int body, int* indices, int* size) {
+		memcpy(indices, simulation->bodies_collisions[body].data(), simulation->bodies_collisions[body].size() * 4);
+		*size = simulation->bodies_collisions[body].size();
+	}
+
+	int get_num_bodies(Simulation* simulation) {
+		return simulation->num_bodies;
+	}
+
+	bool do_collide(Simulation* simulation, int body) {
+		if (simulation->bodies_collisions[body].size() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	bool check_collision(Simulation* simulation, int body1, int body2) {
 		for (int i = 0; i < simulation->bodies_collisions[body1].size(); i++) {
 			if (simulation->bodies_collisions[body1][i] == body2) {
@@ -245,7 +263,9 @@ namespace Bullet {
 	}
 
 	glm::vec3 get_body_position(Simulation* simulation, int body) {
-		btTransform& t = simulation->rigidbodies[body]->getWorldTransform();
+		btTransform t;
+		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
+		//printf("{%f, %f, %f}\n", t.getOrigin().getX(), t.getOrigin().getY(), t.getOrigin().getZ());
 		return bulletToGlm(t.getOrigin());
 	}
 

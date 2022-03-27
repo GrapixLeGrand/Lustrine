@@ -147,9 +147,15 @@ void init_simulation(
         simulation->ptr_solid_start = simulation->ptr_solid_ordered_end + 1;
         simulation->ptr_solid_end = simulation->ptr_solid_ordered_start + 1; //start was inclusive
 
-        assert(simulation->ptr_solid_start <= simulation->ptr_solid_ordered_start);
-        assert(simulation->ptr_solid_end >= simulation->ptr_solid_ordered_start + 1);
-        assert(simulation->ptr_solid_start >= simulation->ptr_solid_ordered_end + 1);
+        if (simulation->ptr_solid_ordered_start == simulation->ptr_solid_ordered_end) { //not sure
+            simulation->ptr_solid_start = simulation->ptr_solid_ordered_start;
+            simulation->ptr_solid_end = simulation->ptr_solid_ordered_end;
+        }
+
+        //TODO rethink these asserts...
+        //assert(simulation->ptr_solid_start <= simulation->ptr_solid_ordered_start);
+        //assert(simulation->ptr_solid_end >= simulation->ptr_solid_ordered_start + 1);
+        //assert(simulation->ptr_solid_start >= simulation->ptr_solid_ordered_end + 1);
 
         assert(simulation->ptr_solid_ordered_start == simulation->total_allocated - 1);
         assert(simulation->ptr_solid_ordered_end == simulation->ptr_solid_ordered_start - simulation->num_solid_particles);

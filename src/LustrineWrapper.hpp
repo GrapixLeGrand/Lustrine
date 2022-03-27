@@ -83,12 +83,29 @@ namespace Wrapper {
 	/**
 	 * @brief add a box and returns its identifier
 	 */
-	extern "C" LUSTRINE_WRAPPER_EXPORT int add_box(Vec3 position, bool is_dynamic, int lenX, int lenY, int lenZ);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions);
 	
 	/**
 	 * @brief returns true if two bodies pointed by indices are colliding
 	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT bool check_collision(int body1, int body2);
+
+	/**
+	 * @brief returns true if it collides with anything
+	 */
+	extern "C" LUSTRINE_WRAPPER_EXPORT bool do_collide(int body);
+
+	/**
+	 * @brief write all collisions indices in the given array, Warning, indices must be at least
+	 * of num_bodies.
+	 * @param body the given body
+	 * @param indices a pointer array of indices
+	 * @param the amount of recorded collisions
+	 */
+	extern "C" LUSTRINE_WRAPPER_EXPORT void check_collisions(int body, int* indices, int* size);
+
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT int get_num_bodies();
 
 	/**
 	 * @brief apply an impulse to the designated body
