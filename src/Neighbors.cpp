@@ -256,7 +256,8 @@ void find_neighbors_uniform_grid_sand(Simulation* simulation) {
 
                             for (int i = 0; i < current_cell_indices.size(); i++) {
                                 const int current_index = current_cell_indices[i];
-                                if (current_index >= simulation->ptr_static_start) {
+                                // only handle dynamic's neighbour (but neighbour particle can be static)
+                                if (current_index >= simulation->ptr_static_start && current_index < simulation->ptr_static_end) {
                                     continue;
                                 }
                                 const glm::vec3& self = simulation->positions_star[current_index];

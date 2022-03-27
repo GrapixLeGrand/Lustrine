@@ -127,7 +127,8 @@ struct Simulation {
     
     std::vector<glm::vec3> positions; //array containing positions of the particles
     std::vector<glm::vec3> positions_star; //array containing the prediction of the positions of the particles
-    std::vector<glm::vec3> velocities; //array containing the velocities of each particles
+    std::vector<glm::vec3> velocities; //array containing the velocities of each
+    std::vector<float> inversed_masses; //array containing the masses
 
     std::vector<float> lambdas;
     //std::vector<glm::vec3> vorticities; unused for now
