@@ -128,14 +128,9 @@ int main(void) {
         if (inputController->isKeyReleased(Levek::LEVEK_KEY_V)) {
             attract_flag = false;
         }
-        if (inputController->isKeyPressed(Levek::LEVEK_KEY_B)) {
-            blow_flag = true;
-        }
-        if (inputController->isKeyReleased(Levek::LEVEK_KEY_B)) {
-            blow_flag = false;
-        }
-
-            //simulation.time_step = windowController->getDeltaTime();
+        blow_flag = inputController->isKeyPressed(Levek::LEVEK_KEY_B);
+        
+        //simulation.time_step = windowController->getDeltaTime();
         //sim here
         Lustrine::simulate_sand(&simulation, windowController->getDeltaTime(), gravity_source, attract_flag, blow_flag);
 
