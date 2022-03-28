@@ -1,4 +1,6 @@
-add_subdirectory(bullet)
-add_subdirectory(fluid)
+if (UNIX)
+	add_subdirectory(bullet)
+	add_subdirectory(fluid)
+endif()
 add_subdirectory(voxel_loader)
 add_subdirectory(wrapper)
