@@ -78,6 +78,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, int64_t size);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen);
 
 	//physics
 	/**

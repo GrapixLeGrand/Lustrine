@@ -2,8 +2,11 @@
 #include "VoxelLoader.hpp"
 
 #include <iostream>
+#include <sstream>
+#include "../thirdparty/opengametools/ogt_vox.h"
 #include <vector>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 namespace Lustrine {
@@ -260,6 +263,98 @@ namespace Wrapper {
 	void set_body_no_rotation(int body) {
 		Lustrine::Bullet::set_body_no_rotation(&simulation->bullet_physics_simulation, body);
 	}
+
+	void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen) {
+		
+		// Rewrite of init_grid_from_magika_voxel
+		char* newpath = (char*)malloc(pathlen + 1);
+		int i;
+		for (i = 0; i < pathlen; ++i) {
+			newpath[i] = path[i];
+		}
+		newpath[i] = 0;
+		//std::string s(newpath);
+		//printf("\n ***********   paththt is %s \n ",newpath);
+		FILE* fp;
+		try {
+			fp = fopen(newpath, "rb");
+			free(newpath);
+		}
+		catch (int e) {
+			std::cout << "An exception occurred" << std::endl;
+		}
+		//std::cout << sizeof(path[0]) << std::endl;
+		if (!fp) {
+			std::cout << "File could not be allocated" << std::endl;
+			return;
+		}
+		
+		// get the buffer size which matches the size of the file
+		fseek(fp, 0, SEEK_END);
+		uint32_t buffer_size = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+
+		// load the file into a memory buffer
+		uint8_t* buffer = new uint8_t[buffer_size];
+		fread(buffer, buffer_size, 1, fp);
+		fclose(fp);
+
+		// construct the scene from the buffer
+		const ogt_vox_scene* scene = ogt_vox_read_scene_with_flags(buffer, buffer_size, 0);
+		
+		// the buffer can be safely deleted once the scene is instantiated.
+		delete[] buffer;
+		
+		if (scene->num_models < 1) {
+			std::cout << "Emtpy voxel model" << std::endl;
+		}
+		
+		std::cout << scene->num_layers << std::endl;
+		const ogt_vox_model* model = scene->models[0];
+
+		grid->X = model->size_x;
+		grid->Y = model->size_y;
+		grid->Z = model->size_z;
+
+		grid->type = type;
+		grid->num_grid_cells = model->size_x * model->size_y * model->size_z;
+		grid->cells = (bool*)calloc(grid->num_grid_cells,sizeof(bool)); //std::vector<bool>(grid->num_grid_cells, false);
+		grid->colors = (Color*)calloc(grid->num_grid_cells, sizeof(Color));  //std::vector<glm::vec4>(grid->num_grid_cells, { 0, 0, 0, 0 });
+		grid->has_one_color_per_cell = true;
+		
+		int counter = 0;
+		for (int x = 0; x < grid->X; x++) {
+			for (int y = 0; y < grid->Y; y++) {
+				for (int z = 0; z < grid->Z; z++) {
+					int voxel_index = x + (y * model->size_x) + (z * model->size_x * model->size_y);
+					int grid_index = (x * grid->Y * grid->Z) + (y * grid->Z) + z;
+					uint8_t color_index = model->voxel_data[voxel_index];
+
+					if (color_index == 0) { //voxel is non existent
+						continue;
+					}
+
+					ogt_vox_rgba voxel_color = scene->palette.color[color_index];
+					grid->cells[grid_index] = true;
+					Color& grid_color = grid->colors[grid_index];
+
+					grid_color.r = voxel_color.r/255.0;
+					grid_color.g = voxel_color.g/255.0;
+					grid_color.b = voxel_color.b/255.0;
+					grid_color.a = voxel_color.a/255.0;
+					//grid_color /= 255.0;
+
+					counter++;
+				}
+			}
+		}
+
+		grid->num_occupied_grid_cells = counter;
+		ogt_vox_destroy_scene(scene);
+
+		return;
+	}
+
 	
 }	
 }
