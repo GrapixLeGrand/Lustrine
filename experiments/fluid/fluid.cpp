@@ -40,9 +40,9 @@ int main(void) {
     //////////////////////////////////////////////////////////////////////////////////////////
     Lustrine::Simulation simulation;
     Lustrine::SimulationParameters parameters;
-    parameters.X = 30.0f;
+    parameters.X = 40.0f;
     parameters.Y = 25.0f;
-    parameters.Z = 30.0f;
+    parameters.Z = 40.0f;
 
     std::vector<Lustrine::Grid> sand_grids (2);
     std::vector<glm::vec3> sand_grids_positions (2);
@@ -56,7 +56,7 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
     Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
 
     Lustrine::init_simulation(

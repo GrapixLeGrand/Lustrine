@@ -237,7 +237,7 @@ namespace Wrapper {
 	}
 
 	int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions) {
-		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, wrapper_to_glm(half_dimensions), -1, INT32_MAX);
+		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, wrapper_to_glm(half_dimensions)); //, -1, INT32_MAX);
 	}
 
 	bool check_collision(int body1, int body2) {

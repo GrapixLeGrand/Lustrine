@@ -36,10 +36,22 @@ namespace Bullet {
 	 * @return int 
 	 */
 	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic);
-	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
-	extern int add_box(Simulation* simulation, btBoxShape* box_shape, glm::vec3 position, bool is_dynamic, int group, int mask);
-	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
-	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims, int group, int mask);
+	//extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic); //, int group, int mask);
+	extern int add_shape(Simulation* simulation, btConvexShape* box_shape, glm::vec3 position, bool is_dynamic); //, int group, int mask);
+	//extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
+	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims);//, int group, int mask);
+
+
+	extern int add_capsule(Simulation* simulation, glm::vec3 position);
+
+	/**
+	 * @brief set the gravity of bullet world
+	 * 
+	 * @param simulation 
+	 * @param new_gravity 
+	 */
+	extern void set_gravity(Simulation* simulation, glm::vec3 new_gravity);
+	extern glm::vec3 get_gravity(Simulation* simulation);
 
 	/**
 	 * @brief Allocates a pool of bodies that could collide with the rest of the world
@@ -131,7 +143,24 @@ namespace Bullet {
 	 */
 	extern void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end);
 	
+	/**
+	 * @brief returns the current body positions as specified by its motion state.
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @return glm::vec3 
+	 */
 	extern glm::vec3 get_body_position(Simulation* simulation, int body);
+
+	/**
+	 * @brief Will override the motion state of the object and set its position to be the new
+	 * one specified
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @param new_position 
+	 */
+	extern void set_body_position(Simulation* simulation, int body, glm::vec3 new_position);
 
 	/**
 	 * @brief helper to print the collisions

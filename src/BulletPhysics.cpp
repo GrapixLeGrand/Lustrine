@@ -51,17 +51,8 @@ namespace Bullet {
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			body = new btRigidBody(mass, myMotionState, shape, localInertia);
 			body->setActivationState(ISLAND_SLEEPING);
-			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);// CF_STATIC_OBJECT);
 		}
-
-		//body->setContactProcessingThreshold(m_defaultContactProcessingThreshold);
-		
-		//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT); //warning was dynamic object before.
-		//body->activate(true);
-
-		//btRigidBody* body = new btRigidBody(mass, 0, shape, localInertia);
-		//body->setWorldTransform(startTransform);
-        //
 
 		body->setUserIndex(index);
 		return body;
@@ -88,6 +79,15 @@ namespace Bullet {
 		simulation->bodies_collisions = std::vector<std::vector<int>>({});
 	}
 
+	void set_gravity(Simulation* simulation, glm::vec3 new_gravity) {
+		simulation->dynamicWorld->setGravity(glmToBullet(new_gravity));
+	}
+
+	glm::vec3 get_gravity(Simulation* simulation) {
+		btVector3 gravity = simulation->dynamicWorld->getGravity();
+		return bulletToGlm(gravity);
+	}
+
 	void clean_bullet(Simulation* simulation) {
 
 		std::cout << "Lustrine::info Exiting bullet" << std::endl;
@@ -100,21 +100,33 @@ namespace Bullet {
 	}
 
 	void simulate_bullet(Simulation* simulation, float dt) {
-		std::cout << "simulate bullet" << std::endl;
+		//std::cout << "simulate bullet" << std::endl;
 		gather_collisions(simulation);
 		//print_collisions(simulation);
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
+	int add_capsule(Simulation* simulation, glm::vec3 position) {
+
+		/*
+		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
+		simulation->collisionShapes.push_back(new_box_shape);
+		
+		int result = add_shape(simulation, new_box_shape, position, is_dynamic);//, group, mask);
+		return result;
+		*/
+	return 0;
+	}
+
 	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic) {
-		return add_box(simulation, simulation->unit_box_shape, position, is_dynamic, btBroadphaseProxy::AllFilter, INT32_MAX);
+		return add_shape(simulation, simulation->unit_box_shape, position, is_dynamic); //, btBroadphaseProxy::AllFilter, INT32_MAX);
 	}
-
+	/*
 	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask) {
-		return add_box(simulation, simulation->unit_box_shape, position, is_dynamic, group, mask);
-	}
+		return add_shape(simulation, simulation->unit_box_shape, position, is_dynamic); //, group, mask);
+	}*/
 
-	int add_box(Simulation* simulation, btBoxShape* box_shape, glm::vec3 position, bool is_dynamic, int group, int mask) {
+	int add_shape(Simulation* simulation, btConvexShape* box_shape, glm::vec3 position, bool is_dynamic) { //, int group, int mask) {
 		btTransform tmpTransform;
 		tmpTransform.setIdentity();
 		btVector3 pos = glmToBullet(position);
@@ -122,36 +134,26 @@ namespace Bullet {
 		float mass = is_dynamic ? simulation->box_mass : 0.0f;
 		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, box_shape, simulation->num_bodies);
 		newBody->setFriction(simulation->default_body_friction);
+		
+		//btVector3 linearFactor = btVector3(0, 1.f, 0);
+		//newBody->setLinearFactor(linearFactor);
+
 		simulation->rigidbodies.push_back(newBody);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
 		simulation->bodies_collisions.resize(simulation->num_bodies, {});
-		simulation->dynamicWorld->addRigidBody(newBody, group, mask);
+		simulation->dynamicWorld->addRigidBody(newBody);//, group, mask);
 		return result;
 	}
 
-	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims, int group, int mask) {
+	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims) { //, int group, int mask) {
 		
 		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
 		simulation->collisionShapes.push_back(new_box_shape);
 		
-		int result = add_box(simulation, new_box_shape, position, is_dynamic, group, mask);
+		int result = add_shape(simulation, new_box_shape, position, is_dynamic); //, group, mask);
 		return result;
-		/*btTransform tmpTransform;
-		tmpTransform.setIdentity();
-		btVector3 pos = glmToBullet(position);
-		tmpTransform.setOrigin(pos);
-		float mass = is_dynamic ? simulation->box_mass : 0.0f;
-		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, new_box_shape, simulation->num_bodies);
-		newBody->setFriction(1.0f);
-		simulation->rigidbodies.push_back(newBody);
-		simulation->transforms.push_back(tmpTransform);
-		int result = simulation->num_bodies;
-		simulation->num_bodies++;
-		simulation->bodies_collisions.resize(simulation->num_bodies, {});
-		simulation->dynamicWorld->addRigidBody(newBody, simulation->collision_group_0, simulation->collision_mask_0);
-		return result;*/
 	}
 
 	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
@@ -189,7 +191,11 @@ namespace Bullet {
 
 	void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
 		simulation->rigidbodies[body_index]->activate(true);
-        simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
+		btVector3 current_vel = simulation->rigidbodies[body_index]->getLinearVelocity();
+		current_vel.setX(0.0f);
+		current_vel.setZ(0.0f);
+		simulation->rigidbodies[body_index]->setLinearVelocity(current_vel + glmToBullet(velocity));
+        //simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
 	void print_resume(const Simulation* simulation) {
@@ -267,6 +273,14 @@ namespace Bullet {
 		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
 		//printf("{%f, %f, %f}\n", t.getOrigin().getX(), t.getOrigin().getY(), t.getOrigin().getZ());
 		return bulletToGlm(t.getOrigin());
+	}
+
+	void set_body_position(Simulation* simulation, int body, glm::vec3 new_position) {
+		btTransform t;
+		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
+		t.setOrigin(glmToBullet(new_position));
+		simulation->rigidbodies[body]->setWorldTransform(t);
+		//simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
 	}
 
 	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {

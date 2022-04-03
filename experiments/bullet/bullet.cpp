@@ -75,7 +75,7 @@ int main(void) {
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (1);
+    std::vector<Lustrine::Grid> sand_grids (0);
     std::vector<glm::vec3> sand_grids_positions (1);
     sand_grids_positions[0] = {20.0f, 5.0f, 0.0f};
     //sand_grids_positions[1] = {15, 0, 15};
@@ -86,7 +86,7 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/little_level.vox", Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    //Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
 
     Lustrine::init_simulation(
@@ -102,14 +102,16 @@ int main(void) {
     
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
-    float basic_speed = 400.0f;
+    float speed = 2000.0f;
     float basic_impulse = 100.0f;
+    glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
+    float gravity_y = -9.81f;
 
     int box_index = Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
     int box_index_2 = Lustrine::Bullet::add_box(bulletPhysics, {16, 15, 16}, true);
     int box_index_3 = Lustrine::Bullet::add_box(bulletPhysics, {14, 15, 14}, true);
-    int box_index_4 = Lustrine::Bullet::add_box(bulletPhysics, {10, 2, 10}, true, half_dims_box_4, bulletPhysics->collision_group_1, INT32_MAX);
-    int ground_index = Lustrine::Bullet::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {parameters.X / 2, 1, parameters.Z / 2}, bulletPhysics->collision_group_0 | bulletPhysics->collision_group_1, INT32_MAX);
+    int box_index_4 = Lustrine::Bullet::add_box(bulletPhysics, {10, 2, 10}, true, half_dims_box_4); //, bulletPhysics->collision_group_1, INT32_MAX);
+    int ground_index = Lustrine::Bullet::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {parameters.X / 2, 1, parameters.Z / 2}); //, bulletPhysics->collision_group_0 | bulletPhysics->collision_group_1, INT32_MAX);
 
     Lustrine::Bullet::set_body_no_rotation(bulletPhysics, box_index);
 
@@ -154,7 +156,7 @@ int main(void) {
         } else {
             
             //btVector3 velocity (0.0, 0.0, 0.0);
-            float speed = windowController->getDeltaTime() * basic_speed;
+            
             glm::vec3 velocity (0.0);
 
             bool playerLeftGround = true;
@@ -176,23 +178,28 @@ int main(void) {
             if (playerLeftGround == false) {
                 if (inputController->isKeyPressed(Levek::LEVEK_KEY_W) == true) {
                     velocity.x -= speed;
-                    Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
                 }
 
                 if (inputController->isKeyPressed(Levek::LEVEK_KEY_S) == true) {
                     velocity.x += speed;;
-                    Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
+                    //Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
                 }
 
                 if (inputController->isKeyPressed(Levek::LEVEK_KEY_A) == true) {
                     velocity.z += speed;
-                    Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
+                    //Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
                 }
 
                 if (inputController->isKeyPressed(Levek::LEVEK_KEY_D) == true) {
                     velocity.z -= speed;
-                    Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
+                    //Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
                 }
+                float l = glm::length(velocity); 
+                if (l > 0.0f) {
+                    velocity /= l;
+                    velocity *= (speed * windowController->getDeltaTime());
+                }
+                Lustrine::Bullet::set_body_velocity(bulletPhysics, box_index, velocity);
             }
             //playerLeftGround == false &&
             if (playerLeftGround == false && inputController->isKeyPressed(Levek::LEVEK_KEY_X) == true) {
@@ -239,7 +246,9 @@ int main(void) {
         ImGui::Begin("Scene");
         ImGui::BeginTabBar("Scene parameters");
         if (ImGui::BeginTabItem("Simulation")) {
-            
+            ImGui::InputFloat("speed:", &speed, 1.0f, 10000.0f, "%.3f");
+            ImGui::InputFloat("gravity_y:", &gravity_y, 1.0f, 100.0f, "%.3f");
+
             ImGui::Text("%d fps", (int) (1.0f / windowController->getDeltaTime()));
             ImGui::Text("%d fps sim", (int) (1.0f / simulation.time_step));
 
@@ -272,6 +281,7 @@ int main(void) {
 
 
             if (ImGui::Button("reset")) {
+                Lustrine::Bullet::set_body_position(&simulation.bullet_physics_simulation, box_index, {15, 15, 15});
                 //Lustrine::init_grid_box(&simulation, &grids[0], 20, 30, 20);
                 //Lustrine::init_simulation(&parameters, &simulation, grids, grids_positions);
             }
@@ -294,6 +304,9 @@ int main(void) {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         #endif
+
+        gravity.y = gravity_y;
+        Lustrine::Bullet::set_gravity(&simulation.bullet_physics_simulation, gravity);
 
         lineRenderer->SetViewProjection(projection * camera.getView());
         //lineRenderer->AddLine({0, 0, 0}, {1, 0, 0}, {1.0, 0.0, 0.0, 1.0}); 
