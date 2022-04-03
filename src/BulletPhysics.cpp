@@ -76,8 +76,8 @@ namespace Bullet {
 
 		simulation->solver = new btSequentialImpulseConstraintSolver();
 		simulation->dynamicWorld = new btDiscreteDynamicsWorld(simulation->dispatcher, simulation->broadPhase, simulation->solver, simulation->collisionConfiguration);
-		btVector3 gravity(0, -10, 0);
-		simulation->dynamicWorld->setGravity(gravity);
+		//btVector3 gravity(0, -10, 0);
+		simulation->dynamicWorld->setGravity(simulation->gravity);
 
 		btVector3 half(0.5, 0.5, 0.5);
 		simulation->unit_box_shape = new btBoxShape(half); //for now we register only a unit cube
@@ -133,6 +133,8 @@ namespace Bullet {
 		BodyType type = mass > 0.0 ? DYNAMIC : KINEMATIC;
 		btRigidBody* newBody = bullet_create_rigidbody(simulation, type, mass, tmpTransform, box_shape, simulation->num_bodies);
 		newBody->setFriction(simulation->default_body_friction);
+		//newBody->setLinearFactor(btVector3(1.5f, 1.5f, 1.5f));
+		//newBody->setDamping(-100.0f, 0.0f);
 		
 		//btVector3 linearFactor = btVector3(0, 1.f, 0);
 		//newBody->setLinearFactor(linearFactor);
