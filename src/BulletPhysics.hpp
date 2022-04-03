@@ -41,8 +41,17 @@ namespace Bullet {
 	//extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
 	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims);//, int group, int mask);
 
-
-	extern int add_capsule(Simulation* simulation, glm::vec3 position);
+	/**
+	 * @brief adds a capsule at the given location. The capsule is necessrily dynamic and will fall.
+	 * Prefered collider for player for now.
+	 * 
+	 * @param simulation 
+	 * @param position 
+	 * @param radius 
+	 * @param height 
+	 * @return int 
+	 */
+	extern int add_capsule(Simulation* simulation, glm::vec3 position, float radius, float height);
 
 	/**
 	 * @brief set the gravity of bullet world
@@ -51,6 +60,13 @@ namespace Bullet {
 	 * @param new_gravity 
 	 */
 	extern void set_gravity(Simulation* simulation, glm::vec3 new_gravity);
+
+	/**
+	 * @brief get the world's gravity
+	 * 
+	 * @param simulation 
+	 * @return glm::vec3 
+	 */
 	extern glm::vec3 get_gravity(Simulation* simulation);
 
 	/**
@@ -60,6 +76,14 @@ namespace Bullet {
 	 * @param body_index 
 	 */
 	extern void allocate_particles_colliders(Simulation* simulation, int num_particles);
+
+	/**
+	 * @brief disable every allocated particles bounding boxes. Meaning that the
+	 * bodies will now stop colliding with the sand.
+	 * 
+	 * @param simulation 
+	 */
+	extern void disable_particles_bounding_boxes(Simulation* simulation);
 
 	/**
 	 * @brief Body will move but not rotate (main player)
@@ -77,6 +101,25 @@ namespace Bullet {
 	 * @param velocity 
 	 */
 	extern void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity);
+
+	/**
+	 * @brief Get the current velocity of the body and keep only the y component (vertical).
+	 * Then it adds the specified velocity to it.
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param velocity 
+	 */
+	extern void add_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity);
+
+	/**
+	 * @brief clear the velocity of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param velocity 
+	 */
+	extern void clear_body_velocity(Simulation* simulation, int body_index);
 
 	/**
 	 * @brief Apply an impulse on the center of mass of the body

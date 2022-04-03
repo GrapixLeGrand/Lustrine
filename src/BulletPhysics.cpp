@@ -106,16 +106,11 @@ namespace Bullet {
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
-	int add_capsule(Simulation* simulation, glm::vec3 position) {
-
-		/*
-		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
-		simulation->collisionShapes.push_back(new_box_shape);
-		
-		int result = add_shape(simulation, new_box_shape, position, is_dynamic);//, group, mask);
+	int add_capsule(Simulation* simulation, glm::vec3 position, float radius, float height) {
+		btCapsuleShape* capsule = new btCapsuleShape(radius, height);
+		simulation->collisionShapes.push_back(capsule);
+		int result = add_shape(simulation, capsule, position, true);//, group, mask);
 		return result;
-		*/
-	return 0;
 	}
 
 	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic) {
@@ -156,6 +151,8 @@ namespace Bullet {
 		return result;
 	}
 
+
+
 	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
 		
 		if (num_particles < simulation->sand_particles_colliders.size()) {
@@ -179,7 +176,7 @@ namespace Bullet {
 			tmpTransform.setOrigin(pos);
 			float mass = 0.0f; //particles must not be moving at first
 			simulation->sand_particles_colliders[old_size] = bullet_create_rigidbody(simulation, mass, tmpTransform, simulation->unit_box_shape, simulation->num_bodies);
-			simulation->dynamicWorld->addRigidBody(simulation->sand_particles_colliders[old_size], simulation->collision_group_1, simulation->collision_mask_1);
+			simulation->dynamicWorld->addRigidBody(simulation->sand_particles_colliders[old_size]); //, simulation->collision_group_1, simulation->collision_mask_1);
 			simulation->num_bodies++;
 		}
 	}
@@ -191,11 +188,15 @@ namespace Bullet {
 
 	void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
 		simulation->rigidbodies[body_index]->activate(true);
+        simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
+	}
+
+	void add_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
+		simulation->rigidbodies[body_index]->activate(true);
 		btVector3 current_vel = simulation->rigidbodies[body_index]->getLinearVelocity();
 		current_vel.setX(0.0f);
 		current_vel.setZ(0.0f);
 		simulation->rigidbodies[body_index]->setLinearVelocity(current_vel + glmToBullet(velocity));
-        //simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
 	void print_resume(const Simulation* simulation) {
@@ -293,6 +294,27 @@ namespace Bullet {
 
 	}
 
+
+	void disable_particles_bounding_boxes(Simulation* simulation) {
+		std::cout << "moving out particles bounding boxes" << std::endl;
+		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+			btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
+			t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f));
+        	simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
+			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
+		}
+	}
+
+	/**
+	 * @brief NOT USED CURRENTLY
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @param particles 
+	 * @param start 
+	 * @param end 
+	 * @param particleRadius 
+	 */
 	void set_particles_positions(Simulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius) {
 		
 		btTransform& t = simulation->rigidbodies[body]->getWorldTransform();
