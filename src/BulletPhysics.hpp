@@ -5,6 +5,12 @@
 namespace Lustrine {
 namespace Bullet {
 
+	enum BodyType {
+		DYNAMIC,
+		KINEMATIC,//not moving but movable by user
+		DETECTOR
+	};
+
 	/**
 	 * @brief 
 	 * 
@@ -40,6 +46,18 @@ namespace Bullet {
 	extern int add_shape(Simulation* simulation, btConvexShape* box_shape, glm::vec3 position, bool is_dynamic); //, int group, int mask);
 	//extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask);
 	extern int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims);//, int group, int mask);
+
+	/**
+	 * @brief Add a ghost object with box shape. No collision response is generated, however collisions
+	 * get registered.
+	 * 
+	 * @param simulation 
+	 * @param position 
+	 * @param is_dynamic 
+	 * @param half_dims 
+	 * @return int 
+	 */
+	extern int add_detector_block(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims);
 
 	/**
 	 * @brief adds a capsule at the given location. The capsule is necessrily dynamic and will fall.

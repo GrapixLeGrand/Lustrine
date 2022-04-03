@@ -33,25 +33,32 @@ namespace Bullet {
 	 * @param shape 
 	 * @return btRigidBody* 
 	 */
-	 btRigidBody* bullet_create_rigidbody(Simulation* simulation, float mass, const btTransform& startTransform, btCollisionShape* shape, int index) {
+	 btRigidBody* bullet_create_rigidbody(Simulation* simulation, BodyType type, float mass, const btTransform& startTransform, btCollisionShape* shape, int index) {
 
 		btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 		//rigidbody is dynamic if and only if mass is non zero, otherwise static
 		bool isDynamic = (mass != 0.f);
 		btVector3 localInertia(0, 0, 0);
 		btRigidBody* body = nullptr;
-		if (isDynamic) {
+		if (type == DYNAMIC) {
 			shape->calculateLocalInertia(mass, localInertia);
 			//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
 			body = new btRigidBody(cInfo);
 		
-		} else {
+		} else if (type == KINEMATIC) {
 			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			body = new btRigidBody(mass, myMotionState, shape, localInertia);
 			body->setActivationState(ISLAND_SLEEPING);
 			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);// CF_STATIC_OBJECT);
+		} else if (type == DETECTOR) {
+			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			body = new btRigidBody(mass, myMotionState, shape, localInertia);
+			body->setActivationState(ISLAND_SLEEPING);
+			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+		} else {	
+			assert(false);
 		}
 
 		body->setUserIndex(index);
@@ -116,10 +123,6 @@ namespace Bullet {
 	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic) {
 		return add_shape(simulation, simulation->unit_box_shape, position, is_dynamic); //, btBroadphaseProxy::AllFilter, INT32_MAX);
 	}
-	/*
-	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, int group, int mask) {
-		return add_shape(simulation, simulation->unit_box_shape, position, is_dynamic); //, group, mask);
-	}*/
 
 	int add_shape(Simulation* simulation, btConvexShape* box_shape, glm::vec3 position, bool is_dynamic) { //, int group, int mask) {
 		btTransform tmpTransform;
@@ -127,7 +130,8 @@ namespace Bullet {
 		btVector3 pos = glmToBullet(position);
 		tmpTransform.setOrigin(pos);
 		float mass = is_dynamic ? simulation->box_mass : 0.0f;
-		btRigidBody* newBody = bullet_create_rigidbody(simulation, mass, tmpTransform, box_shape, simulation->num_bodies);
+		BodyType type = mass > 0.0 ? DYNAMIC : KINEMATIC;
+		btRigidBody* newBody = bullet_create_rigidbody(simulation, type, mass, tmpTransform, box_shape, simulation->num_bodies);
 		newBody->setFriction(simulation->default_body_friction);
 		
 		//btVector3 linearFactor = btVector3(0, 1.f, 0);
@@ -152,6 +156,28 @@ namespace Bullet {
 	}
 
 
+	int add_detector_block(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims) {
+		
+		btTransform tmpTransform;
+		tmpTransform.setIdentity();
+		btVector3 pos = glmToBullet(position);
+		tmpTransform.setOrigin(pos);
+
+		btBoxShape* shape = new btBoxShape(glmToBullet(half_dims));
+		simulation->collisionShapes.push_back(shape);
+
+		btRigidBody* newBody = bullet_create_rigidbody(simulation, DETECTOR, 0.0f, tmpTransform, shape, simulation->num_bodies);
+		newBody->setFriction(simulation->default_body_friction);
+		
+		simulation->rigidbodies.push_back(newBody);
+		simulation->transforms.push_back(tmpTransform);
+		int result = simulation->num_bodies;
+		simulation->num_bodies++;
+		simulation->bodies_collisions.resize(simulation->num_bodies, {});
+		simulation->dynamicWorld->addRigidBody(newBody);//, group, mask);
+		return result;
+	}
+
 
 	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
 		
@@ -175,7 +201,7 @@ namespace Bullet {
 			btVector3 pos (0.0f, 0.0f, 0.0f);
 			tmpTransform.setOrigin(pos);
 			float mass = 0.0f; //particles must not be moving at first
-			simulation->sand_particles_colliders[old_size] = bullet_create_rigidbody(simulation, mass, tmpTransform, simulation->unit_box_shape, simulation->num_bodies);
+			simulation->sand_particles_colliders[old_size] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, simulation->unit_box_shape, simulation->num_bodies);
 			simulation->dynamicWorld->addRigidBody(simulation->sand_particles_colliders[old_size]); //, simulation->collision_group_1, simulation->collision_mask_1);
 			simulation->num_bodies++;
 		}
@@ -287,6 +313,7 @@ namespace Bullet {
 	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {
 		
 		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+			simulation->sand_particles_colliders[i]->setActivationState(ACTIVE_TAG);
 			btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
 			t.setOrigin(glmToBullet(particles[i]));
         	simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
@@ -298,10 +325,10 @@ namespace Bullet {
 	void disable_particles_bounding_boxes(Simulation* simulation) {
 		std::cout << "moving out particles bounding boxes" << std::endl;
 		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
-			btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
-			t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f));
-        	simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
-			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
+			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
+			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
+        	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
+			simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
 		}
 	}
 

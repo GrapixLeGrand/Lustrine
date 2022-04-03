@@ -76,7 +76,7 @@ int main(void) {
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (1);
+    std::vector<Lustrine::Grid> sand_grids (0);
     std::vector<glm::vec3> sand_grids_positions (1);
     sand_grids_positions[0] = {20.0f, 5.0f, 0.0f};
     //sand_grids_positions[1] = {15, 0, 15};
@@ -87,9 +87,9 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/little_level.vox", Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    //Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
-
+    //Anemoiapolis: I need to test this game once it comes out
     Lustrine::init_simulation(
         &parameters,
         &simulation,
@@ -115,6 +115,8 @@ int main(void) {
     int box_index_4 = Lustrine::Bullet::add_box(bulletPhysics, {10, 2, 10}, true, half_dims_box_4); //, bulletPhysics->collision_group_1, INT32_MAX);
     int ground_index = Lustrine::Bullet::add_box(bulletPhysics, {parameters.X / 2, -0.5, parameters.Z / 2}, false, {parameters.X / 2, 1, parameters.Z / 2}); //, bulletPhysics->collision_group_0 | bulletPhysics->collision_group_1, INT32_MAX);
 
+    int detector_block = Lustrine::Bullet::add_detector_block(bulletPhysics, {10, 10, 10}, {2, 2, 2});
+
     Lustrine::Bullet::set_body_no_rotation(bulletPhysics, box_index);
     Lustrine::Bullet::allocate_particles_colliders(bulletPhysics, simulation.num_sand_particles);
 
@@ -125,6 +127,8 @@ int main(void) {
     btTransform transformBox3;
     btTransform transformBox4;
 
+    btTransform transformDetector;
+
     btTransform transformGround;
 
     glm::mat4 boxModel(0.0);
@@ -132,6 +136,7 @@ int main(void) {
     glm::mat4 box3Model(0.0);
     glm::mat4 box4Model(0.0);
     glm::mat4 groundModel(0.0);
+    glm::mat4 detectorModel(0.0);
 
     //////////////////////////////////////////////////////////////////////////////////////////
     ParticlesPipelineSate sandParticlesPipeline(engine, simulation.positions, simulation.colors, simulation.num_sand_particles);
@@ -150,6 +155,10 @@ int main(void) {
         
         if (areParticlesDisabled == false) {
             Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions, 0, simulation.ptr_sand_end);
+        }
+
+        if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, detector_block) == true) {
+            std::cout << "detection!!!!" << std::endl;
         }
 
         //Lustrine::Bullet::simulate_bullet(bulletPhysics, windowController->getDeltaTime());
@@ -351,6 +360,11 @@ int main(void) {
         bulletPhysics->rigidbodies[ground_index]->getMotionState()->getWorldTransform(transformGround);
         transformGround.getOpenGLMatrix(glm::value_ptr(groundModel));
 
+
+        transformDetector = bulletPhysics->rigidbodies[detector_block]->getWorldTransform();
+        bulletPhysics->rigidbodies[detector_block]->getMotionState()->getWorldTransform(transformDetector);
+        transformDetector.getOpenGLMatrix(glm::value_ptr(detectorModel));
+
         //Levek::printMat4(boxModel);
         glm::vec3 capsule_dims = glm::vec3(0.5, 1.0, 0.5);
         addLineBox(lineRenderer, boxModel, capsule_dims, {1.0, 0.0, 0.0, 1.0});
@@ -359,6 +373,8 @@ int main(void) {
         addLineBox(lineRenderer, box4Model, half_dims_box_4, {0.0, 1.0, 1.0, 1.0});
 
         addLineBox(lineRenderer, groundModel, ground_dims, {1.0, 1.0, 1.0, 1.0});
+
+        addLineBox(lineRenderer, detectorModel, {2, 2, 2}, {1.0, 1.0, 1.0, 1.0});
     
         lineRenderer->Draw();
 
