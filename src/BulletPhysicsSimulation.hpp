@@ -21,7 +21,7 @@ namespace Bullet {
 		btConstraintSolver* solver;
 		btDefaultCollisionConfiguration* collisionConfiguration;
 		btDiscreteDynamicsWorld* dynamicWorld;
-		btVector3 gravity;
+		btVector3 gravity = btVector3(0.0f, -25.0f, 0.0f);
 
 		btAlignedObjectArray<btCollisionShape*> collisionShapes;
 		btBoxShape* unit_box_shape; //unit box shape
@@ -42,7 +42,7 @@ namespace Bullet {
 		int collision_group_2 = (1 << 13); //particles (and optionally player)
 		int collision_mask_2 = (1 << 13);
 
-		float default_body_friction = 5.0f;
+		float default_body_friction = 0.0f;
 		float box_mass = 1.0f;
 
 	};

@@ -105,10 +105,10 @@ int main(void) {
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
     float speed = 2000.0f;
     float basic_impulse = 100.0f;
-    glm::vec3 gravity = glm::vec3(0.0f, -9.81f, 0.0f);
-    float gravity_y = -9.81f;
+    glm::vec3 gravity = glm::vec3(0.0f, -25.0f, 0.0f);
+    float gravity_y = -25.0f;
 
-    int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 15, 15}, 1.0f, 2.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
+    int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 15, 15}, 2.0f, 3.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
 
     int box_index_2 = Lustrine::Bullet::add_box(bulletPhysics, {16, 15, 16}, true);
     int box_index_3 = Lustrine::Bullet::add_box(bulletPhysics, {14, 15, 14}, true);
@@ -366,7 +366,7 @@ int main(void) {
         transformDetector.getOpenGLMatrix(glm::value_ptr(detectorModel));
 
         //Levek::printMat4(boxModel);
-        glm::vec3 capsule_dims = glm::vec3(0.5, 1.0, 0.5);
+        glm::vec3 capsule_dims = glm::vec3(1, 1.5, 1);
         addLineBox(lineRenderer, boxModel, capsule_dims, {1.0, 0.0, 0.0, 1.0});
         addLineBox(lineRenderer, box2Model, dims, {0.0, 1.0, 0.0, 1.0});
         addLineBox(lineRenderer, box3Model, dims, {0.0, 0.0, 1.0, 1.0});
