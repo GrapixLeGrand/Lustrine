@@ -398,7 +398,7 @@ void simulate_sand(Simulation* simulation, float dt, glm::vec3 character_pos, bo
     //integration
     for (int i = simulation->ptr_fluid_start; i < simulation->ptr_fluid_end; i++) {
         float w = simulation->inversed_masses[i];
-        velocities[i] += simulation->gravity * w * dt;
+        velocities[i] += simulation->gravity * dt;
         if (attract_flag) {
             glm::vec3 p_to_cp = character_pos - positions[i];
 //        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
@@ -407,7 +407,7 @@ void simulate_sand(Simulation* simulation, float dt, glm::vec3 character_pos, bo
         if (blow_flag) {
             glm::vec3 p_to_cp = character_pos - positions[i];
 //        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
-            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 20.0f * w;
+            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 1.0f * w;
         }
 
         positions_star[i] = positions[i] + velocities[i] * dt; // update both

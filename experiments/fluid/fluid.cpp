@@ -118,17 +118,12 @@ int main(void) {
     float factor = 1.0f;
 
     glm::vec3 gravity_source = glm::vec3(5, 5, 5);
-    bool attract_flag = false;
-    bool blow_flag = false;
 
-    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {            
-        if (inputController->isKeyPressed(Levek::LEVEK_KEY_V)) {
-            attract_flag = true;
-        }
-        if (inputController->isKeyReleased(Levek::LEVEK_KEY_V)) {
-            attract_flag = false;
-        }
-        blow_flag = inputController->isKeyPressed(Levek::LEVEK_KEY_B);
+
+    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
+        // TODO: add long press or single-time prcess detection.
+        bool attract_flag = inputController->isKeyPressed(Levek::LEVEK_KEY_V);
+        bool blow_flag = inputController->isKeyPressed(Levek::LEVEK_KEY_B);
         
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
