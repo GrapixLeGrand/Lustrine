@@ -99,11 +99,12 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialTy
 }
 
 JsonWriter &operator<<(JsonWriter &j, const ogt_vox_transform &t) {
+    // ogt_vox_transform matrix is in col-major order, so we transpose it here
     j.bArray();
-    j << t.m00 << t.m01 << t.m02 << t.m03;
-    j << t.m10 << t.m11 << t.m12 << t.m13;
-    j << t.m20 << t.m21 << t.m22 << t.m23;
-    j << t.m30 << t.m31 << t.m32 << t.m33;
+    j << t.m00 << t.m10 << t.m20 << t.m30;
+    j << t.m01 << t.m11 << t.m21 << t.m31;
+    j << t.m02 << t.m12 << t.m22 << t.m32;
+    j << t.m03 << t.m13 << t.m23 << t.m33;
     j.eArray();
     return j;
 }
@@ -121,6 +122,7 @@ JsonWriter &operator<<(JsonWriter &j, const ogt_vox_rgba &c) {
 std::string read_vox_scene_json(const uint8_t *buffer, int64_t size) {
     std::stringstream s;
     const ogt_vox_scene *scene = ogt_vox_read_scene(buffer, size);
+    if (!scene) throw std::runtime_error("failed to read scene");
     JsonWriter j{s};
     j.bObject();
     j.safeKey("models").bArray();
@@ -133,6 +135,8 @@ std::string read_vox_scene_json(const uint8_t *buffer, int64_t size) {
         j.safeKey("sizeY") << model->size_y;
         j.safeKey("sizeZ") << model->size_z;
         j.safeKey("data").bArray();
+        // color indices in x -> y -> z order. a color index of 0 means empty, all other indices mean solid and can be
+        // used to index the scene's palette to obtain the color for the voxel
         uint32_t model_size = model->size_x * model->size_y * model->size_z;
         for (int i = 0; i < model_size; ++i) {
             j << model->voxel_data[i];
