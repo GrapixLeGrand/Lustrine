@@ -76,7 +76,7 @@ int main(void) {
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (0);
+    std::vector<Lustrine::Grid> sand_grids (1);
     std::vector<glm::vec3> sand_grids_positions (1);
     sand_grids_positions[0] = {20.0f, 5.0f, 0.0f};
     //sand_grids_positions[1] = {15, 0, 15};
@@ -87,7 +87,7 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/little_level.vox", Lustrine::MaterialType::SOLID);
     
-    //Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
     //Anemoiapolis: I need to test this game once it comes out
     Lustrine::init_simulation(
@@ -103,7 +103,7 @@ int main(void) {
     
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
-    float speed = 2000.0f;
+    float speed = 200.0f;
     float basic_impulse = 100.0f;
     glm::vec3 gravity = glm::vec3(0.0f, -25.0f, 0.0f);
     float gravity_y = -25.0f;

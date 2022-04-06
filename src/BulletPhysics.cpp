@@ -65,6 +65,11 @@ namespace Bullet {
 		return body;
 	}
 
+	/**
+	 * @brief initialize the engine. Must be called before anything regarding to bullet.
+	 * 
+	 * @param simulation 
+	 */
 	void init_bullet(Simulation* simulation) {
 		
 		std::cout << "Lustrine::info Initializing bullet" << std::endl;
@@ -86,15 +91,32 @@ namespace Bullet {
 		simulation->bodies_collisions = std::vector<std::vector<int>>({});
 	}
 
+	/**
+	 * @brief set the gravity of bullet world
+	 * 
+	 * @param simulation 
+	 * @param new_gravity 
+	 */
 	void set_gravity(Simulation* simulation, glm::vec3 new_gravity) {
 		simulation->dynamicWorld->setGravity(glmToBullet(new_gravity));
 	}
 
+	/**
+	 * @brief get the world's gravity
+	 * 
+	 * @param simulation 
+	 * @return glm::vec3 
+	 */
 	glm::vec3 get_gravity(Simulation* simulation) {
 		btVector3 gravity = simulation->dynamicWorld->getGravity();
 		return bulletToGlm(gravity);
 	}
 
+	/**
+	 * @brief destroy the memory allocated by the engine.
+	 * 
+	 * @param simulation 
+	 */
 	void clean_bullet(Simulation* simulation) {
 
 		std::cout << "Lustrine::info Exiting bullet" << std::endl;
@@ -106,6 +128,12 @@ namespace Bullet {
 		delete simulation->collisionConfiguration;
 	}
 
+	/**
+	 * @brief 
+	 * 
+	 * @param simulation 
+	 * @param dt 
+	 */
 	void simulate_bullet(Simulation* simulation, float dt) {
 		//std::cout << "simulate bullet" << std::endl;
 		gather_collisions(simulation);
@@ -113,6 +141,16 @@ namespace Bullet {
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
+	/**
+	 * @brief adds a capsule at the given location. The capsule is necessrily dynamic and will fall.
+	 * Prefered collider for player for now.
+	 * 
+	 * @param simulation 
+	 * @param position 
+	 * @param radius 
+	 * @param height 
+	 * @return int 
+	 */
 	int add_capsule(Simulation* simulation, glm::vec3 position, float radius, float height) {
 		btCapsuleShape* capsule = new btCapsuleShape(radius, height);
 		simulation->collisionShapes.push_back(capsule);
@@ -120,6 +158,14 @@ namespace Bullet {
 		return result;
 	}
 
+	/**
+	 * @brief adds a box and returns its body index
+	 * 
+	 * @param simulation 
+	 * @param position 
+	 * @param is_dynamic 
+	 * @return int 
+	 */
 	int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic) {
 		return add_shape(simulation, simulation->unit_box_shape, position, is_dynamic); //, btBroadphaseProxy::AllFilter, INT32_MAX);
 	}
@@ -157,7 +203,16 @@ namespace Bullet {
 		return result;
 	}
 
-
+	/**
+	 * @brief Add a ghost object with box shape. No collision response is generated, however collisions
+	 * get registered.
+	 * 
+	 * @param simulation 
+	 * @param position 
+	 * @param is_dynamic 
+	 * @param half_dims 
+	 * @return int 
+	 */
 	int add_detector_block(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims) {
 		
 		btTransform tmpTransform;
@@ -181,6 +236,12 @@ namespace Bullet {
 	}
 
 
+	/**
+	 * @brief Allocates a pool of bodies that could collide with the rest of the world
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
 	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
 		
 		if (num_particles < simulation->sand_particles_colliders.size()) {
@@ -209,16 +270,48 @@ namespace Bullet {
 		}
 	}
 
+	/**
+	 * @brief set the possible axis of ration of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
+	void set_body_rotations(Simulation* simulation, int body_index, bool X, bool Y, bool Z) {
+		btVector3 linFact (X ? 1.0f : 0.0f, Y ? 1.0f : 0.0f, Z ? 1.0f : 0.0f);
+        simulation->rigidbodies[body_index]->setAngularFactor(linFact);
+	}
+
+	/**
+	 * @brief Body will move but not rotate (main player)
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
 	void set_body_no_rotation(Simulation* simulation, int body_index) {
 		btVector3 linFact (0.0, 0.0, 0.0);
         simulation->rigidbodies[body_index]->setAngularFactor(linFact);
 	}
 
+	/**
+	 * @brief Set the velocity of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param velocity 
+	 */
 	void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
 		simulation->rigidbodies[body_index]->activate(true);
         simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
+	/**
+	 * @brief Get the current velocity of the body and keep only the y component (vertical).
+	 * Then it adds the specified velocity to it.
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param velocity 
+	 */
 	void add_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity) {
 		simulation->rigidbodies[body_index]->activate(true);
 		btVector3 current_vel = simulation->rigidbodies[body_index]->getLinearVelocity();
@@ -233,10 +326,23 @@ namespace Bullet {
 			<< "\tnum registered shapes: " << simulation->collisionShapes.size() << std::endl;
 	}
 
+	/**
+	 * @brief Apply an impulse on the center of mass of the body
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 * @param force 
+	 */
 	void apply_impulse(Simulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 position) {
 		simulation->rigidbodies[body_index]->applyImpulse(glmToBullet(impulse), glmToBullet(position));
 	}
 
+	/**
+	 * @brief helper to print the collisions
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
 	void print_collisions(Simulation* simulation) {
 		for (int i = 0; i < simulation->bodies_collisions.size(); i++) {
 			std::cout << i << " -> " << std::endl;
@@ -246,16 +352,38 @@ namespace Bullet {
 			std::cout << std::endl;
 		}
 	}
-
+	/**
+	 * @brief store in indices the indices of body colliding with body. Warning, the
+	 * pointer is assume to have at least num_bodies entries. Mind the "s".
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @param indices 
+	 * @param size 
+	 */
 	void check_collisions(Simulation* simulation, int body, int* indices, int* size) {
 		memcpy(indices, simulation->bodies_collisions[body].data(), simulation->bodies_collisions[body].size() * 4);
 		*size = simulation->bodies_collisions[body].size();
 	}
 
+	/**
+	 * @brief Get the num bodies object
+	 * 
+	 * @param simulation 
+	 * @return int 
+	 */
 	int get_num_bodies(Simulation* simulation) {
 		return simulation->num_bodies;
 	}
 
+	/**
+	 * @brief WARNING might not be working need to test
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @return true 
+	 * @return false 
+	 */
 	bool do_collide(Simulation* simulation, int body) {
 		if (simulation->bodies_collisions[body].size() > 0) {
 			return true;
@@ -264,6 +392,12 @@ namespace Bullet {
 		}
 	}
 
+	/**
+	 * @brief returns true if the body considered do collides (are touching in the current frame), false otw.
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
 	bool check_collision(Simulation* simulation, int body1, int body2) {
 		for (int i = 0; i < simulation->bodies_collisions[body1].size(); i++) {
 			if (simulation->bodies_collisions[body1][i] == body2) {
@@ -273,6 +407,12 @@ namespace Bullet {
 		return false;
 	}
 
+	/**
+	 * @brief Clear and fill the collisions for all the bodies that collided (this function is called in the simulate bullet)
+	 * 
+	 * @param simulation 
+	 * @param body_index 
+	 */
 	void gather_collisions(Simulation* simulation) {
 
 		for (int i = 0; i < simulation->bodies_collisions.size(); i++) {
@@ -297,6 +437,13 @@ namespace Bullet {
 
 	}
 
+	/**
+	 * @brief returns the current body positions as specified by its motion state.
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @return glm::vec3 
+	 */
 	glm::vec3 get_body_position(Simulation* simulation, int body) {
 		btTransform t;
 		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
@@ -304,6 +451,14 @@ namespace Bullet {
 		return bulletToGlm(t.getOrigin());
 	}
 
+	/**
+	 * @brief Will override the motion state of the object and set its position to be the new
+	 * one specified
+	 * 
+	 * @param simulation 
+	 * @param body 
+	 * @param new_position 
+	 */
 	void set_body_position(Simulation* simulation, int body, glm::vec3 new_position) {
 		btTransform t;
 		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
@@ -312,6 +467,14 @@ namespace Bullet {
 		//simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
 	}
 
+	/**
+	 * @brief Set the particles box colliders positions object
+	 * 
+	 * @param simulation 
+	 * @param particles 
+	 * @param start 
+	 * @param end 
+	 */
 	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {
 		
 		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
@@ -324,6 +487,12 @@ namespace Bullet {
 	}
 
 
+	/**
+	 * @brief disable every allocated particles bounding boxes. Meaning that the
+	 * bodies will now stop colliding with the sand.
+	 * 
+	 * @param simulation 
+	 */
 	void disable_particles_bounding_boxes(Simulation* simulation) {
 		std::cout << "moving out particles bounding boxes" << std::endl;
 		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {

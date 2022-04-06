@@ -16,24 +16,12 @@ namespace Wrapper {
 		std::cout << "Lustrine::Debug" << " " << msg << std::endl;
 	}
 
-	/*
-	void allocate_simulation_data(SimulationData** data) {
-		*data = new SimulationData();
-		(*data)->start_sand_index = 0xBEEF;
-	}
-
-	void allocate_simulation_parameters(SimulationParameters** parameters) {
-		*parameters = new SimulationParameters();
-	}
-
-	void free_simulation_data(SimulationData* data) {
-		delete data;
-	}
-	
-	void free_simulation_parameters(SimulationParameters* parameters) {
-		delete parameters;
-	}*/
-
+	/**
+	 * @brief Helper method that convert structs from/to glm
+	 * 
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	glm::vec4 wrapper_to_glm(const Color& color) {
 		glm::vec4 result (0.0);
 		result.r = color.r;
@@ -43,6 +31,12 @@ namespace Wrapper {
 		return result;
 	}
 
+	/**
+	 * @brief Helper method that convert structs from/to glm
+	 * 
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	glm::vec3 wrapper_to_glm(const Vec3& position) {
 		glm::vec3 result(0.0);
 		result.x = position.x;
@@ -51,6 +45,12 @@ namespace Wrapper {
 		return result;
 	}
 
+	/**
+	 * @brief Helper method that convert structs from/to glm
+	 * 
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	Vec3 glm_to_wrapper(const glm::vec3& position) {
 		Vec3 result{ 0.0f, 0.0f, 0.0f };
 		result.x = position.x;
@@ -59,6 +59,12 @@ namespace Wrapper {
 		return result;
 	}
 
+	/**
+	 * @brief Helper method that convert structs from/to glm
+	 * 
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	Color glm_to_wrapper(const glm::vec4& color) {
 		Color result{ 0.0f, 0.0f, 0.0f, 0.0f };
 		result.r = color.r;
@@ -68,6 +74,12 @@ namespace Wrapper {
 		return result;
 	}
 
+	/**
+	 * @brief Helper method that convert grids from simulation into wrapper and vice versa
+	 * The one from Lustrine and the one from LustrineWrapper.
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	void grid_wrapper_to_grid(const Grid* wrapped, Lustrine::Grid* original) {
 
 		original->cells = std::vector<bool>(wrapped->num_grid_cells);
@@ -93,6 +105,12 @@ namespace Wrapper {
 
 	}
 
+	/**
+	 * @brief Helper method that convert grids from simulation into wrapper and vice versa
+	 * The one from Lustrine and the one from LustrineWrapper.
+	 * @param color 
+	 * @return glm::vec4 
+	 */
 	void grid_to_grid_wrapper(const Lustrine::Grid* original, Grid* wrapped) {
 
 		wrapped->cells = new bool[original->num_grid_cells];
@@ -118,12 +136,18 @@ namespace Wrapper {
 
 	}
 
-	/*
-	void allocate_grids(Grid** grids, int num_grids) {
-		__debug_msg("allocated an array of grids");
-		*grids = new Grid[num_grids];
-	}*/
-
+	/**
+	 * @brief Init the wrapped simulation
+	 * 
+	 * @param parameters 
+	 * @param data 
+	 * @param sand_grids 
+	 * @param sand_grids_positions 
+	 * @param num_sand_grids 
+	 * @param solid_grids 
+	 * @param solid_grids_positions 
+	 * @param num_solid_grids 
+	 */
 	void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
@@ -193,6 +217,33 @@ namespace Wrapper {
 
 	}
 
+	/**
+	 * @brief Set the gravity of the bullet physics simulation
+	 * 
+	 * @param new_gravity 
+	 */
+	void set_gravity(Vec3 new_gravity) {
+		Lustrine::Bullet::set_gravity(&simulation->bullet_physics_simulation, wrapper_to_glm(new_gravity));
+	}
+
+	/**
+	 * @brief add a capsule of height and radius.
+	 * The capsule is automatically dynamic (will fall).
+	 * @return the body index of the new capsule
+	 * 
+	 */
+	int add_capsule(Vec3 position, float radius, float height) {
+		return Lustrine::Bullet::add_capsule(&simulation->bullet_physics_simulation, wrapper_to_glm(position), radius, height);
+	}
+
+	/**
+	 * @brief Adds a detector block at position and of dimensions halfdims * 2
+	 * @return the index of the new detector block
+	 */
+	int add_detector_block(Vec3 position, Vec3 half_dims) {
+		return Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
+	}
+
 	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, int type, Color color) {
 		std::cout << "init grid called" << std::endl;
 		Lustrine::Grid original_grid;
@@ -228,6 +279,13 @@ namespace Wrapper {
 	    data->data = nullptr;
 	}
 
+	/**
+	 * @brief write all collisions indices in the given array, Warning, indices must be at least
+	 * of num_bodies.
+	 * @param body the given body
+	 * @param indices a pointer array of indices
+	 * @param the amount of recorded collisions
+	 */
 	void check_collisions(int body, int* indices, int* size) {
 		Lustrine::Bullet::check_collisions(&simulation->bullet_physics_simulation, body, indices, size);
 	}
@@ -236,30 +294,54 @@ namespace Wrapper {
 		return Lustrine::Bullet::get_num_bodies(&simulation->bullet_physics_simulation);
 	}
 
+	/**
+	 * @brief add a box and returns its identifier
+	 */
 	int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions) {
 		return Lustrine::Bullet::add_box(&simulation->bullet_physics_simulation, wrapper_to_glm(position), is_dynamic, wrapper_to_glm(half_dimensions)); //, -1, INT32_MAX);
 	}
 
+	/**
+	 * @brief returns true if two bodies pointed by indices are colliding
+	 */
 	bool check_collision(int body1, int body2) {
 		return Lustrine::Bullet::check_collision(&simulation->bullet_physics_simulation, body1, body2);
 	}
 
+	/**
+	 * @brief returns true if the body collides with anything
+	 */
 	bool do_collide(int body) {
 		return Lustrine::Bullet::do_collide(&simulation->bullet_physics_simulation, body);
 	}
 
+	/**
+	 * @brief apply an impulse to the designated body
+	 */
 	void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos) {
 		Lustrine::Bullet::apply_impulse(&simulation->bullet_physics_simulation, body, wrapper_to_glm(impulse), wrapper_to_glm(relative_pos));
 	}
 
+	/**
+	 * @brief returns the position of the body
+	 */
 	Vec3 get_position(int body) {
 		return glm_to_wrapper(Lustrine::Bullet::get_body_position(&simulation->bullet_physics_simulation, body));
 	}
 
+	/**
+	 * @brief set the velocity of the body
+	 * 
+	 */
 	void set_velocity(int body, Vec3 velocity) {
 		Lustrine::Bullet::set_body_velocity(&simulation->bullet_physics_simulation, body, wrapper_to_glm(velocity));
 	}
 
+	
+	/**
+	 * @brief remove body's rotation
+	 * 
+	 */
 	void set_body_no_rotation(int body) {
 		Lustrine::Bullet::set_body_no_rotation(&simulation->bullet_physics_simulation, body);
 	}

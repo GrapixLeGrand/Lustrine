@@ -410,6 +410,9 @@ float avoid0(float x) {
 
 //void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag = false, bool blow_flag = false) {
 void simulate(Simulation* simulation, float dt) {
+    
+    Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt);
+
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
     float friction_coeff = 0.5f;

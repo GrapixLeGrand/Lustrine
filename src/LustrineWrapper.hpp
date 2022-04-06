@@ -1,5 +1,16 @@
 #pragma once
 
+/**
+ * @file LustrineWrapper.hpp
+ * @author Quentin Guignard (qguignard@student.ethz.ch), Gilles Waeber
+ * @brief 
+ * @version 0.1
+ * @date 2022-04-06
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include "LustrineWrapper_Export.h"
 #include "Lustrine.hpp"
 
@@ -42,6 +53,12 @@ namespace Wrapper {
 		float z;
 	};
 
+	/**
+	 * @brief Wrapper structure for Lustrine::Grid. WARNING: TWO grids are defined in the project.
+	 * This one in LustrineWrapper (LustrineWrapper::Grid) that wraps the other Lustrine::Grid in
+	 * Simulation.hpp. This Grid has NO managed memory and MUST never have some to stay compatible
+	 * with the binding.
+	 */
 	struct Grid {
 		bool* cells;
 		Color* colors;
@@ -72,6 +89,11 @@ namespace Wrapper {
 		int num_solid_grids
 	);
 
+	/**
+	 * @brief Utils function of the bindings
+	 * 
+	 */
+
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate(float dt);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions_copy(float* position_ptr);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void cleanup_simulation();
@@ -80,78 +102,24 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen);
 
-	//physics
 	/**
-	 * @brief add a box and returns its identifier
+	 * @brief bullet physics functions. doc in cpp. 
+	 * 
 	 */
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_gravity(Vec3 new_gravity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions);
-	
-	/**
-	 * @brief returns true if two bodies pointed by indices are colliding
-	 */
+	extern "C" LUSTRINE_WRAPPER_EXPORT int add_capsule(Vec3 position, float radius, float height);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int add_detector_block(Vec3 position, Vec3 half_dims);
 	extern "C" LUSTRINE_WRAPPER_EXPORT bool check_collision(int body1, int body2);
-
-	/**
-	 * @brief returns true if it collides with anything
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT bool do_collide(int body);
-
-	/**
-	 * @brief write all collisions indices in the given array, Warning, indices must be at least
-	 * of num_bodies.
-	 * @param body the given body
-	 * @param indices a pointer array of indices
-	 * @param the amount of recorded collisions
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT void check_collisions(int body, int* indices, int* size);
-
-
 	extern "C" LUSTRINE_WRAPPER_EXPORT int get_num_bodies();
-
-	/**
-	 * @brief apply an impulse to the designated body
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos);
-	
-	/**
-	 * @brief returns the position of the body
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT Vec3 get_position(int body);
-
-	/**
-	 * @brief set the velocity of the body
-	 * 
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_velocity(int body, Vec3 velocity);
-
-	/**
-	 * @brief remove body's rotation
-	 * 
-	 */
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_no_rotation(int body);
 
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions(float** position_ptr, int num_positions);
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void say_hello();
-
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_data(SimulationData** data);
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_parameters(SimulationParameters** parameters);
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grids(Grid** grid, int num_grids);
-
-	/*
-	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_data(SimulationData** data);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_simulation_parameters(SimulationParameters** params);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grids(Grid**, int num_grids);
-
-	extern "C" LUSTRINE_WRAPPER_EXPORT void free_simulation_data(SimulationData* data);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void free_simulation_parameters(SimulationParameters* parameters);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void free_grids(Grid* grids);
-	*/
-	
-	
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_grid(Grid* grid, int X, int Y, int Z, bool has_per_cell_color);
-	//extern "C" LUSTRINE_WRAPPER_EXPORT void free_grid(Grid* grid);
-
-	
 
 } //Wrapper
 } //Lustrine
