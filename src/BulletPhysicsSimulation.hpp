@@ -28,11 +28,16 @@ namespace Bullet {
 		
 		int num_bodies = 0;
 
+		bool allocated_particles_bounding_boxes = false;
+		size_t ptr_bounding_box_start = 0;//inclusive
+		size_t ptr_bounding_box_end = 0;//exclusive
+
 		std::vector<btTransform> transforms;
 		std::vector<btRigidBody*> rigidbodies; //store all registered bodies
 		std::vector<std::vector<int>> bodies_collisions;
 
-		std::vector<btRigidBody*> sand_particles_colliders;
+
+		//std::vector<btRigidBody*> sand_particles_colliders;
 
 		//attention this is work in progress and this group thing does not work for now
 		int collision_group_0 = (1 << 11);

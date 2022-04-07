@@ -244,6 +244,36 @@ namespace Bullet {
 	 */
 	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
 		
+		assert(simulation->allocated_particles_bounding_boxes == false);
+		if (simulation->allocated_particles_bounding_boxes == true) {
+			std::cout << "already allocated particles! (not allowed to allocate twice" << std::endl;
+		}
+
+		simulation->bodies_collisions.resize(simulation->num_bodies + num_particles, std::vector<int>{});
+		simulation->rigidbodies.resize(simulation->num_bodies + num_particles, nullptr);
+
+		simulation->ptr_bounding_box_start = simulation->num_bodies;
+
+		for (size_t old_size = 0; old_size < num_particles; old_size++) {
+			btTransform tmpTransform;
+			tmpTransform.setIdentity();
+			btVector3 pos (0.0f, 0.0f, 0.0f);
+			tmpTransform.setOrigin(pos);
+			float mass = 0.0f; //particles must not be moving at first
+			size_t index = old_size + simulation->num_bodies;
+			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, simulation->unit_box_shape, index);
+			simulation->dynamicWorld->addRigidBody(simulation->rigidbodies[index]); //, simulation->collision_group_1, simulation->collision_mask_1);
+		}
+
+		simulation->num_bodies += num_particles;
+		simulation->ptr_bounding_box_end = simulation->num_bodies;
+		simulation->allocated_particles_bounding_boxes = true;
+
+		assert(simulation->ptr_bounding_box_end - simulation->ptr_bounding_box_start == num_particles);
+
+		//simulation->sand_particles_colliders = std::vector<btRigidBody*>(num_particles, nullptr);
+
+		/*
 		if (num_particles < simulation->sand_particles_colliders.size()) {
 			return;
 		}
@@ -258,7 +288,7 @@ namespace Bullet {
 
 		simulation->bodies_collisions.resize(simulation->num_bodies + num_particles, std::vector<int>{});
 
-		for (old_size; old_size < num_particles; old_size++) {
+		for (; old_size < num_particles; old_size++) {
 			btTransform tmpTransform;
 			tmpTransform.setIdentity();
 			btVector3 pos (0.0f, 0.0f, 0.0f);
@@ -267,7 +297,7 @@ namespace Bullet {
 			simulation->sand_particles_colliders[old_size] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, simulation->unit_box_shape, simulation->num_bodies);
 			simulation->dynamicWorld->addRigidBody(simulation->sand_particles_colliders[old_size]); //, simulation->collision_group_1, simulation->collision_mask_1);
 			simulation->num_bodies++;
-		}
+		}*/
 	}
 
 	/**
@@ -477,11 +507,11 @@ namespace Bullet {
 	 */
 	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles) {
 		
-		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
-			simulation->sand_particles_colliders[i]->setActivationState(ACTIVE_TAG);
-			btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
-			t.setOrigin(glmToBullet(particles[i]));
-        	simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
+		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
+			simulation->rigidbodies[i]->setActivationState(ACTIVE_TAG);
+			btTransform& t = simulation->rigidbodies[i]->getWorldTransform();
+			t.setOrigin(glmToBullet(particles[i - simulation->ptr_bounding_box_start]));
+        	simulation->rigidbodies[i]->getMotionState()->setWorldTransform(t);
 		}
 
 	}
@@ -497,22 +527,22 @@ namespace Bullet {
 	 */
 	void disable_particles_bounding_boxes(Simulation* simulation) {
 		std::cout << "moving out particles bounding boxes" << std::endl;
-		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
 			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
 			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
         	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
 			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
-			simulation->sand_particles_colliders[i]->setCollisionFlags(simulation->sand_particles_colliders[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
 	}
 
 	void enable_particles_bounding_boxes(Simulation* simulation) {
-		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
 			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
 			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
         	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
 			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
-			simulation->sand_particles_colliders[i]->setCollisionFlags(simulation->sand_particles_colliders[i]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
 	}
 

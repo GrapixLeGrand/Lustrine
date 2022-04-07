@@ -108,6 +108,8 @@ int main(void) {
     glm::vec3 gravity = glm::vec3(0.0f, -25.0f, 0.0f);
     float gravity_y = -25.0f;
 
+    
+    
     int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 15, 15}, 2.0f, 3.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
 
     int box_index_2 = Lustrine::Bullet::add_box(bulletPhysics, {16, 15, 16}, true);
@@ -118,7 +120,7 @@ int main(void) {
     int detector_block = Lustrine::Bullet::add_detector_block(bulletPhysics, {10, 10, 10}, {2, 2, 2});
 
     Lustrine::Bullet::set_body_no_rotation(bulletPhysics, box_index);
-    Lustrine::Bullet::allocate_particles_colliders(bulletPhysics, simulation.num_sand_particles);
+    
 
     //bulletPhysics->rigidbodies[box_index]->setActivationState(DISABLE_DEACTIVATION);
 

@@ -195,6 +195,7 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
 }
