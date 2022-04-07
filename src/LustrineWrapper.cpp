@@ -218,6 +218,15 @@ namespace Wrapper {
 	}
 
 	/**
+	 * @brief Get the current gravity of the bullet world
+	 * 
+	 * @return Vec3 
+	 */
+	Vec3 get_gravity() {
+		return glm_to_wrapper(Lustrine::Bullet::get_gravity(&simulation->bullet_physics_simulation));
+	}
+
+	/**
 	 * @brief Set the gravity of the bullet physics simulation
 	 * 
 	 * @param new_gravity 
@@ -435,6 +444,42 @@ namespace Wrapper {
 		ogt_vox_destroy_scene(scene);
 
 		return;
+	}
+
+	/**
+	 * @brief allocate particles collider. Meaning that we allocate a box (for now at least)
+	 * that will encapsulate the particles. This functions only allocates the boxes but never
+	 * sets the actual positions of the bodies.
+	 * @note This function can be recalled with another argument, possibly resizing the existing
+	 * allocation.
+	 * @param num_particles 
+	 */
+	void allocate_particles_colliders(int num_particles) {
+		Lustrine::Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, num_particles);
+	}
+
+	/**
+	 * @brief Set the bounding box (in bullet) of the particles to the particles
+	 * position (in the simulation)
+	 */
+	void set_particles_box_colliders_positions() {
+		Lustrine::Bullet::set_particles_box_colliders_positions(&simulation->bullet_physics_simulation, simulation->positions);
+	}
+
+	/**
+	 * @brief enables the bounding box of the particles (can collide with the player)
+	 * 
+	 */
+	void enable_particles_bounding_boxes() {
+		Lustrine::Bullet::enable_particles_bounding_boxes(&simulation->bullet_physics_simulation);
+	}
+
+	/**
+	 * @brief disable the bounding boxes of the particles (cannot collide with the player)
+	 * 
+	 */
+	void disable_particles_bounding_boxes() {
+		Lustrine::Bullet::disable_particles_bounding_boxes(&simulation->bullet_physics_simulation);
 	}
 
 	

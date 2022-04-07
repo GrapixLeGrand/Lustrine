@@ -154,7 +154,7 @@ namespace Bullet {
 	int add_capsule(Simulation* simulation, glm::vec3 position, float radius, float height) {
 		btCapsuleShape* capsule = new btCapsuleShape(radius, height);
 		simulation->collisionShapes.push_back(capsule);
-		int result = add_shape(simulation, capsule, position, true);//, group, mask);
+		int result = add_shape(simulation, capsule, position, true); //, group, mask);
 		return result;
 	}
 
@@ -468,14 +468,14 @@ namespace Bullet {
 	}
 
 	/**
-	 * @brief Set the particles box colliders positions object
+	 * @brief Set the particles box colliders positions object (those that are allocated)
 	 * 
 	 * @param simulation 
 	 * @param particles 
 	 * @param start 
 	 * @param end 
 	 */
-	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start, int end) {
+	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles) {
 		
 		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
 			simulation->sand_particles_colliders[i]->setActivationState(ACTIVE_TAG);
@@ -490,7 +490,9 @@ namespace Bullet {
 	/**
 	 * @brief disable every allocated particles bounding boxes. Meaning that the
 	 * bodies will now stop colliding with the sand.
-	 * 
+	 * @note WARNING: Because of the interpolation, the boxes could have infinite speed
+	 * during a single frame which could cause colliding object (player) to move very fast
+	 * as in a huge kinematic collision.
 	 * @param simulation 
 	 */
 	void disable_particles_bounding_boxes(Simulation* simulation) {
@@ -499,7 +501,18 @@ namespace Bullet {
 			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
 			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
         	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
-			simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
+			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
+			simulation->sand_particles_colliders[i]->setCollisionFlags(simulation->sand_particles_colliders[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+		}
+	}
+
+	void enable_particles_bounding_boxes(Simulation* simulation) {
+		for (int i = 0; i < simulation->sand_particles_colliders.size(); i++) {
+			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
+			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
+        	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
+			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
+			simulation->sand_particles_colliders[i]->setCollisionFlags(simulation->sand_particles_colliders[i]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
 	}
 
@@ -513,6 +526,7 @@ namespace Bullet {
 	 * @param end 
 	 * @param particleRadius 
 	 */
+	/*
 	void set_particles_positions(Simulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius) {
 		
 		btTransform& t = simulation->rigidbodies[body]->getWorldTransform();
@@ -540,6 +554,6 @@ namespace Bullet {
 		}
 
 
-	}
+	}*/
 }
 }

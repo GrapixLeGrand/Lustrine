@@ -106,7 +106,8 @@ namespace Wrapper {
 	 * @brief bullet physics functions. doc in cpp. 
 	 * 
 	 */
-
+	
+	extern "C" LUSTRINE_WRAPPER_EXPORT Vec3 get_gravity();
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_gravity(Vec3 new_gravity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_capsule(Vec3 position, float radius, float height);
@@ -120,6 +121,12 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_velocity(int body, Vec3 velocity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_no_rotation(int body);
 
+	/**
+	 * @brief For particles interactions
+	 */
+	//extern "C" LUSTRINE_WRAPPER_EXPORT void allocate_particles_colliders(int num_particles);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void enable_particles_bounding_boxes();
+	extern "C" LUSTRINE_WRAPPER_EXPORT void disable_particles_bounding_boxes();
 
 } //Wrapper
 } //Lustrine

@@ -47,7 +47,7 @@ void init_simulation(
     const std::vector<Grid>& grids_solid_arg, 
     const std::vector<glm::vec3>& grids_solid_positions_arg) {
 
-    init_bullet(&simulation->bullet_physics_simulation);
+    Bullet::init_bullet(&simulation->bullet_physics_simulation);
 
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
@@ -195,7 +195,7 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    print_resume(&simulation->bullet_physics_simulation);
+    Bullet::print_resume(&simulation->bullet_physics_simulation);
 
 }
 
@@ -420,6 +420,7 @@ void simulate(Simulation* simulation, float dt) {
     float mu_k = 0.8f;
 
     dt = glm::clamp(dt, 0.001f, 0.01f);
+    dt = (1.0f / 30.0f);
     simulation->time_step = dt;
 
     int n = simulation->num_particles;

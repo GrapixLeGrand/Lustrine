@@ -152,16 +152,13 @@ int main(void) {
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
-        
-        if (areParticlesDisabled == false) {
-            Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions, 0, simulation.ptr_sand_end);
-        }
+        //if (areParticlesDisabled == false) 
+        Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);
 
         if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, detector_block) == true) {
             std::cout << "detection!!!!" << std::endl;
         }
 
-        //Lustrine::Bullet::simulate_bullet(bulletPhysics, windowController->getDeltaTime());
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
         renderer->clear();
 
@@ -169,10 +166,7 @@ int main(void) {
             UpdateCameraPositionWASD(inputController, camera, windowController->getDeltaTime(), 10.f);
         } else {
             
-            //btVector3 velocity (0.0, 0.0, 0.0);
-            
             glm::vec3 velocity (0.0);
-
             bool playerLeftGround = true;
             for (int i = 0; i < bulletPhysics->num_bodies; i++) {
                 if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, i) == true) {
@@ -263,8 +257,11 @@ int main(void) {
 
             if (ImGui::Button("particles bounding box")) {
                 if (areParticlesDisabled == true) {
+                    std::cout << "particles enabled" << std::endl;
                     areParticlesDisabled = false;
+                    Lustrine::Bullet::enable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 } else {
+                    std::cout << "particles disabled" << std::endl;
                     areParticlesDisabled = true;
                     Lustrine::Bullet::disable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 }            
