@@ -258,13 +258,13 @@ int main(void) {
         if (ImGui::BeginTabItem("Simulation")) {
 
             if (ImGui::Button("particles bounding box")) {
-                if (areParticlesDisabled == true) {
+                if (bulletPhysics->particles_bounding_box_requested_state == true) {
                     std::cout << "particles enabled" << std::endl;
-                    areParticlesDisabled = false;
+                    bulletPhysics->particles_bounding_box_requested_state = false;
                     //Lustrine::Bullet::enable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 } else {
                     std::cout << "particles disabled" << std::endl;
-                    areParticlesDisabled = true;
+                    bulletPhysics->particles_bounding_box_requested_state = true;
                     //Lustrine::Bullet::disable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 }            
             }

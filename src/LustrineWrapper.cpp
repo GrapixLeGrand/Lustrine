@@ -471,7 +471,7 @@ namespace Wrapper {
 	 * 
 	 */
 	void enable_particles_bounding_boxes() {
-		Lustrine::Bullet::enable_particles_bounding_boxes(&simulation->bullet_physics_simulation);
+		simulation->bullet_physics_simulation.particles_bounding_box_requested_state = true;
 	}
 
 	/**
@@ -479,7 +479,7 @@ namespace Wrapper {
 	 * 
 	 */
 	void disable_particles_bounding_boxes() {
-		Lustrine::Bullet::disable_particles_bounding_boxes(&simulation->bullet_physics_simulation);
+		simulation->bullet_physics_simulation.particles_bounding_box_requested_state = false;
 	}
 
 	

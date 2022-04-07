@@ -74,7 +74,8 @@ namespace Bullet {
 	extern void disable_particles_bounding_boxes(Simulation* simulation);
 	extern void enable_particles_bounding_boxes(Simulation* simulation);
 	extern void bind_foreign_sand_positions(Simulation* simulation, glm::vec3* foreign_positions);
-	
+
+
 	/**
 	 * @brief Helpers
 	 */
