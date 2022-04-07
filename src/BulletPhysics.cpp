@@ -135,9 +135,15 @@ namespace Bullet {
 	 * @param dt 
 	 */
 	void simulate_bullet(Simulation* simulation, float dt) {
-		//std::cout << "simulate bullet" << std::endl;
 		gather_collisions(simulation);
-		//print_collisions(simulation);
+		if (simulation->particles_bounding_box_current_state == false && simulation->particles_bounding_box_requested_state == true) {
+			Lustrine::Bullet::enable_particles_bounding_boxes(simulation);
+			simulation->particles_bounding_box_current_state = true;
+		} else if (simulation->particles_bounding_box_current_state == true && simulation->particles_bounding_box_requested_state == false) {
+			Lustrine::Bullet::disable_particles_bounding_boxes(simulation);
+			simulation->particles_bounding_box_current_state = false;
+		}
+		set_particles_box_colliders_positions(simulation, simulation->foreign_sand_positions);
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
@@ -544,6 +550,17 @@ namespace Bullet {
 			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
 			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
+	}
+
+	/**
+	 * @brief Will bind the positions used interally in the bullet for bounding boxes
+	 * with the actual positions from the particle simulation.
+	 * 
+	 * @param simulation 
+	 * @param foreign_positions 
+	 */
+	void bind_foreign_sand_positions(Simulation* simulation, glm::vec3* foreign_positions) {
+		simulation->foreign_sand_positions = foreign_positions;
 	}
 
 	/**

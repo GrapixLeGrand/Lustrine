@@ -28,7 +28,11 @@ namespace Bullet {
 		
 		int num_bodies = 0;
 
-		bool allocated_particles_bounding_boxes = false;
+		bool allocated_particles_bounding_boxes = false;//FOR NOW A SINGLE ALLOCATION IS POSSIBLE
+		bool particles_bounding_box_requested_state = true;//By default the particles are enabled
+		bool particles_bounding_box_current_state = true;//internal variable used to detect rising edge on bounding box deactivation/activation
+
+		glm::vec3* foreign_sand_positions = nullptr;
 		size_t ptr_bounding_box_start = 0;//inclusive
 		size_t ptr_bounding_box_end = 0;//exclusive
 

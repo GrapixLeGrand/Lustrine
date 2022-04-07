@@ -155,7 +155,7 @@ int main(void) {
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
         //if (areParticlesDisabled == false) 
-        Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);
+        //Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);
 
         if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, detector_block) == true) {
             std::cout << "detection!!!!" << std::endl;
@@ -261,11 +261,11 @@ int main(void) {
                 if (areParticlesDisabled == true) {
                     std::cout << "particles enabled" << std::endl;
                     areParticlesDisabled = false;
-                    Lustrine::Bullet::enable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
+                    //Lustrine::Bullet::enable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 } else {
                     std::cout << "particles disabled" << std::endl;
                     areParticlesDisabled = true;
-                    Lustrine::Bullet::disable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
+                    //Lustrine::Bullet::disable_particles_bounding_boxes(&simulation.bullet_physics_simulation);
                 }            
             }
 

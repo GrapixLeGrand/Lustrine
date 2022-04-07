@@ -196,6 +196,7 @@ void init_simulation(
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
     Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles);
+    Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
 }

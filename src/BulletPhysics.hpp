@@ -65,15 +65,16 @@ namespace Bullet {
 	extern void check_collisions(Simulation* simulation, int body, int* indices, int* size);
 	extern bool do_collide(Simulation* simulation, int body);
 
-	
-	
-	
+	/**
+	 * @brief Particles/rigidbodies related function
+	 */
+
 	extern void allocate_particles_colliders(Simulation* simulation, int num_particles);
 	extern void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles);
-	//extern void set_particles_positions(Simulation* simulation, int body, std::vector<glm::vec3> particles, int start, int end, float particleRadius);
 	extern void disable_particles_bounding_boxes(Simulation* simulation);
 	extern void enable_particles_bounding_boxes(Simulation* simulation);
-		
+	extern void bind_foreign_sand_positions(Simulation* simulation, glm::vec3* foreign_positions);
+	
 	/**
 	 * @brief Helpers
 	 */
