@@ -1,6 +1,6 @@
-if (UNIX)
+#if (UNIX)
 	add_subdirectory(bullet)
-endif()
+#endif()
 add_subdirectory(fluid)
 #endif()
 add_subdirectory(voxel_loader)

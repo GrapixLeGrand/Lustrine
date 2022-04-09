@@ -54,7 +54,7 @@ extern void LUSTRINE_EXPORT init_simulation(
  *
  * @param simulation
  */
-extern void clean_simulation(Simulation* simulation);
+extern LUSTRINE_EXPORT void clean_simulation(Simulation* simulation);
 
 /**
  * @brief 
@@ -65,7 +65,7 @@ extern void clean_simulation(Simulation* simulation);
  * @param position 
  * @param type 
  */
-extern void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type);
+extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type);
 
 /**
  * @brief Init a grid full of partlices. A box full of particles with X * Y * Z particles.
