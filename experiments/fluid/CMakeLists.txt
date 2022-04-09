@@ -13,6 +13,20 @@ if (WIN32)
     find_package(OpenGL REQUIRED)
     include_directories(${GLFW3_INCLUDE_DIRS})
     include_directories(${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIRS})
+    
+    # Copy library DLL to target directory
+    add_custom_command(TARGET fluid POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Lustrine> $<TARGET_FILE_DIR:fluid>
+            )
+    add_custom_command(TARGET fluid POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${LevekGL_SOURCE_DIR}/thirdparty/windows/assimp/MD/assimp.dll $<TARGET_FILE_DIR:fluid>
+            )
+    add_custom_command(TARGET fluid POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${LevekGL_SOURCE_DIR}/thirdparty/windows/zlib-1.2.11/zlib.dll $<TARGET_FILE_DIR:fluid>
+            )
 endif (WIN32)
 
 target_link_libraries(fluid Lustrine)
