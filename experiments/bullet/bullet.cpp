@@ -51,9 +51,9 @@ int main(void) {
     Levek::InputController* inputController = engine->getInputController();
 
     windowController->setWindowTitle("Fluid");
-    #ifdef PLATFORM_UNIX
+    //#ifdef PLATFORM_UNIX
     windowController->initImGui();
-    #endif
+    //#endif
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
     Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
     const Levek::Mesh* sphere = model->getMesh(0);
@@ -248,7 +248,7 @@ int main(void) {
         groundPipelineState.draw(renderer);
 
         
-        #ifdef PLATFORM_UNIX
+        //#ifdef PLATFORM_UNIX
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -327,7 +327,7 @@ int main(void) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        #endif
+        //#endif
 
         gravity.y = gravity_y;
         Lustrine::Bullet::set_gravity(&simulation.bullet_physics_simulation, gravity);
