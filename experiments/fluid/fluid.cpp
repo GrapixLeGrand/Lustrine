@@ -4,22 +4,26 @@
 
 #include <string>
 
-#ifdef PLATFORM_UNIX
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_glfw.h"
-#endif
+//#ifdef PLATFORM_UNIX
+//#include "GL/glew.h"
+
+//#endif
 
 #include "Lustrine.hpp"
 #include "../Utils.hpp"
 #include "LevekGL.hpp"
+
+#include "GL/glew.h"
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_glfw.h"
 
 
 int resolutionX = 1280;
 int resolutionY = 720;
 
 int main(void) {
-
+    
     Levek::RenderingEngine* engine = new Levek::RenderingEngine(resolutionX, resolutionY);
 
     Levek::Renderer* renderer = engine->getRenderer();
@@ -28,9 +32,9 @@ int main(void) {
     Levek::InputController* inputController = engine->getInputController();
 
     windowController->setWindowTitle("Fluid");
-    #ifdef PLATFORM_UNIX
+    //#ifdef PLATFORM_UNIX
     windowController->initImGui();
-    #endif
+    //#endif
 
     Levek::ModelLoader* meshLoader = engine->getModelLoader();
     Levek::PerspectiveCamera camera({20, 20, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
@@ -122,7 +126,7 @@ int main(void) {
         groundPipelineState.setUniforms(vp);
         groundPipelineState.draw(renderer);
         
-        #ifdef PLATFORM_UNIX
+        //#ifdef PLATFORM_UNIX
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -183,7 +187,7 @@ int main(void) {
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        #endif
+        //#endif
 
         lineRenderer->SetViewProjection(projection * camera.getView());
         //lineRenderer->AddLine({0, 0, 0}, {1, 0, 0}, {1.0, 0.0, 0.0, 1.0}); 

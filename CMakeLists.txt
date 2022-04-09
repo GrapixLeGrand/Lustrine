@@ -21,8 +21,13 @@ endif()
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} OFF)
 #option(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8/glm/glm.hpp")
 
-set(ENV{LEVEKGL_USE_INTERNAL_GLM_REQUESTED})
-set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
+set(LEVEKGL_BUILD_SAMPLES OFF CACHE BOOL "Do not build LevekGL samples" FORCE)
+set(LEVEKGL_USE_INTERNAL_GLM OFF CACHE BOOL "Request LevekGL to use another path for GLM" FORCE)
+
+set(ENV{LEVEKGL_EXTERNAL_GLM_PATH} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8") #CACHE STRING "Request LevekGL to use another path for GLM" FORCE)
+
+#set(ENV{LEVEKGL_USE_INTERNAL_GLM_REQUESTED})
+#set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
 
 add_subdirectory(thirdparty)
 
