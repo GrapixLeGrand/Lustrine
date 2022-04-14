@@ -68,12 +68,24 @@ void save_vox_scene(const char* pcFilename, const ogt_vox_scene* scene)
 #define NUM_CHAR_PATH 200
 static char input_path[NUM_CHAR_PATH] = LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox";
 static char output_path[NUM_CHAR_PATH] = "out.vox";
-double target_density = 0.5;
+double target_density = 0.01;
 uint32_t subdivision = 5;
+
+uint32_t count_voxels(const uint8_t* data, uint32_t size) {
+    uint32_t counter = 0;
+    for (uint32_t i = 0; i < size; i++) {
+        if (data[i] > 0) counter++;
+    }
+    return counter;
+}
+
+uint32_t getsize(const ogt_vox_model* model) {
+    return model->size_x * model->size_y * model->size_z;
+}
 
 int main(char** args, int argc) {
 	
-    if (argc > 1) {
+    if (argc > 1 && false) {
         std::cout << "using custom arguments" << "\n";
         assert(argc == 5);
         char* dummy = NULL;
@@ -175,35 +187,57 @@ int main(char** args, int argc) {
             }
         }
     }
+
+    uint32_t initial_dims = getsize(model);
+    uint32_t initial_occupied = count_voxels(model->voxel_data, initial_dims);
+    uint32_t initial_dims_sub = getsize(subdivided_model);
+    uint32_t initial_occupied_sub = count_voxels(subdivided_model->voxel_data, initial_dims_sub);
     
-    subdivided_model->voxel_hash = _vox_hash(subdivided_model->voxel_data, subdivided_model->size_x * subdivided_model->size_y * subdivided_model->size_z);
+    uint8_t* tmp_voxel_data = new uint8_t[subdivided_model->size_x * subdivided_model->size_y * subdivided_model->size_z];
+    assert(tmp_voxel_data != nullptr);
 
-    uint32_t actual = 0;
-    for (uint32_t i = 0; i < model->size_x * model->size_y * model->size_z; i++) {
-        if (model->voxel_data[i] != 0) {
-            actual++;
-        }
-    }
+    memcpy(tmp_voxel_data, subdivided_model->voxel_data, subdivided_model->size_x * subdivided_model->size_y * subdivided_model->size_z * sizeof(uint8_t));
 
-    std::cout << "\trecored\t" << total_counter << "\tactual\t" << actual << std::endl;
+    //here remove unseen voxels
+    for (uint32_t z = 1; z < subdivided_model->size_z - 1; z++) {
+        for (uint32_t y = 1; y < subdivided_model->size_y - 1; y++) {
+            for (uint32_t x = 1; x < subdivided_model->size_x - 1; x++) {
+               
+                uint32_t X = subdivided_model->size_x;
+                uint32_t Y = subdivided_model->size_y;
 
-    actual = 0;
-    for (uint32_t x = 0; x < model->size_x; x++) {
-        for (uint32_t y = 0; y < model->size_y; y++) {
-            for (uint32_t z = 0; z < model->size_z; z++) {
-                uint32_t index = x + (y * model->size_x) + (z * model->size_x * model->size_y);
-                if (model->voxel_data[index] != 0) {
-                    actual++;
+                uint32_t xx = x;
+                uint32_t yy = y;
+                uint32_t zz = z;
+
+                if (
+                    tmp_voxel_data[(x - 1) + y * X + z * X * Y] > 0 &&
+                    tmp_voxel_data[(x + 1) + y * X + z * X * Y] > 0 &&
+                    tmp_voxel_data[x + (y - 1) * X + z * X * Y] > 0 &&
+                    tmp_voxel_data[x + (y + 1) * X + z * X * Y] > 0 &&
+                    tmp_voxel_data[x + y * X + (z - 1) * X * Y] > 0 &&
+                    tmp_voxel_data[x + y * X + (z + 1) * X * Y] > 0
+                    ) {
+                    ((uint8_t*)(subdivided_model->voxel_data))[x + y * X + z * X * Y] = 0; //remove the voxel if not visible
                 }
+
             }
         }
     }
-    std::cout << "\trechecked\t" << actual << std::endl;
 
-    std::cout << "num occupied voxels " << occupied_voxel_count << std::endl;
+    delete[] tmp_voxel_data;
+    subdivided_model->voxel_hash = _vox_hash(subdivided_model->voxel_data, subdivided_model->size_x * subdivided_model->size_y * subdivided_model->size_z);
 
+    uint32_t initial_dims_simp = getsize(subdivided_model);
+    uint32_t initial_occupied_simp = count_voxels(subdivided_model->voxel_data, initial_dims_sub);
+
+    std::cout << "stats:" << "\n"
+        << "\tinitial:\t" << "\ttotal vox\t" << initial_dims << "\tused:\t" << initial_occupied << "\toccupency:\t" << ((double)initial_occupied) / ((double)initial_dims) << "%\n"
+        << "\tsubdiv:\t" << "\ttotal vox\t" << initial_dims_sub << "\tused:\t" << initial_occupied_sub << "\toccupency:\t" << ((double)initial_occupied_sub) / ((double)initial_dims_sub) << "%\n"
+        << "\tsimplified:\t" << "\ttotal vox\t" << initial_dims_simp << "\tused:\t" << initial_occupied_simp << "\toccupency:\t" << ((double)initial_occupied_simp) / ((double)initial_dims_simp) << "%\n";
+
+    //saving the subdivided model
     scene->models[0] = subdivided_model;
-       
     save_vox_scene("out.vox", scene);
 
     std::cout << "written scene" << std::endl;
