@@ -4,6 +4,8 @@
 #include "opengametools/ogt_vox.h"
 #include <cassert>
 #include <algorithm>
+#include <fstream>  
+
 
 const ogt_vox_scene* load_vox_scene(const char* filename, uint32_t scene_read_flags = 0)
 {
@@ -37,9 +39,59 @@ const ogt_vox_scene* load_vox_scene(const char* filename, uint32_t scene_read_fl
     return scene;
 }
 
+void save_vox_scene(const char* pcFilename, const ogt_vox_scene* scene)
+{
+    // save the scene back out. 
+    uint32_t buffersize = 0;
+    uint8_t* buffer = ogt_vox_write_scene(scene, &buffersize);
+    if (!buffer)
+        return;
+
+    // open the file for write
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+    FILE* fp;
+    if (0 != fopen_s(&fp, pcFilename, "wb"))
+        fp = 0;
+#else
+    FILE* fp = fopen(pcFilename, "wb");
+#endif
+    if (!fp) {
+        ogt_vox_free(buffer);
+        return;
+    }
+
+    fwrite(buffer, buffersize, 1, fp);
+    fclose(fp);
+    ogt_vox_free(buffer);
+}
+
+#define NUM_CHAR_PATH 200
+static char input_path[NUM_CHAR_PATH] = LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox";
+static char output_path[NUM_CHAR_PATH] = "out.vox";
+double target_density = 0.5;
+uint32_t subdivision = 5;
 
 int main(char** args, int argc) {
 	
+    if (argc > 1) {
+        std::cout << "using custom arguments" << "\n";
+        assert(argc == 5);
+        char* dummy = NULL;
+        memcpy(input_path, args[1], strlen(args[1]));
+        memcpy(output_path, args[2], strlen(args[2]));
+        target_density = strtod(args[3], &dummy);
+        subdivision = (uint32_t) strtol(args[4], &dummy, 10);
+    }
+    else {
+        std::cout << "using default arguments" << "\n";
+    }
+
+    std::cout << "Arguments:" << "\n";
+    std::cout << "\tin:\t" << input_path << "\n";
+    std::cout << "\tout:\t" << output_path << "\n";
+    std::cout << "\tdensity:\t" << target_density << "\n";
+    std::cout << "\tsubdivision:\t" << subdivision << "\n";
+
 	std::cout << "level maker start" << std::endl;
     std::cout << "model at path " << LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox" << std::endl;
 
@@ -60,9 +112,7 @@ int main(char** args, int argc) {
     std::cout << "\ty:\t" << model->size_y << std::endl;
     std::cout << "\tz:\t" << model->size_z << std::endl;
     
-    uint32_t subdivision = 5;
     uint32_t voxel_per_subdivision = subdivision * subdivision * subdivision;
-    double target_density = 0.5;
 
     uint32_t division_size_x = (model->size_x / subdivision) + (model->size_x % subdivision > 0 ? 1 : 0);
     uint32_t division_size_y = (model->size_y / subdivision) + (model->size_y % subdivision > 0 ? 1 : 0);
@@ -86,26 +136,21 @@ int main(char** args, int argc) {
     for (uint32_t z = 0; z < division_size_z; z++) {
         for (uint32_t y = 0; y < division_size_y; y++) {
             for (uint32_t x = 0; x < division_size_x; x++) {
-            
-
-                //std::cout << x << " " << y << " " << z << std::endl;
-
-                uint32_t sub_x = x * subdivision;
-                uint32_t sub_y = y * subdivision;
-                uint32_t sub_z = z * subdivision;
 
                 uint32_t sub_max_x = std::min((x + 1) * subdivision, model->size_x);
                 uint32_t sub_max_y = std::min((y + 1) * subdivision, model->size_y);
                 uint32_t sub_max_z = std::min((z + 1) * subdivision, model->size_z);
+
+                uint32_t current_voxel_volume = (sub_max_x % subdivision) * (sub_max_y % subdivision) * (sub_max_z % subdivision);
 
                 uint32_t counter = 0;
                 uint8_t last_palette_index = 0;
                    
                 //std::cout << "z: " << sub_z << " " << sub_max_z << std::endl;
 
-                for (sub_z = z * subdivision; sub_z < sub_max_z; sub_z++) {
-                    for (sub_y = y * subdivision; sub_y < sub_max_y; sub_y++) {
-                        for (sub_x = x * subdivision; sub_x < sub_max_x; sub_x++) {
+                for (uint32_t sub_z = z * subdivision; sub_z < sub_max_z; sub_z++) {
+                    for (uint32_t sub_y = y * subdivision; sub_y < sub_max_y; sub_y++) {
+                        for (uint32_t sub_x = x * subdivision; sub_x < sub_max_x; sub_x++) {
                         
 
                             uint32_t index = sub_x + (sub_y * model->size_x) + (sub_z * model->size_x * model->size_y);
@@ -119,8 +164,8 @@ int main(char** args, int argc) {
                 }
                 
                 total_counter += counter;
-                double density = ((double)counter) / ((double)voxel_per_subdivision);
-                //std::cout << "\tcounter\t" << counter << "\tdensity\t" << density << std::endl;
+                double density = ((double)counter) / ((double)current_voxel_volume);
+               
                 if (density > target_density) {
                     occupied_voxel_count++;
                     uint32_t subdivided_index = x + (y * division_size_x) + (z * division_size_x * division_size_y);
@@ -131,15 +176,14 @@ int main(char** args, int argc) {
         }
     }
     
+    subdivided_model->voxel_hash = _vox_hash(subdivided_model->voxel_data, subdivided_model->size_x * subdivided_model->size_y * subdivided_model->size_z);
+
     uint32_t actual = 0;
     for (uint32_t i = 0; i < model->size_x * model->size_y * model->size_z; i++) {
         if (model->voxel_data[i] != 0) {
             actual++;
         }
     }
-
-    
-
 
     std::cout << "\trecored\t" << total_counter << "\tactual\t" << actual << std::endl;
 
@@ -158,7 +202,13 @@ int main(char** args, int argc) {
 
     std::cout << "num occupied voxels " << occupied_voxel_count << std::endl;
 
-    ogt_vox_free(subdivided_model);
+    scene->models[0] = subdivided_model;
+       
+    save_vox_scene("out.vox", scene);
+
+    std::cout << "written scene" << std::endl;
+
+    ogt_vox_free((void*)model);
     ogt_vox_destroy_scene(scene);
     std::cout << "level maker exit" << std::endl;
 }
