@@ -54,6 +54,13 @@ set(LUSTRINEWRAPPER_SOURCES
 
 
 add_library(Lustrine SHARED ${LUSTRINE_SOURCES})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_property(TARGET Lustrine PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+else()
+set_property(TARGET Lustrine PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+endif()
 generate_export_header(Lustrine
         BASE_NAME Lustrine
         EXPORT_MACRO_NAME LUSTRINE_EXPORT
@@ -62,7 +69,16 @@ generate_export_header(Lustrine
 )
 target_include_directories(Lustrine PUBLIC ${CMAKE_BINARY_DIR}/exports)
 
+
+
 add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set_property(TARGET LustrineWrapper PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+else()
+set_property(TARGET LustrineWrapper PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+endif()
 #add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
 generate_export_header(LustrineWrapper
         BASE_NAME LustrineWrapper
