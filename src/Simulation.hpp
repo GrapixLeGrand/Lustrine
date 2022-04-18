@@ -21,7 +21,6 @@ typedef glm::vec3 (*gradW_fun)(const Simulation*, const glm::vec3&);
 
 /**
  * @brief The phyical type of the particles making an object
- * 
  */
 enum MaterialType {
     SOLID = 0,

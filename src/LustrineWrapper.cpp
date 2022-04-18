@@ -136,6 +136,13 @@ namespace Wrapper {
 
 	}
 
+	void init_grid_magikavoxel(Grid* grid, const char* path) {
+		std::cout << "LustrineWrapper: init grid with magika at " << path << std::endl;
+		Lustrine::Grid tmp;
+		Lustrine::init_grid_from_magika_voxel(&tmp, path, Lustrine::MaterialType::SOLID);
+		grid_to_grid_wrapper(&tmp, grid);
+	}
+
 	/**
 	 * @brief Init the wrapped simulation
 	 * 
