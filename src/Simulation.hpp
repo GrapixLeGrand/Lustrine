@@ -177,6 +177,9 @@ struct Simulation {
     std::vector<glm::vec3> grids_initial_positions_sand;
     std::vector<Chunk> chunks_sand;//all the chunks of sands
 
+    //utils
+    glm::vec3* positions_tmp = nullptr;
+
 };
 
 
