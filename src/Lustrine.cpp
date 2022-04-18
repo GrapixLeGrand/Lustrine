@@ -557,6 +557,8 @@ void simulate(Simulation* simulation, float dt) {
         perturbation = false;
     }
 
+    delete positions_tmp;
+
 }
 
 
