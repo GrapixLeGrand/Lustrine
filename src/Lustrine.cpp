@@ -43,11 +43,23 @@ void init_simulation(
     const SimulationParameters* parameters, 
     Simulation* simulation, 
     const std::vector<Grid>& grids_sand_arg, 
-    const std::vector<glm::vec3>& grids_sand_positions_arg, 
-    const std::vector<Grid>& grids_solid_arg, 
-    const std::vector<glm::vec3>& grids_solid_positions_arg) {
+    const std::vector<Grid>& grids_solid_arg
+) {
 
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
+
+    std::vector<glm::vec3> grids_sand_positions_arg;
+    std::vector<glm::vec3> grids_solid_positions_arg;
+
+    grids_sand_positions_arg.reserve(grids_sand_arg.size());
+    for (int i = 0; i < grids_sand_arg.size(); i++) {
+        grids_sand_positions_arg.push_back(grids_sand_arg[i].position);
+    }
+
+    grids_solid_positions_arg.reserve(grids_solid_arg.size());
+    for (int i = 0; i < grids_solid_arg.size(); i++) {
+        grids_solid_positions_arg.push_back(grids_solid_arg[i].position);
+    }
 
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
@@ -93,7 +105,7 @@ void init_simulation(
         for (int i = 0; i < simulation->grids_sand.size(); i++) {
             Chunk chunk;
             assert(simulation->grids_sand[i].type == SAND);
-            init_chunk_from_grid(parameters, &chunk, &simulation->grids_sand[i], simulation->grids_initial_positions_sand[i], SAND);
+            init_chunk_from_grid(parameters, &chunk, &simulation->grids_sand[i], SAND);
             simulation->chunks_sand.push_back(chunk);
 
             for (int j = 0; j < chunk.num_particles; j++) {
@@ -124,7 +136,7 @@ void init_simulation(
         for (int i = 0; i < simulation->grids_solid.size(); i++) {
             Chunk chunk;
             assert(simulation->grids_solid[i].type == SOLID);
-            init_chunk_from_grid(parameters, &chunk, &simulation->grids_solid[i], simulation->grids_initial_positions_solid[i], SOLID);
+            init_chunk_from_grid(parameters, &chunk, &simulation->grids_solid[i], SOLID);
             simulation->chunks_solid.push_back(chunk);
             
             simulation->grids_solid_chunk_ptrs[i].second = simulation->ptr_solid_ordered_end + 1;
@@ -210,7 +222,7 @@ void clean_simulation(Simulation* simulation) {
     delete simulation->positions_tmp;
 }
 
-void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color) {
+void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type) {
 
     grid->type = type;
     grid->num_grid_cells = X * Y * Z;
@@ -222,6 +234,8 @@ void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, in
 
     grid->cells = std::vector<bool>(grid->num_grid_cells, true);
     grid->color = color;
+    
+    grid->position = position;
 
     const float diameter = parameters->particleDiameter;
     const float radius = parameters->particleRadius;
@@ -231,7 +245,7 @@ void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, in
 
 }
 
-void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type) {
+void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type) {
     
     chunk->type = type;
     chunk->num_particles = grid->num_occupied_grid_cells;
@@ -261,7 +275,7 @@ void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, 
                     particle_position.y = y * diameter; 
                     particle_position.z = z * diameter; 
 
-                    particle_position += position;
+                    particle_position += grid->position;
 
                     if (chunk->has_one_color_per_particles == true) {
                         const glm::vec4& grid_color = grid->colors[x * Y * Z + y * Z + z];

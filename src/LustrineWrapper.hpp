@@ -63,6 +63,7 @@ namespace Wrapper {
 		bool* cells;
 		Color* colors;
 		Color color;
+		Vec3 position;
 		bool has_one_color_per_cell;
 		int X;
 		int Y;
@@ -81,11 +82,9 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const Grid* sand_grids, 
-		const Vec3* sand_grids_positions, 
+		const Grid* sand_grids,
 		int num_sand_grids,
-		const Grid* solid_grids, 
-		const Vec3* solid_grids_positions,
+		const Grid* solid_grids,
 		int num_solid_grids
 	);
 
@@ -97,11 +96,11 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate(float dt);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions_copy(float* position_ptr);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void cleanup_simulation();
-	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, int type, Color color);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, Vec3 position, Color color, int type);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, int64_t size);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_magikavoxel(Grid* grid, const char* path);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_magikavoxel(Grid* grid, const char* path, Vec3 position);
 
 	/**
 	 * @brief bullet physics functions. doc in cpp. 

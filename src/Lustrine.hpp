@@ -43,10 +43,8 @@ struct Simulation;
 extern void LUSTRINE_EXPORT init_simulation(
     const SimulationParameters* parameters, 
     Simulation* simulation, 
-    const std::vector<Grid>& grids_sand_arg, 
-    const std::vector<glm::vec3>& grids_sand_positions_arg, 
-    const std::vector<Grid>& grids_solid_arg, 
-    const std::vector<glm::vec3>& grids_solid_positions_arg
+    const std::vector<Grid>& grids_sand_arg,
+    const std::vector<Grid>& grids_solid_arg
 );
 
 /**
@@ -65,7 +63,7 @@ extern LUSTRINE_EXPORT void clean_simulation(Simulation* simulation);
  * @param position 
  * @param type 
  */
-extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, glm::vec3 position, MaterialType type);
+extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
 
 /**
  * @brief Init a grid full of partlices. A box full of particles with X * Y * Z particles.
@@ -78,9 +76,9 @@ extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* par
  * @param type 
  * @param color 
  */
-extern LUSTRINE_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, MaterialType type, glm::vec4 color);
+extern LUSTRINE_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type);
 
-extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type);
+extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);

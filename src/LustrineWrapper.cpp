@@ -91,7 +91,8 @@ namespace Wrapper {
 		original->color = wrapper_to_glm(wrapped->color);
 		original->num_occupied_grid_cells = wrapped->num_occupied_grid_cells;
 		original->num_grid_cells = wrapped->num_grid_cells;
-		
+		original->position = wrapper_to_glm(wrapped->position);
+
 		for (int i = 0; i < original->num_grid_cells; i++) {
 			original->cells[i] = wrapped->cells[i];
 		}
@@ -122,7 +123,7 @@ namespace Wrapper {
 		wrapped->color = glm_to_wrapper(original->color);
 		wrapped->num_occupied_grid_cells = original->num_occupied_grid_cells;
 		wrapped->num_grid_cells = original->num_grid_cells;
-
+		wrapped->position = glm_to_wrapper(original->position);
 		for (int i = 0; i < wrapped->num_grid_cells; i++) {
 			wrapped->cells[i] = original->cells[i];
 		}
@@ -136,10 +137,10 @@ namespace Wrapper {
 
 	}
 
-	void init_grid_magikavoxel(Grid* grid, const char* path) {
+	void init_grid_magikavoxel(Grid* grid, const char* path, Vec3 position) {
 		std::cout << "LustrineWrapper: init grid with magika at " << path << std::endl;
 		Lustrine::Grid tmp;
-		Lustrine::init_grid_from_magika_voxel(&tmp, path, Lustrine::MaterialType::SOLID);
+		Lustrine::init_grid_from_magika_voxel(&tmp, path, wrapper_to_glm(position), Lustrine::MaterialType::SOLID);
 		grid_to_grid_wrapper(&tmp, grid);
 	}
 
@@ -158,57 +159,42 @@ namespace Wrapper {
 	void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const Grid* sand_grids, 
-		const Vec3* sand_grids_positions, 
+		const Grid* sand_grid,
 		int num_sand_grids,
 		const Grid* solid_grids, 
-		const Vec3* solid_grids_positions,
 		int num_solid_grids
 	) {
 		
 		std::cout << "Lustrine::wrapper init called!" << std::endl;
 		
 		if (num_sand_grids < 0 || num_solid_grids < 0) {
-			std::cout << "Lustrine bad arguments..." << std::endl;
+			std::cout << "Lustrine bad arguments...?" << std::endl;
 			return;
 		}
 
 		simulation = new Simulation();
 
 		std::vector<Lustrine::Grid> original_sand_grids(num_sand_grids);
-		std::vector<glm::vec3> original_sand_positions(num_sand_grids);
 		
 		//init the converted grids
 		for (int i = 0; i < num_sand_grids; i++) {
-			grid_wrapper_to_grid(&sand_grids[i], &original_sand_grids[i]);
+			grid_wrapper_to_grid(&sand_grid[i], &original_sand_grids[i]);
 		}
 		
-		//convert the positions
-		for (int i = 0; i < num_sand_grids; i++) {
-			original_sand_positions[i] = wrapper_to_glm(sand_grids_positions[i]);
-		}
 
 		//solid
 		std::vector<Lustrine::Grid> original_solid_grids(num_solid_grids);
-		std::vector<glm::vec3> original_solid_positions(num_solid_grids);
 		
 		//init the converted grids
 		for (int i = 0; i < num_solid_grids; i++) {
 			grid_wrapper_to_grid(&solid_grids[i], &original_solid_grids[i]);
-		}
-		
-		//convert the positions
-		for (int i = 0; i < num_solid_grids; i++) {
-			original_solid_positions[i] = wrapper_to_glm(solid_grids_positions[i]);
 		}
 
 		Lustrine::init_simulation(
 			parameters,
 			simulation,
 			original_sand_grids,
-			original_sand_positions,
-			original_solid_grids,
-			original_solid_positions
+			original_solid_grids
 		);
 
 		data->start_sand_index = simulation->ptr_sand_start;
@@ -260,10 +246,10 @@ namespace Wrapper {
 		return Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
 	}
 
-	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, int type, Color color) {
+	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, Vec3 position, Color color, int type) {
 		std::cout << "init grid called" << std::endl;
 		Lustrine::Grid original_grid;
-		Lustrine::init_grid_box(parameters, &original_grid, X, Y, Z, (Lustrine::MaterialType)type, wrapper_to_glm(color));
+		Lustrine::init_grid_box(parameters, &original_grid, X, Y, Z, wrapper_to_glm(position), wrapper_to_glm(color), (Lustrine::MaterialType)type);
 		grid_to_grid_wrapper(&original_grid, wrapped);
 	}
 

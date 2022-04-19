@@ -85,18 +85,16 @@ int main(void) {
     std::vector<glm::vec3> solid_grids_positions (1);
     solid_grids_positions[0] = {0, 0, 0};
 
-    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/bullet/models/little_level.vox", Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 0, 0, 0 }, Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, Lustrine::MaterialType::SAND, glm::vec4(0.0, 0.2, 1.0, 1.0));
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, { 20.0f, 5.0f, 0.0f }, glm::vec4(0.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
     //Anemoiapolis: I need to test this game once it comes out
     Lustrine::init_simulation(
         &parameters,
         &simulation,
         sand_grids,
-        sand_grids_positions,
-        solid_grids,
-        solid_grids_positions
+        solid_grids
     );
 
     Lustrine::Bullet::Simulation* bulletPhysics = &simulation.bullet_physics_simulation;

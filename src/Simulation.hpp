@@ -63,6 +63,7 @@ struct Grid {
     int num_grid_cells;
     int num_occupied_grid_cells;
     MaterialType type;
+    glm::vec3 position;
 
     //bellow are to be used to parametrise bullet
     bool sparse_solid;//true imply a box per occupied cell, false imply a single box (ignored if gridtype is not solid)

@@ -44,7 +44,7 @@ const ogt_vox_scene* load_vox_scene(const char* filename, uint32_t scene_read_fl
 }
 
 
-void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialType type) {
+void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type) {
     const ogt_vox_scene* scene = load_vox_scene(path.c_str());
 
     if (scene->num_models < 1) {
@@ -96,6 +96,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, MaterialTy
     grid->sparse_solid = true;
     grid->dynamic_solid = false;
 
+    grid->position = position;
 }
 
 JsonWriter &operator<<(JsonWriter &j, const ogt_vox_transform &t) {

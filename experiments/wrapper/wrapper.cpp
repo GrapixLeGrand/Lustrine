@@ -20,18 +20,16 @@ int main(void) {
 	solid_positions[0] = { 10.0f, 0, 10.0f };
 	solid_positions[1] = { 0, 0, 0 };
 
-	Lustrine::Wrapper::init_grid_box(&parameters, &sand_grids[0], 10, 10, 10, 1, { 1.0f, 0.0f, 0.0f, 1.0f });
-	Lustrine::Wrapper::init_grid_box(&parameters, &solid_grids[0], 1, 5, 1, 0, { 1.0f, 0.0f, 0.0f, 1.0f });
-	Lustrine::Wrapper::init_grid_box(&parameters, &solid_grids[1], 30, 1, 30, 0, { 1.0f, 0.0f, 0.0f, 1.0f });
+	Lustrine::Wrapper::init_grid_box(&parameters, &sand_grids[0], 10, 10, 10, { 0, 0, 0 }, { 1.0f, 0.0f, 0.0f, 1.0f }, 1);
+	Lustrine::Wrapper::init_grid_box(&parameters, &solid_grids[0], 1, 5, 1, { 10.0f, 0, 10.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, 0);
+	Lustrine::Wrapper::init_grid_box(&parameters, &solid_grids[1], 30, 1, 30, { 0, 0, 0 }, { 1.0f, 0.0f, 0.0f, 1.0f }, 0);
 
 	Lustrine::Wrapper::init_simulation(
 		&parameters,
 		&data,
 		sand_grids,
-		sand_positions,
 		1,
 		solid_grids,
-		solid_positions,
 		2
 	);
 
