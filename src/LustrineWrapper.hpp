@@ -119,6 +119,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos);
 	extern "C" LUSTRINE_WRAPPER_EXPORT Vec3 get_position(int body);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_velocity(int body, Vec3 velocity);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_position(int body, Vec3 position);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void add_velocity(int body, Vec3 velocity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_no_rotation(int body);
 

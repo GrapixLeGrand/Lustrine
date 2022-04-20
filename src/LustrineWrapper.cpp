@@ -343,6 +343,10 @@ namespace Wrapper {
 		Lustrine::Bullet::add_body_velocity(&simulation->bullet_physics_simulation, body, wrapper_to_glm(velocity));
 	}
 
+	void set_position(int body, Vec3 position) {
+		Lustrine::Bullet::set_body_position(&simulation->bullet_physics_simulation, body, wrapper_to_glm(position));
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

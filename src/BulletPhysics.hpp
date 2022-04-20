@@ -51,6 +51,7 @@ namespace Bullet {
 	extern LUSTRINE_EXPORT void apply_impulse(Simulation* simulation, int body_index, glm::vec3 impulse, glm::vec3 relative_position);
 	//extern void apply_force(Simulation* simulation, int body_index, glm::vec3 force);
 	extern LUSTRINE_EXPORT glm::vec3 get_body_position(Simulation* simulation, int body);
+	extern LUSTRINE_EXPORT void set_body_position(Simulation* simulation, int body, glm::vec3 position);
 	extern LUSTRINE_EXPORT void set_body_position(Simulation* simulation, int body, glm::vec3 new_position);
 	extern LUSTRINE_EXPORT void set_body_rotations(Simulation* simulation, int body_index, bool X, bool Y, bool Z);
 	extern LUSTRINE_EXPORT void set_body_no_rotation(Simulation* simulation, int body_index);
