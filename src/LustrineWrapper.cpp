@@ -352,6 +352,14 @@ namespace Wrapper {
 		Lustrine::Bullet::set_body_frixion(&simulation->bullet_physics_simulation, body, frixion);
 	}
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_damping(int body, float linear, float angular) {
+		Lustrine::Bullet::set_body_damping(&simulation->bullet_physics_simulation, body, linear, angular);
+	}
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT float get_body_damping(int body) {
+		return Lustrine::Bullet::get_body_lin_damping(&simulation->bullet_physics_simulation, body);
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

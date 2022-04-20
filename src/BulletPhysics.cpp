@@ -344,6 +344,18 @@ namespace Bullet {
 		simulation->rigidbodies[body]->setFriction((btScalar)frixion);
 	}
 
+	float get_body_frixion(Simulation* simulation, int body) {
+		return (float) simulation->rigidbodies[body]->getFriction();
+	}
+
+	void set_body_damping(Simulation* simulation, int body, float linear, float angular) {
+		simulation->rigidbodies[body]->setDamping((btScalar)linear, (btScalar)angular);
+	}
+
+	float get_body_lin_damping(Simulation* simulation, int body) {
+		return (float)simulation->rigidbodies[body]->getLinearDamping();
+	}
+
 	/**
 	 * @brief Get the current velocity of the body and keep only the y component (vertical).
 	 * Then it adds the specified velocity to it.

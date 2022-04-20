@@ -58,6 +58,11 @@ namespace Bullet {
 	extern LUSTRINE_EXPORT void set_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity);
 	extern LUSTRINE_EXPORT void add_body_velocity(Simulation* simulation, int body_index, glm::vec3 velocity);
 	extern LUSTRINE_EXPORT void set_body_frixion(Simulation* simulation, int body, float frixion);
+	extern LUSTRINE_EXPORT float get_body_frixion(Simulation* simulation, int body);
+	extern LUSTRINE_EXPORT void set_body_damping(Simulation* simulation, int body, float linear, float angular);
+	extern LUSTRINE_EXPORT float get_body_lin_damping(Simulation* simulation, int body);
+	//extern LUSTRINE_EXPORT float get_body_angular_damping(Simulation* simulation, int body)
+
 	/**
 	 * @brief Collision related 
 	 */
