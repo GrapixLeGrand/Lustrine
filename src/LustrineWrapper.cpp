@@ -306,15 +306,15 @@ namespace Wrapper {
 	/**
 	 * @brief returns true if two bodies pointed by indices are colliding
 	 */
-	bool check_collision(int body1, int body2) {
-		return Lustrine::Bullet::check_collision(&simulation->bullet_physics_simulation, body1, body2);
+	int check_collision(int body1, int body2) {
+		return (int) Lustrine::Bullet::check_collision(&simulation->bullet_physics_simulation, body1, body2);
 	}
 
 	/**
 	 * @brief returns true if the body collides with anything
 	 */
-	bool do_collide(int body) {
-		return Lustrine::Bullet::do_collide(&simulation->bullet_physics_simulation, body);
+	int do_collide(int body) {
+		return (int) Lustrine::Bullet::do_collide(&simulation->bullet_physics_simulation, body);
 	}
 
 	/**

@@ -155,6 +155,13 @@ int main(void) {
         //if (areParticlesDisabled == false) 
         //Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);
 
+        /*if (Lustrine::Bullet::do_collide(bulletPhysics, box_index)) {
+            std::cout << "colliding" << std::endl;
+        }
+        else {
+            std::cout << "not colliding" << std::endl;
+        }*/
+
         if (Lustrine::Bullet::check_collision(bulletPhysics, box_index, detector_block) == true) {
             std::cout << "detection!!!!" << std::endl;
         }
