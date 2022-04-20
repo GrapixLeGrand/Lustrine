@@ -347,6 +347,11 @@ namespace Wrapper {
 		Lustrine::Bullet::set_body_position(&simulation->bullet_physics_simulation, body, wrapper_to_glm(position));
 	}
 
+
+	void set_body_frixion(int body, float frixion) {
+		Lustrine::Bullet::set_body_frixion(&simulation->bullet_physics_simulation, body, frixion);
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

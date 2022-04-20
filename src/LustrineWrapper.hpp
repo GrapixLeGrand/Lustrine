@@ -122,6 +122,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_position(int body, Vec3 position);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void add_velocity(int body, Vec3 velocity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_no_rotation(int body);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_frixion(int body, float frixion);
 
 	/**
 	 * @brief For particles interactions

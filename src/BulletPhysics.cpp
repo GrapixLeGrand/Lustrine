@@ -340,6 +340,10 @@ namespace Bullet {
         simulation->rigidbodies[body_index]->setLinearVelocity(glmToBullet(velocity));
 	}
 
+	void set_body_frixion(Simulation* simulation, int body, float frixion) {
+		simulation->rigidbodies[body]->setFriction((btScalar)frixion);
+	}
+
 	/**
 	 * @brief Get the current velocity of the body and keep only the y component (vertical).
 	 * Then it adds the specified velocity to it.
