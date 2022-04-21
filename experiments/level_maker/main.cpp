@@ -83,7 +83,7 @@ uint32_t getsize(const ogt_vox_model* model) {
     return model->size_x * model->size_y * model->size_z;
 }
 
-int main(char** args, int argc) {
+int main(int argc, char** args) {
 	
     if (argc > 1 && false) {
         std::cout << "using custom arguments" << "\n";

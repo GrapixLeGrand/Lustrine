@@ -1,3 +1,4 @@
+add_subdirectory(performance)
 #if (UNIX)
 	add_subdirectory(bullet)
 #endif()

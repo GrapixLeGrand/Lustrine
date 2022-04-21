@@ -16,6 +16,15 @@ if (WIN32)
     add_compile_definitions(PLATFORM_WINDOWS)
 endif()
 
+if (WIN32)
+#set(CMAKE_CXX_FLAGS "-ffast-math ${CMAKE_CXX_FLAGS}")
+#message(${CMAKE_CXX_FLAGS})
+#add_compile_options(-ffast-math)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message("using predefined flags")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2")
+endif()
+endif()
 
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} "Include paths to external GLM library" ON)
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} OFF)
@@ -55,11 +64,11 @@ set(LUSTRINEWRAPPER_SOURCES
 
 add_library(Lustrine SHARED ${LUSTRINE_SOURCES})
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_property(TARGET Lustrine PROPERTY
-             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-else()
 set_property(TARGET Lustrine PROPERTY
              MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+else()
+set_property(TARGET Lustrine PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 endif()
 generate_export_header(Lustrine
         BASE_NAME Lustrine
@@ -73,11 +82,11 @@ target_include_directories(Lustrine PUBLIC ${CMAKE_BINARY_DIR}/exports)
 
 add_library(LustrineWrapper SHARED ${LUSTRINEWRAPPER_SOURCES})
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_property(TARGET LustrineWrapper PROPERTY
-             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-else()
 set_property(TARGET LustrineWrapper PROPERTY
              MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL")
+else()
+set_property(TARGET LustrineWrapper PROPERTY
+             MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 endif()
 #add_library(LustrineWrapper STATIC ${LUSTRINEWRAPPER_SOURCES})
 generate_export_header(LustrineWrapper

@@ -237,7 +237,7 @@ static char input_path[NUM_CHAR_PATH] = LUSTRINE_EXPERIMENTS_DIRECTORY"/resource
 static char output_path[NUM_CHAR_PATH] = "out.obj";
 
 
-int main(char** args, int argc) {
+int main(int argc, char** args) {
 	
     /*
     if (argc > 1) {
