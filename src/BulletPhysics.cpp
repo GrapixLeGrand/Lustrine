@@ -16,7 +16,7 @@ namespace Bullet {
 		return result;
 	}
 
-	glm::vec3 bulletToGlm(btVector3& v) {
+	glm::vec3 bulletToGlm(const btVector3& v) {
 		glm::vec3 result;
 		result.x = v.getX();
 		result.y = v.getY();
@@ -326,6 +326,10 @@ namespace Bullet {
 	void set_body_no_rotation(Simulation* simulation, int body_index) {
 		btVector3 linFact (0.0, 0.0, 0.0);
         simulation->rigidbodies[body_index]->setAngularFactor(linFact);
+	}
+
+	glm::vec3 get_body_velocity(Simulation* simulation, int body_index) {
+		return bulletToGlm(simulation->rigidbodies[body_index]->getLinearVelocity());
 	}
 
 	/**

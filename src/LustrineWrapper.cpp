@@ -331,6 +331,9 @@ namespace Wrapper {
 		return glm_to_wrapper(Lustrine::Bullet::get_body_position(&simulation->bullet_physics_simulation, body));
 	}
 
+	glm::vec3 get_velocity(int body) {
+		return Lustrine::Bullet::get_body_velocity(&simulation->bullet_physics_simulation, body);
+	}
 	/**
 	 * @brief set the velocity of the body
 	 * 
