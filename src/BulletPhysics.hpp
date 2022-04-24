@@ -77,7 +77,7 @@ namespace Bullet {
 	 * @brief Particles/rigidbodies related function
 	 */
 
-	extern LUSTRINE_EXPORT void allocate_particles_colliders(Simulation* simulation, int num_particles);
+	extern LUSTRINE_EXPORT void allocate_particles_colliders(Simulation* simulation, int num_particles, float radius);
 	extern LUSTRINE_EXPORT void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles);
 	extern LUSTRINE_EXPORT void disable_particles_bounding_boxes(Simulation* simulation);
 	extern LUSTRINE_EXPORT void enable_particles_bounding_boxes(Simulation* simulation);

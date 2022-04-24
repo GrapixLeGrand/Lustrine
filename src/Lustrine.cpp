@@ -224,9 +224,9 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    //Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles);
-    //Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
-    //Bullet::print_resume(&simulation->bullet_physics_simulation);
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles, simulation->particleRadius);
+    Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
+    Bullet::print_resume(&simulation->bullet_physics_simulation);
 
 }
 
@@ -644,8 +644,8 @@ void simulate(Simulation* simulation, float dt) {
             }
             glm::vec3 delta_pi_friction = wi_wiPwj * delta_pij_friction;
             glm::vec3 delta_pj_friction = -wj_wiPwj * delta_pij_friction;
-            positions_star_i += friction_coeff * delta_pi_friction;
-            positions_star_j += friction_coeff * delta_pi_friction;
+            //positions_star_i += friction_coeff * delta_pi_friction;
+            //positions_star_j += friction_coeff * delta_pi_friction;
 
             positions_star[i] += positions_star_i - simulation->positions_tmp[i];
             positions_star[j] += positions_star_j - simulation->positions_tmp[j];

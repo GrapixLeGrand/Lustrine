@@ -248,7 +248,7 @@ namespace Bullet {
 	 * @param simulation 
 	 * @param body_index 
 	 */
-	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
+	void allocate_particles_colliders(Simulation* simulation, int num_particles, float radius) {
 		
 		assert(simulation->allocated_particles_bounding_boxes == false);
 		if (simulation->allocated_particles_bounding_boxes == true) {
@@ -267,7 +267,9 @@ namespace Bullet {
 			tmpTransform.setOrigin(pos);
 			float mass = 0.0f; //particles must not be moving at first
 			size_t index = old_size + simulation->num_bodies;
-			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, simulation->unit_box_shape, index);
+
+			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btSphereShape(radius), index);
+			//simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btBoxShape(btVector3(radius, radius, radius)), index);
 			simulation->dynamicWorld->addRigidBody(simulation->rigidbodies[index]); //, simulation->collision_group_1, simulation->collision_mask_1);
 		}
 
