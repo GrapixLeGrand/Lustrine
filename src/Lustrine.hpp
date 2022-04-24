@@ -40,11 +40,12 @@ struct Simulation;
  * @param player_grid 
  * @param player_position 
  */
-extern void LUSTRINE_EXPORT init_simulation(
+void init_simulation(
     const SimulationParameters* parameters, 
     Simulation* simulation, 
     const std::vector<Grid>& grids_sand_arg,
-    const std::vector<Grid>& grids_solid_arg
+    const std::vector<Grid>& grids_solid_arg,
+    int subdivision
 );
 
 /**
@@ -52,7 +53,7 @@ extern void LUSTRINE_EXPORT init_simulation(
  *
  * @param simulation
  */
-extern LUSTRINE_EXPORT void clean_simulation(Simulation* simulation);
+void clean_simulation(Simulation* simulation);
 
 /**
  * @brief 
@@ -63,8 +64,9 @@ extern LUSTRINE_EXPORT void clean_simulation(Simulation* simulation);
  * @param position 
  * @param type 
  */
-extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
-
+void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
+void init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision);
+void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
 /**
  * @brief Init a grid full of partlices. A box full of particles with X * Y * Z particles.
  * 
@@ -76,14 +78,13 @@ extern LUSTRINE_EXPORT void init_chunk_from_grid(const SimulationParameters* par
  * @param type 
  * @param color 
  */
-extern LUSTRINE_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type);
-
-extern LUSTRINE_EXPORT void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
+void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type);
+void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);
 
-extern LUSTRINE_EXPORT void simulate(Simulation* simulation, float dt);
+void simulate(Simulation* simulation, float dt);
 
 /**
  * @brief This function will add a solid chunk to the sim

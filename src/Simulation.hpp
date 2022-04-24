@@ -82,8 +82,8 @@ struct SimulationParameters {
     int Y; //domain Y
     int Z; //domain Z
 
-    float particleRadius = 0.5f;
-    float particleDiameter = 1.0f;
+    float particleRadius;
+    float particleDiameter;
 
 };
 
@@ -93,9 +93,9 @@ struct Simulation {
     W_fun W = nullptr;//pointer to function representing the kernel
     gradW_fun gradW = nullptr;//pointer to function representing the gradient of the kernel
 
-    float particleRadius = 0.5;
-    float particleDiameter = 2 * particleRadius;
-    float kernelRadius = 3.1f * particleRadius;
+    float particleRadius;
+    float particleDiameter;
+    float kernelRadius;
     float kernelFactor = 0.5f;
 
     //stuff for the kernel

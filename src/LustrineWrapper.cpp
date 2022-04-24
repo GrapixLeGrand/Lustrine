@@ -162,7 +162,8 @@ namespace Wrapper {
 		const Grid* sand_grid,
 		int num_sand_grids,
 		const Grid* solid_grids, 
-		int num_solid_grids
+		int num_solid_grids,
+		int subdivision
 	) {
 		
 		std::cout << "Lustrine::wrapper init called!" << std::endl;
@@ -194,7 +195,8 @@ namespace Wrapper {
 			parameters,
 			simulation,
 			original_sand_grids,
-			original_solid_grids
+			original_solid_grids,
+			subdivision
 		);
 
 		data->start_sand_index = simulation->ptr_sand_start;

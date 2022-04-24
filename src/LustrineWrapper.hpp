@@ -85,7 +85,8 @@ namespace Wrapper {
 		const Grid* sand_grids,
 		int num_sand_grids,
 		const Grid* solid_grids,
-		int num_solid_grids
+		int num_solid_grids,
+		int subdivision
 	);
 
 	/**
