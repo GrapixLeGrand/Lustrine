@@ -7,6 +7,7 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include "profiling/Profiling.hpp"
 
 namespace Lustrine {
 

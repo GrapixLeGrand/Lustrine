@@ -1,23 +1,22 @@
-#ifndef TSC_X86_HEADER
-
-#define TSC_X86_HEADER
 /* ==================== GNU C and possibly other UNIX compilers ===================== */
-#if !defined(WIN32) || defined(__GNUC__)
+
+extern "C" {
+#ifndef WIN32
 
 #if defined(__GNUC__) || defined(__linux__)
 #define VOLATILE __volatile__
 #define ASM __asm__
 #else
-/* if we're neither compiling with gcc or under linux, we can hope
-		 * the following lines work, they probably won't */
+	/* if we're neither compiling with gcc or under linux, we can hope
+	 * the following lines work, they probably won't */
 #define ASM asm
-#define VOLATILE
+#define VOLATILE 
 #endif
 
 #define myInt64 unsigned long long
 #define INT32 unsigned int
 
-		 /* ======================== WIN32 ======================= */
+	 /* ======================== WIN32 ======================= */
 #else
 
 #define myInt64 signed __int64
@@ -25,10 +24,10 @@
 
 #endif
 
-/* This is the RDTSC timer.
- * RDTSC is an instruction on several Intel and compatible CPUs that Reads the
- * Time Stamp Counter. The Intel manuals contain more information.
- */
+	/* This is the RDTSC timer.
+	 * RDTSC is an instruction on several Intel and compatible CPUs that Reads the
+	 * Time Stamp Counter. The Intel manuals contain more information.
+	 */
 
 
 #define COUNTER_LO(a) ((a).int32.lo)
@@ -41,28 +40,28 @@
 #define COUNTER_DIFF(a,b) \
 	(COUNTER(a)-COUNTER(b))
 
- /* ==================== GNU C and possibly other UNIX compilers ===================== */
-#if !defined(WIN32) || defined(__GNUC__)
+	 /* ==================== GNU C and possibly other UNIX compilers ===================== */
+#ifndef WIN32
 
-typedef union
-{
-	myInt64 int64;
-	struct { INT32 lo, hi; } int32;
-} tsc_counter;
+	typedef union
+	{
+		myInt64 int64;
+		struct { INT32 lo, hi; } int32;
+	} tsc_counter;
 
 #define RDTSC(cpu_c) \
 	  ASM VOLATILE ("rdtsc" : "=a" ((cpu_c).int32.lo), "=d"((cpu_c).int32.hi))
 #define CPUID() \
 		ASM VOLATILE ("cpuid" : : "a" (0) : "bx", "cx", "dx" )
 
-/* ======================== WIN32 ======================= */
+	/* ======================== WIN32 ======================= */
 #else
 
-typedef union
-{
-	myInt64 int64;
-	struct { INT32 lo, hi; } int32;
-} tsc_counter;
+	typedef union
+	{
+		myInt64 int64;
+		struct { INT32 lo, hi; } int32;
+	} tsc_counter;
 
 #define RDTSC(cpu_c)   \
 	{       __asm rdtsc    \
@@ -79,22 +78,21 @@ typedef union
 #endif
 
 
-void init_tsc() {
-	; // no need to initialize anything for x86
-}
+	void init_tsc() {
+		; // no need to initialize anything for x86
+	}
 
-myInt64 start_tsc(void) {
-	tsc_counter start;
-	CPUID();
-	RDTSC(start);
-	return COUNTER_VAL(start);
-}
+	myInt64 start_tsc(void) {
+		tsc_counter start;
+		CPUID();
+		RDTSC(start);
+		return COUNTER_VAL(start);
+	}
 
-myInt64 stop_tsc(myInt64 start) {
-	tsc_counter end;
-	RDTSC(end);
-	CPUID();
-	return COUNTER_VAL(end) - start;
+	myInt64 stop_tsc(myInt64 start) {
+		tsc_counter end;
+		RDTSC(end);
+		CPUID();
+		return COUNTER_VAL(end) - start;
+	}
 }
-
-#endif

@@ -49,6 +49,7 @@ set(LUSTRINE_SOURCES
     "src/Neighbors.cpp"
     "src/VoxelLoader.cpp"
     "src/BulletPhysics.cpp"
+    "src/profiling/Profiling.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
@@ -59,6 +60,7 @@ set(LUSTRINEWRAPPER_SOURCES
     "src/LustrineWrapper.cpp"
     "src/BulletPhysics.cpp"
     "src/VoxelLoader.cpp"
+    "src/profiling/Profiling.cpp"
 )
 
 
