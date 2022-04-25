@@ -84,7 +84,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);
 
-void simulate(Simulation* simulation, float dt);
+void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag, bool blow_flag);
 
 /**
  * @brief This function will add a solid chunk to the sim

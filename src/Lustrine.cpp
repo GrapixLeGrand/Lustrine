@@ -540,8 +540,7 @@ float avoid0(float x) {
 }
 
 //void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag = false, bool blow_flag = false) {
-void simulate(Simulation* simulation, float dt) {
-
+void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag, bool blow_flag) {
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt);
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
@@ -572,16 +571,16 @@ void simulate(Simulation* simulation, float dt) {
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
         velocities[i] += simulation->gravity * dt;
-//        if (attract_flag) {
-//            glm::vec3 p_to_cp = character_pos - positions[i];
-////        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
-//            velocities[i] += glm::normalize(p_to_cp) * simulation->particleRadius * 100.0f * dt * w;
-//        }
-//        if (blow_flag) {
-//            glm::vec3 p_to_cp = character_pos - positions[i];
-////        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
-//            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 1.0f * w;
-//        }
+        if (attract_flag) {
+            glm::vec3 p_to_cp = character_pos - positions[i];
+//        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
+            velocities[i] += glm::normalize(p_to_cp) * simulation->particleRadius * 1000.0f * dt * w;
+        }
+        if (blow_flag) {
+            glm::vec3 p_to_cp = character_pos - positions[i];
+//        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
+            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 200.0f * w;
+        }
 
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
