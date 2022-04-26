@@ -209,7 +209,7 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles);
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation);
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
@@ -315,7 +315,7 @@ float resolve_collision(float value, float min, float max) {
 
 void simulate_fluid(Simulation* simulation, float dt) {
 
-    simulate_bullet(&simulation->bullet_physics_simulation, dt);
+    simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
 
     dt = glm::clamp(dt, 0.001f, 0.01f);
     simulation->time_step = dt;
@@ -430,7 +430,7 @@ float avoid0(float x) {
 //void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag = false, bool blow_flag = false) {
 void simulate(Simulation* simulation, float dt) {
     
-    Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt);
+    Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
 
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;

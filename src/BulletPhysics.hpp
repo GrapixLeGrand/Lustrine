@@ -18,7 +18,7 @@ namespace Bullet {
 	
 	extern LUSTRINE_EXPORT void init_bullet(Simulation* simulation);
 	extern LUSTRINE_EXPORT void clean_bullet(Simulation* simulation);
-	extern LUSTRINE_EXPORT void simulate_bullet(Simulation* simulation, float dt);
+	extern LUSTRINE_EXPORT void simulate_bullet(Simulation* simulation, float dt, int start, int end);
 	extern LUSTRINE_EXPORT int get_num_bodies(Simulation* simulation);
 	extern LUSTRINE_EXPORT void set_gravity(Simulation* simulation, glm::vec3 new_gravity);
 	extern LUSTRINE_EXPORT glm::vec3 get_gravity(Simulation* simulation);
@@ -77,8 +77,8 @@ namespace Bullet {
 	 * @brief Particles/rigidbodies related function
 	 */
 
-	extern LUSTRINE_EXPORT void allocate_particles_colliders(Simulation* simulation, int num_particles);
-	extern LUSTRINE_EXPORT void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles);
+	extern LUSTRINE_EXPORT void allocate_particles_colliders(Simulation* simulation);
+	extern LUSTRINE_EXPORT void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start_ptr, int end_ptr);
 	extern LUSTRINE_EXPORT void disable_particles_bounding_boxes(Simulation* simulation);
 	extern LUSTRINE_EXPORT void enable_particles_bounding_boxes(Simulation* simulation);
 	extern LUSTRINE_EXPORT void bind_foreign_sand_positions(Simulation* simulation, glm::vec3* foreign_positions);

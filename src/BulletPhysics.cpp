@@ -134,7 +134,7 @@ namespace Bullet {
 	 * @param simulation 
 	 * @param dt 
 	 */
-	void simulate_bullet(Simulation* simulation, float dt) {
+	void simulate_bullet(Simulation* simulation, float dt, int sand_start, int sand_end) {
 		gather_collisions(simulation);
 		if (simulation->particles_bounding_box_current_state == false && simulation->particles_bounding_box_requested_state == true) {
 			Lustrine::Bullet::enable_particles_bounding_boxes(simulation);
@@ -143,7 +143,7 @@ namespace Bullet {
 			Lustrine::Bullet::disable_particles_bounding_boxes(simulation);
 			simulation->particles_bounding_box_current_state = false;
 		}
-		set_particles_box_colliders_positions(simulation, simulation->foreign_sand_positions);
+		set_particles_box_colliders_positions(simulation, simulation->foreign_sand_positions, sand_start, sand_end);
 		simulation->dynamicWorld->stepSimulation(dt);
 	}
 
@@ -248,19 +248,19 @@ namespace Bullet {
 	 * @param simulation 
 	 * @param body_index 
 	 */
-	void allocate_particles_colliders(Simulation* simulation, int num_particles) {
+	void allocate_particles_colliders(Simulation* simulation) {
 		
 		assert(simulation->allocated_particles_bounding_boxes == false);
 		if (simulation->allocated_particles_bounding_boxes == true) {
 			std::cout << "already allocated particles! (not allowed to allocate twice" << std::endl;
 		}
 
-		simulation->bodies_collisions.resize(simulation->num_bodies + num_particles, std::vector<int>{});
-		simulation->rigidbodies.resize(simulation->num_bodies + num_particles, nullptr);
+		simulation->bodies_collisions.resize(simulation->num_bodies + simulation->num_particles_allocated, std::vector<int>{});
+		simulation->rigidbodies.resize(simulation->num_bodies + simulation->num_particles_allocated, nullptr);
 
 		simulation->ptr_bounding_box_start = simulation->num_bodies;
 
-		for (size_t old_size = 0; old_size < num_particles; old_size++) {
+		for (size_t old_size = 0; old_size < simulation->num_particles_allocated; old_size++) {
 			btTransform tmpTransform;
 			tmpTransform.setIdentity();
 			btVector3 pos (0.0f, 0.0f, 0.0f);
@@ -271,7 +271,7 @@ namespace Bullet {
 			simulation->dynamicWorld->addRigidBody(simulation->rigidbodies[index]); //, simulation->collision_group_1, simulation->collision_mask_1);
 		}
 
-		simulation->num_bodies += num_particles;
+		simulation->num_bodies += simulation->num_particles_allocated;
 		simulation->ptr_bounding_box_end = simulation->num_bodies;
 		simulation->allocated_particles_bounding_boxes = true;
 
@@ -531,13 +531,36 @@ namespace Bullet {
 	 * @param start 
 	 * @param end 
 	 */
-	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles) {
+	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start_ptr, int end_ptr) {
 		
-		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
-			simulation->rigidbodies[i]->setActivationState(ACTIVE_TAG);
-			btTransform& t = simulation->rigidbodies[i]->getWorldTransform();
-			t.setOrigin(glmToBullet(particles[i - simulation->ptr_bounding_box_start]));
-        	simulation->rigidbodies[i]->getMotionState()->setWorldTransform(t);
+		int num_close = 0;
+		for (int i = start_ptr; i < end_ptr; i++) {
+			glm::vec3 tmp = particles[i] - simulation->player_position;
+			if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {// (glm::dot(tmp, tmp) < simulation->player_box_radius * simulation->player_box_radius) {
+				simulation->rigidbodies[num_close]->setActivationState(ACTIVE_TAG);
+				btTransform t;
+				simulation->rigidbodies[num_close]->getMotionState()->getWorldTransform(t);
+				t.setOrigin(glmToBullet(particles[i]));
+				simulation->rigidbodies[num_close]->getMotionState()->setWorldTransform(t);
+				simulation->rigidbodies[num_close]->setWorldTransform(t);
+				simulation->rigidbodies[num_close]->setInterpolationWorldTransform(t);
+
+				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+				simulation->rigidbodies[num_close]->clearForces();
+				btVector3 v(0.0, 0.0, 0.0);
+				simulation->rigidbodies[num_close]->setInterpolationLinearVelocity(v);
+				simulation->rigidbodies[num_close]->setLinearVelocity(v);
+				num_close++;
+				if (num_close >= simulation->num_particles_allocated) {
+					break;
+				}
+			}
+		}
+		//std::cout << simulation->player_position.x << std::endl;
+		std::cout << num_close << std::endl;
+		for (int i = num_close; i < simulation->num_particles_allocated; i++) {
+			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
 
 	}
