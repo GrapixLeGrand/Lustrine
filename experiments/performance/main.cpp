@@ -1,39 +1,47 @@
 #include <iostream>
 //#include "tsc_x86.h"
 //#include <profileapi.h>
-#include <Windows.h>
-
-/** Use to init the clock */
-#define TIMER_INIT \
-    LARGE_INTEGER frequency; \
-    LARGE_INTEGER t1,t2; \
-    double elapsedTime; \
-    QueryPerformanceFrequency(&frequency);
-
-
-/** Use to start the performance timer */
-#define TIMER_START QueryPerformanceCounter(&t1);
-
-/** Use to stop the performance timer and output the result to the standard stream. Less verbose than \c TIMER_STOP_VERBOSE */
-#define TIMER_STOP \
-    QueryPerformanceCounter(&t2); \
-    elapsedTime=(float)(t2.QuadPart-t1.QuadPart)/frequency.QuadPart; \
-    std::cout<< elapsedTime <<std::endl;
-
+#include <iostream>
+#include <vector>
+#include "Lustrine.hpp"
+#include "profiling/Profiling.hpp"
 
 int main(int argc, char** args) {
-	
-	std::cout << "performance observed" << std::endl;
-	TIMER_INIT;
-	int lim;
-	std::cin >> lim;
-	TIMER_START;
-	float a = 0;
-	for (int i = 0; i < lim; i++) {
-		a += i;
-	}
-	TIMER_STOP;
+	std::cout << "Performance profiling" << std::endl;
 
-	std::cout << a << std::endl;
+	Lustrine::Simulation simulation;
+	Lustrine::SimulationParameters parameters;
+	parameters.X = 40;
+	parameters.Y = 40;
+	parameters.Z = 40;
+
+
+	std::vector<Lustrine::Grid> grids (1);
+	Lustrine::init_grid_box(&parameters, &grids[0], 20, 20, 20, {0, 0, 0}, {0, 0, 0, 1.0}, Lustrine::MaterialType::SAND);
+	std::vector<Lustrine::Grid> solid_grids(1);
+	Lustrine::init_grid_box(&parameters, &solid_grids[0], 20, 20, 20, { 0, 0, 0 }, { 0, 0, 0, 1.0 }, Lustrine::MaterialType::SAND);
+
+	Lustrine::init_simulation(&parameters, &simulation, grids, solid_grids);
+
+	std::cout << "Inititalized simulation" << std::endl;
+
+	long long total = 0;
+	int iter = 100;
+	std::vector<long long> cycles(Lustrine::Profiling::get_num_observation());
+	std::vector<double> durations(Lustrine::Profiling::get_num_observation());
+
+
+	for (int i = 0; i < iter; i++) {
+		Lustrine::simulate(&simulation, 0.01f);
+		for (int j = 0; j < cycles.size(); j++) {
+			cycles[j] += Lustrine::Profiling::get_cycles(j);
+			durations[j] += Lustrine::Profiling::get_duration(j);
+		}
+	}
+	
+	for (int i = 0; i < cycles.size(); i++) {
+		std::cout << i << ": " << (((double)cycles[i]) / iter) << " cylces\t" << (((double)durations[i]) / ((double)iter))  << " ms" << std::endl;
+	}
+
 	return 0;
 }

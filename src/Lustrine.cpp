@@ -47,6 +47,7 @@ void init_simulation(
     const std::vector<Grid>& grids_solid_arg
 ) {
 
+    Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
 
     std::vector<glm::vec3> grids_sand_positions_arg;
@@ -430,7 +431,13 @@ float avoid0(float x) {
 //void simulate(Simulation* simulation, float dt, glm::vec3 character_pos, bool attract_flag = false, bool blow_flag = false) {
 void simulate(Simulation* simulation, float dt) {
     
+    Profiling::start_counter(0);
+
+    Profiling::start_counter(1);
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
+    Profiling::stop_counter(1);
+
+    Profiling::start_counter(2);
 
     float collision_coeff = 0.9f;
     float boundary_collision_coeff = 0.9f;
@@ -557,6 +564,8 @@ void simulate(Simulation* simulation, float dt) {
         }
 
         memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
+    
+        Profiling::stop_counter(0);
     }
 
 
@@ -574,6 +583,7 @@ void simulate(Simulation* simulation, float dt) {
         perturbation = false;
     }
 
+    Profiling::stop_counter(2);
 }
 
 

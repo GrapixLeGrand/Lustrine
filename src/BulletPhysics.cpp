@@ -558,7 +558,7 @@ namespace Bullet {
 			}
 		}
 		//std::cout << simulation->player_position.x << std::endl;
-		std::cout << num_close << std::endl;
+		//std::cout << num_close << std::endl;
 		for (int i = num_close; i < simulation->num_particles_allocated; i++) {
 			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
