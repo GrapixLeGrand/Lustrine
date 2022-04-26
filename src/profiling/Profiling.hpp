@@ -8,7 +8,7 @@
 #include "Windows.h"
 #endif
 
-#define LUSTRINE_MAX_NUM_MEASUREMENTS 3
+#define LUSTRINE_MAX_NUM_MEASUREMENTS 4
 
 namespace Lustrine {
 	

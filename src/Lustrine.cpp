@@ -485,7 +485,9 @@ void simulate(Simulation* simulation, float dt) {
     memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
 
     //find_neighbors_counting_sort(simulation);
+    Profiling::start_counter(3);
     find_neighbors_uniform_grid(simulation);
+    Profiling::stop_counter(3);
 //    find_neighbors_brute_force(simulation);
 
     // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
@@ -565,7 +567,7 @@ void simulate(Simulation* simulation, float dt) {
 
         memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
     
-        Profiling::stop_counter(0);
+        
     }
 
 
@@ -584,6 +586,7 @@ void simulate(Simulation* simulation, float dt) {
     }
 
     Profiling::stop_counter(2);
+    Profiling::stop_counter(0);
 }
 
 
