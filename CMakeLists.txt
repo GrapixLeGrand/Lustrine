@@ -50,6 +50,7 @@ set(LUSTRINE_SOURCES
     "src/VoxelLoader.cpp"
     "src/BulletPhysics.cpp"
     "src/profiling/Profiling.cpp"
+    "src/Simulate.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
@@ -61,6 +62,7 @@ set(LUSTRINEWRAPPER_SOURCES
     "src/BulletPhysics.cpp"
     "src/VoxelLoader.cpp"
     "src/profiling/Profiling.cpp"
+    "src/Simulate.cpp"
 )
 
 

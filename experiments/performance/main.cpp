@@ -26,7 +26,7 @@ int main(int argc, char** args) {
 	std::cout << "Inititalized simulation" << std::endl;
 
 	long long total = 0;
-	int iter = 100;
+	int iter = 1000;
 	std::vector<long long> cycles(Lustrine::Profiling::get_num_observation());
 	std::vector<double> durations(Lustrine::Profiling::get_num_observation());
 

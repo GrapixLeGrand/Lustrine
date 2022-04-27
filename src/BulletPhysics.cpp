@@ -275,7 +275,7 @@ namespace Bullet {
 		simulation->ptr_bounding_box_end = simulation->num_bodies;
 		simulation->allocated_particles_bounding_boxes = true;
 
-		assert(simulation->ptr_bounding_box_end - simulation->ptr_bounding_box_start == num_particles);
+		assert(simulation->ptr_bounding_box_end - simulation->ptr_bounding_box_start == simulation->num_particles_allocated);
 
 		//simulation->sand_particles_colliders = std::vector<btRigidBody*>(num_particles, nullptr);
 
@@ -545,7 +545,7 @@ namespace Bullet {
 				simulation->rigidbodies[num_close]->setWorldTransform(t);
 				simulation->rigidbodies[num_close]->setInterpolationWorldTransform(t);
 
-				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+				//simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
 				simulation->rigidbodies[num_close]->clearForces();
 				btVector3 v(0.0, 0.0, 0.0);
