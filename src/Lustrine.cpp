@@ -221,10 +221,10 @@ void init_simulation(
 
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
-    delete simulation->positions;
-    delete simulation->positions_star;
-    delete simulation->colors;
-    delete simulation->positions_tmp;
+    delete[] simulation->positions;
+    delete[] simulation->positions_star;
+    delete[] simulation->colors;
+    delete[] simulation->positions_tmp;
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type) {

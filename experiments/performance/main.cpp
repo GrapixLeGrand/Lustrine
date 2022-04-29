@@ -27,34 +27,38 @@ void benchmark_single_iter(Lustrine::Simulation* simulation, int iter) {
 }
 
 int main(int argc, char** args) {
+
+
 	std::cout << "Performance profiling" << std::endl;
+
 
 	Lustrine::Simulation simulation;
 	Lustrine::SimulationParameters parameters;
-	parameters.X = 40;
+	parameters.X = 50;
 	parameters.Y = 40;
-	parameters.Z = 40;
+	parameters.Z = 50;
 
 
 	std::vector<Lustrine::Grid> grids (1);
-	Lustrine::init_grid_box(&parameters, &grids[0], 20, 20, 20, {0, 0, 0}, {0, 0, 0, 1.0}, Lustrine::MaterialType::SAND);
+	Lustrine::init_grid_box(&parameters, &grids[0], 20, 20, 20, {1.0, 1.0, 1.0}, {0, 0, 0, 1.0}, Lustrine::MaterialType::SAND);
 	std::vector<Lustrine::Grid> solid_grids(1);
-	Lustrine::init_grid_box(&parameters, &solid_grids[0], 20, 20, 20, { 0, 0, 0 }, { 0, 0, 0, 1.0 }, Lustrine::MaterialType::SAND);
+	Lustrine::init_grid_box(&parameters, &solid_grids[0], 20, 20, 20, { 20, 1, 20 }, { 0, 0, 0, 1.0 }, Lustrine::MaterialType::SOLID);
 
 	Lustrine::init_simulation(&parameters, &simulation, grids, solid_grids);
 
 	std::cout << "Inititalized simulation" << std::endl;
 	
 	//warm up
-	benchmark_single_iter(&simulation, 10000);
+	benchmark_single_iter(&simulation, 10);
 
 	simulation.simulate_fun = Lustrine::simulate_sand;
 	std::cout << "Simulate base" << std::endl;
-	benchmark_single_iter(&simulation, 10000);
+	benchmark_single_iter(&simulation, 10);
 	std::cout << "Simulate v1" << std::endl;
 	simulation.simulate_fun = Lustrine::simulate_sand_v1;
-	benchmark_single_iter(&simulation, 10000);
+	benchmark_single_iter(&simulation, 10);
 
+	Lustrine::clean_simulation(&simulation);
 
 	return 0;
 }

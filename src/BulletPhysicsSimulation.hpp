@@ -23,7 +23,7 @@ namespace Bullet {
 		btDiscreteDynamicsWorld* dynamicWorld;
 		btVector3 gravity = btVector3(0.0f, -25.0f, 0.0f);
 
-		btAlignedObjectArray<btCollisionShape*> collisionShapes;
+		btAlignedObjectArray<btCollisionShape*> collisionShapes;//seems to be auto managed memory
 		btBoxShape* unit_box_shape; //unit box shape
 		
 		int num_bodies = 0;
@@ -36,7 +36,7 @@ namespace Bullet {
 		bool particles_bounding_box_requested_state = true;//By default the particles are enabled
 		bool particles_bounding_box_current_state = true;//internal variable used to detect rising edge on bounding box deactivation/activation
 
-		glm::vec3* foreign_sand_positions = nullptr;
+		glm::vec3* foreign_sand_positions = nullptr; //ptr not owned
 		size_t ptr_bounding_box_start = 0;//inclusive
 		size_t ptr_bounding_box_end = 0;//exclusive
 

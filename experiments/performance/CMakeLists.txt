@@ -1,6 +1,6 @@
 project(performance)
 
-add_executable(performance main.cpp "tsc_x86.h")
+add_executable(performance main.cpp)
 
 if (WIN32)
     # Copy library DLL to target directory

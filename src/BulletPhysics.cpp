@@ -40,20 +40,19 @@ namespace Bullet {
 		bool isDynamic = (mass != 0.f);
 		btVector3 localInertia(0, 0, 0);
 		btRigidBody* body = nullptr;
+		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 		if (type == DYNAMIC) {
 			shape->calculateLocalInertia(mass, localInertia);
 			//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
 			body = new btRigidBody(cInfo);
-		
 		} else if (type == KINEMATIC) {
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			//btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			body = new btRigidBody(mass, myMotionState, shape, localInertia);
 			body->setActivationState(ISLAND_SLEEPING);
 			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);// CF_STATIC_OBJECT);
 		} else if (type == DETECTOR) {
-			btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+			//btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			body = new btRigidBody(mass, myMotionState, shape, localInertia);
 			body->setActivationState(ISLAND_SLEEPING);
 			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
@@ -126,6 +125,15 @@ namespace Bullet {
 		delete simulation->broadPhase;
 		delete simulation->dispatcher;
 		delete simulation->collisionConfiguration;
+
+		for (int i = 0; i < simulation->rigidbodies.size(); i++) {
+			delete simulation->rigidbodies[i]->getMotionState();
+			delete simulation->rigidbodies[i];
+		}
+
+		for (int i = 0; i < simulation->collisionShapes.size(); i++) {
+			delete simulation->collisionShapes[i];
+		}
 	}
 
 	/**
@@ -191,7 +199,7 @@ namespace Bullet {
 		//btVector3 linearFactor = btVector3(0, 1.f, 0);
 		//newBody->setLinearFactor(linearFactor);
 
-		simulation->rigidbodies.push_back(newBody);
+		simulation->rigidbodies.emplace_back(newBody);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
