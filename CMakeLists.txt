@@ -39,7 +39,6 @@ set(ENV{LEVEKGL_EXTERNAL_GLM_PATH} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.
 #set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
 
 add_subdirectory(thirdparty)
-
 link_directories(${Lustrine_SOURCE_DIR}/src)
 
 set(LUSTRINE_SOURCES
