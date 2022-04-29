@@ -5,6 +5,26 @@
 #include <vector>
 #include "Lustrine.hpp"
 #include "profiling/Profiling.hpp"
+#include "Simulate.hpp"
+
+void benchmark_single_iter(Lustrine::Simulation* simulation, int iter) {
+	long long total = 0;
+	std::vector<long long> cycles(Lustrine::Profiling::get_num_observation());
+	std::vector<double> durations(Lustrine::Profiling::get_num_observation());
+
+
+	for (int i = 0; i < iter; i++) {
+		Lustrine::simulate(simulation, 0.01f);
+		for (int j = 0; j < cycles.size(); j++) {
+			cycles[j] += Lustrine::Profiling::get_cycles(j);
+			durations[j] += Lustrine::Profiling::get_duration(j);
+		}
+	}
+
+	for (int i = 0; i < cycles.size(); i++) {
+		std::cout << i << ": " << (((double)cycles[i]) / iter) << " cylces\t" << (((double)durations[i]) / ((double)iter)) << " ms" << std::endl;
+	}
+}
 
 int main(int argc, char** args) {
 	std::cout << "Performance profiling" << std::endl;
@@ -24,24 +44,17 @@ int main(int argc, char** args) {
 	Lustrine::init_simulation(&parameters, &simulation, grids, solid_grids);
 
 	std::cout << "Inititalized simulation" << std::endl;
-
-	long long total = 0;
-	int iter = 1000;
-	std::vector<long long> cycles(Lustrine::Profiling::get_num_observation());
-	std::vector<double> durations(Lustrine::Profiling::get_num_observation());
-
-
-	for (int i = 0; i < iter; i++) {
-		Lustrine::simulate(&simulation, 0.01f);
-		for (int j = 0; j < cycles.size(); j++) {
-			cycles[j] += Lustrine::Profiling::get_cycles(j);
-			durations[j] += Lustrine::Profiling::get_duration(j);
-		}
-	}
 	
-	for (int i = 0; i < cycles.size(); i++) {
-		std::cout << i << ": " << (((double)cycles[i]) / iter) << " cylces\t" << (((double)durations[i]) / ((double)iter))  << " ms" << std::endl;
-	}
+	//warm up
+	benchmark_single_iter(&simulation, 10000);
+
+	simulation.simulate_fun = Lustrine::simulate_sand;
+	std::cout << "Simulate base" << std::endl;
+	benchmark_single_iter(&simulation, 10000);
+	std::cout << "Simulate v1" << std::endl;
+	simulation.simulate_fun = Lustrine::simulate_sand_v1;
+	benchmark_single_iter(&simulation, 10000);
+
 
 	return 0;
 }

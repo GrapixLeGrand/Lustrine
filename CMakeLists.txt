@@ -22,7 +22,7 @@ if (WIN32)
 #add_compile_options(-ffast-math)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("using predefined flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2 ") #-mfma -ffp-contract=fast") #
 endif()
 endif()
 

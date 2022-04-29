@@ -139,8 +139,6 @@ namespace Lustrine {
 
 void simulate_sand(Simulation* simulation, float dt) {
 
-    Profiling::start_counter(0);
-
     Profiling::start_counter(1);
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
     Profiling::stop_counter(1);
@@ -194,6 +192,7 @@ void simulate_sand(Simulation* simulation, float dt) {
     //    find_neighbors_brute_force(simulation);
 
         // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
+    Profiling::start_counter(4);
     for (int substep = 0; substep < 4; ++substep) {
 
         std::vector<std::pair<int, int>> contacts;
@@ -273,14 +272,17 @@ void simulate_sand(Simulation* simulation, float dt) {
 
 
     }
+    Profiling::stop_counter(4);
 
 
 
+    Profiling::start_counter(6);
     //update velocities and sync positions
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
         positions[i] = positions_star[i];
     }
+    Profiling::stop_counter(6);
 
     //TODO: this perturbation is for test, remove this in the future
     static bool perturbation = true;
@@ -290,7 +292,6 @@ void simulate_sand(Simulation* simulation, float dt) {
     }
 
     Profiling::stop_counter(2);
-    Profiling::stop_counter(0);
 }
 
 void simulate_sand_v1(Simulation* simulation, float dt) {
@@ -307,11 +308,9 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
     float mu_s = 0.5f;
     float mu_k = 0.8f;
 
-    dt = glm::clamp(dt, 0.001f, 0.01f);
     dt = (1.0f / 30.0f);
     simulation->time_step = dt;
 
-    int n = simulation->num_particles;
     int X = simulation->domainX;
     int Y = simulation->domainY;
     int Z = simulation->domainZ;
@@ -338,71 +337,68 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
 
     float particleDiameter2 = simulation->particleDiameter * simulation->particleDiameter;
         // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
-    
+    float mass_inv = 1.0f / simulation->mass;
     Profiling::start_counter(4);
+    const int lower_bound = simulation->ptr_sand_start;
+    const int upper_bound = simulation->ptr_sand_end;
+
     for (int substep = 0; substep < 4; ++substep) {
 
-        std::vector<std::pair<int, int>> contacts;
-        for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        //std::vector<std::pair<int, int>> contacts;
+        for (int i = lower_bound; i < upper_bound; i++) {
             for (int j : neighbors[i]) {
                 if (i >= j) continue;
                 glm::vec3 ij = simulation->positions_star[i] - simulation->positions_star[j];
-                float len = glm::dot(ij, ij); //glm::length(ij);
-                if (len < particleDiameter2) {
-                    contacts.push_back({ i, j });
+                float len2 = glm::dot(ij, ij); //glm::length(ij);
+                if (len2 < particleDiameter2) {
+
+                    float len = glm::length(ij);
+
+                    // TODO: can be optimized by using a single mass;
+                    // i is always sand
+                    float wi = mass_inv;
+                    // compute j's mass
+                    float wj = (j >= simulation->ptr_sand_start && j < simulation->ptr_sand_end) ? mass_inv : 0.0f;
+                    float wi_wj_inv = 1.0f / (wi + wj);
+                    float wi_wiPwj = wi * wi_wj_inv;
+                    float wj_wiPwj = wj * wi_wj_inv;
+
+                    glm::vec3 delta_ij = (len - simulation->particleDiameter) * ij / avoid0(len);
+                    glm::vec3 delta_pi = -wi_wiPwj * delta_ij;
+                    glm::vec3 delta_pj = +wj_wiPwj * delta_ij;
+                    glm::vec3 positions_star_i = simulation->positions_star[i] + collision_coeff * delta_pi;
+                    glm::vec3 positions_star_j = simulation->positions_star[j] + collision_coeff * delta_pj;
+
+                    float d = simulation->particleDiameter - len;
+                    glm::vec3 n = glm::normalize(positions_star_i - positions_star_j);
+                    // FIXME: Should use initial positions but currently very unstable
+                    // glm::vec3 delta_x_star_ij = (positions_star_i - positions[i]) - (positions_star_j - positions[j]);
+                    glm::vec3 delta_x_star_ij = (positions_star_i - simulation->positions_star[i]) - (positions_star_j - simulation->positions_star[j]);
+                    glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
+                    // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
+                    glm::vec3 delta_pij_friction;
+                    if (glm::length(delta_x_tangent) < mu_s * d) {
+                        delta_pij_friction = delta_x_tangent;
+                    }
+                    else {
+                        delta_pij_friction = delta_x_tangent * std::min(mu_k * d / avoid0(glm::length(delta_x_tangent)), 1.0f);
+                    }
+                    glm::vec3 delta_pi_friction = wi_wiPwj * delta_pij_friction;
+                    glm::vec3 delta_pj_friction = -wj_wiPwj * delta_pij_friction;
+                    positions_star_i += friction_coeff * delta_pi_friction;
+                    positions_star_j += friction_coeff * delta_pi_friction;
+
+                    positions_star[i] += positions_star_i - simulation->positions_star[i];
+                    positions_star[j] += positions_star_j - simulation->positions_star[j];
+
                 }
             }
         }
 
-        float mass_inv = 1.0f / simulation->mass;
-        // collision and friction
-        for (auto& contact : contacts) {
-            int i = contact.first, j = contact.second;
-            glm::vec3 ij = simulation->positions_star[i] - simulation->positions_star[j];
-            float len = glm::length(ij);
 
-            // TODO: can be optimized by using a single mass;
-            // i is always sand
-            float wi = mass_inv;
-            // compute j's mass
-            float wj = (j >= simulation->ptr_sand_start && j < simulation->ptr_sand_end) ? mass_inv : 0.0f;
-            float wi_wj_inv = 1.0f / (wi + wj);
-            float wi_wiPwj = wi * wi_wj_inv;
-            float wj_wiPwj = wj * wi_wj_inv;
-
-            glm::vec3 delta_ij = (len - simulation->particleDiameter) * ij / avoid0(len);
-            glm::vec3 delta_pi = -wi_wiPwj * delta_ij;
-            glm::vec3 delta_pj = +wj_wiPwj * delta_ij;
-            glm::vec3 positions_star_i = simulation->positions_star[i] + collision_coeff * delta_pi;
-            glm::vec3 positions_star_j = simulation->positions_star[j] + collision_coeff * delta_pj;
-
-
-            float d = simulation->particleDiameter - len;
-            glm::vec3 n = glm::normalize(positions_star_i - positions_star_j);
-            // FIXME: Should use initial positions but currently very unstable
-//            glm::vec3 delta_x_star_ij = (positions_star_i - positions[i]) - (positions_star_j - positions[j]);
-            glm::vec3 delta_x_star_ij = (positions_star_i - simulation->positions_star[i]) - (positions_star_j - simulation->positions_star[j]);
-            glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
-            // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
-            glm::vec3 delta_pij_friction;
-            if (glm::length(delta_x_tangent) < mu_s * d) {
-                delta_pij_friction = delta_x_tangent;
-            }
-            else {
-                delta_pij_friction = delta_x_tangent * std::min(mu_k * d / avoid0(glm::length(delta_x_tangent)), 1.0f);
-            }
-            glm::vec3 delta_pi_friction = wi_wiPwj * delta_pij_friction;
-            glm::vec3 delta_pj_friction = -wj_wiPwj * delta_pij_friction;
-            positions_star_i += friction_coeff * delta_pi_friction;
-            positions_star_j += friction_coeff * delta_pi_friction;
-
-            positions_star[i] += positions_star_i - simulation->positions_star[i];
-            positions_star[j] += positions_star_j - simulation->positions_star[j];
-
-        }
-
+        Profiling::start_counter(5);
         // particle-bounadry collision
-        for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        for (int i = lower_bound; i < upper_bound; i++) {
             glm::vec3 p = simulation->positions_star[i];
             float r = simulation->particleRadius;
 
@@ -415,7 +411,7 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
             dp += solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z), p, r);
             positions_star[i] += boundary_collision_coeff * dp;
         }
-
+        Profiling::stop_counter(5);
         //memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
 
 
@@ -424,19 +420,14 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
     Profiling::stop_counter(4);
 
 
+    Profiling::start_counter(6);
     float dt_inv = 1.0f / simulation->time_step;
     //update velocities and sync positions
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         velocities[i] = (positions_star[i] - positions[i]) * dt_inv;
         positions[i] = positions_star[i];
     }
-
-    //TODO: this perturbation is for test, remove this in the future
-    static bool perturbation = true;
-    if (perturbation) {
-        velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
-        perturbation = false;
-    }
+    Profiling::stop_counter(6);
 
     Profiling::stop_counter(2);
 }
