@@ -39,30 +39,33 @@ set(ENV{LEVEKGL_EXTERNAL_GLM_PATH} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.
 #set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
 
 add_subdirectory(thirdparty)
-
 link_directories(${Lustrine_SOURCE_DIR}/src)
 
 set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/VoxelLoader.cpp"
     "src/BulletPhysics.cpp"
     "src/profiling/Profiling.cpp"
     "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/LustrineWrapper.cpp"
     "src/BulletPhysics.cpp"
     "src/VoxelLoader.cpp"
     "src/profiling/Profiling.cpp"
     "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 

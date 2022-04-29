@@ -1,6 +1,6 @@
 #include "Simulate.hpp"
 #include "profiling/Profiling.hpp"
-#include "Neighbors.hpp"
+#include "neighbors/Neighbors.hpp"
 
 namespace Lustrine {
 
