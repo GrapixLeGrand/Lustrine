@@ -3,7 +3,7 @@
 
 #include "Simulation.hpp"
 #include "Kernels.hpp"
-#include "Neighbors.hpp"
+#include "neighbors/Neighbors.hpp"
 #include "Lustrine_Export.h"
 #include <vector>
 #ifdef PLATFORM_WINDOWS

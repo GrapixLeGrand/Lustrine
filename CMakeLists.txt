@@ -46,23 +46,27 @@ set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/VoxelLoader.cpp"
     "src/BulletPhysics.cpp"
     "src/profiling/Profiling.cpp"
     "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/LustrineWrapper.cpp"
     "src/BulletPhysics.cpp"
     "src/VoxelLoader.cpp"
     "src/profiling/Profiling.cpp"
     "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 
