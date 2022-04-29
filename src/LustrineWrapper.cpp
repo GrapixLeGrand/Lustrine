@@ -473,17 +473,25 @@ namespace Wrapper {
 	 * allocation.
 	 * @param num_particles 
 	 */
+<<<<<<< HEAD
 	//void allocate_particles_colliders(int num_particles) {
 	//	Lustrine::Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, num_particles, );
 	//}
+=======
+	/*
+	void allocate_particles_colliders() {
+		Lustrine::Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation);
+	}*/
+>>>>>>> cec09dcf7d0348d9586ef58870ab02c8699b8aad
 
 	/**
 	 * @brief Set the bounding box (in bullet) of the particles to the particles
 	 * position (in the simulation)
 	 */
+	/*
 	void set_particles_box_colliders_positions() {
 		Lustrine::Bullet::set_particles_box_colliders_positions(&simulation->bullet_physics_simulation, simulation->positions);
-	}
+	}*/
 
 	/**
 	 * @brief enables the bounding box of the particles (can collide with the player)

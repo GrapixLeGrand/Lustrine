@@ -18,6 +18,8 @@ namespace Lustrine {
 struct Simulation;
 typedef float (*W_fun)(const Simulation*, float);
 typedef glm::vec3 (*gradW_fun)(const Simulation*, const glm::vec3&);
+typedef void (*Simulate_fun)(Simulation*, float);
+
 
 /**
  * @brief The phyical type of the particles making an object
@@ -89,6 +91,7 @@ struct SimulationParameters {
 
 struct Simulation {
 
+    Simulate_fun simulate_fun = nullptr;
     Bullet::Simulation bullet_physics_simulation;
     W_fun W = nullptr;//pointer to function representing the kernel
     gradW_fun gradW = nullptr;//pointer to function representing the gradient of the kernel

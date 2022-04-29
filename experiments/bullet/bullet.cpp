@@ -151,6 +151,8 @@ int main(void) {
 
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
+
+        simulation.bullet_physics_simulation.player_position = Lustrine::Bullet::get_body_position(&simulation.bullet_physics_simulation, box_index);
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
         //if (areParticlesDisabled == false) 
         //Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);

@@ -19,7 +19,11 @@
             "installRoot": "${projectDir}\\out\\install\\${name}",
             "cmakeCommandArgs": "",
             "ctestCommandArgs": "",
+<<<<<<< HEAD
           "inheritEnvironments": [ "msvc_x64_x64" ]
+=======
+            "inheritEnvironments": [ "clang_cl_x64" ]
+>>>>>>> cec09dcf7d0348d9586ef58870ab02c8699b8aad
         }
     ]
 }

@@ -22,9 +22,25 @@ if (WIN32)
 #add_compile_options(-ffast-math)
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("using predefined flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2 ") #-mfma -ffp-contract=fast") #
 endif()
 endif()
+
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    message("Lustrine: using gcc")
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    else()
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O3 -ffast-math -mfma")
+    endif()
+    #target_compile_options(Lustrine PRIVATE -fsanitize=address)
+    #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address)")
+    #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2 ") #-mfma -ffp-contract=fast") #
+endif()
+
+#add_compile_options(-fsanitize=address)
+#add_link_options(-fsanitize=address)
 
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} "Include paths to external GLM library" ON)
 #option(ENV{LEVEKGL_USE_INTERNAL_GLM} OFF)
@@ -39,26 +55,33 @@ set(ENV{LEVEKGL_EXTERNAL_GLM_PATH} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.
 #set(ENV{LEVEKGL_EXTERNAL_GLM} "${Lustrine_SOURCE_DIR}/thirdparty/glm-0.9.9.8")
 
 add_subdirectory(thirdparty)
-
 link_directories(${Lustrine_SOURCE_DIR}/src)
 
 set(LUSTRINE_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/VoxelLoader.cpp"
     "src/BulletPhysics.cpp"
+    "src/profiling/Profiling.cpp"
+    "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 set(LUSTRINEWRAPPER_SOURCES
     "src/Lustrine.cpp"
     "src/JsonWriter.cpp"
     "src/Kernels.cpp"
-    "src/Neighbors.cpp"
+    "src/neighbors/Neighbors.cpp"
     "src/LustrineWrapper.cpp"
     "src/BulletPhysics.cpp"
     "src/VoxelLoader.cpp"
+    "src/profiling/Profiling.cpp"
+    "src/Simulate.cpp"
+    "src/neighbors/Sorting.cpp"
+    "src/neighbors/Utils.cpp"
 )
 
 
@@ -103,6 +126,7 @@ target_include_directories(LustrineWrapper PUBLIC ${CMAKE_BINARY_DIR}/exports)
 
 
 target_link_libraries(Lustrine LevekGL)
+
 
 
 if (WIN32)
