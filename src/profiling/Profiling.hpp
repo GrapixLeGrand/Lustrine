@@ -6,6 +6,9 @@
 #ifdef PLATFORM_WINDOWS
 #define NOMINMAX
 #include "Windows.h"
+#elif PLATFORM_UNIX
+#include <string.h>
+#include "tsc_x86.h"
 #endif
 
 #define LUSTRINE_MAX_NUM_MEASUREMENTS 5
@@ -43,6 +46,25 @@ namespace Lustrine {
 			raw_cycles[index] = (long long) sub;
 			//std::cout << raw_cycles[index] << std::endl;
 			raw_durations[index] = ((double)sub / frequency.QuadPart);
+		}
+#elif PLATFORM_UNIX
+
+		static unsigned long long start_cycles[LUSTRINE_MAX_NUM_MEASUREMENTS];
+
+		static void init_profiling() {
+			init_tsc();
+			memset(start_cycles, 0, LUSTRINE_MAX_NUM_MEASUREMENTS * sizeof(unsigned long long));
+			memset(raw_cycles, 0, LUSTRINE_MAX_NUM_MEASUREMENTS * sizeof(long long));
+			memset(raw_durations, 0, LUSTRINE_MAX_NUM_MEASUREMENTS * sizeof(double));
+		}
+
+		static inline void start_counter(int index) {
+			start_cycles[index] = start_tsc();
+		}
+
+		static inline void stop_counter(int index) {
+			myInt64 result = stop_tsc(start_cycles[index]);
+			raw_cycles[index] = result; 
 		}
 #else
 		static void init_profiling() { std::cout << "Lustrine::Profiling: disabled" << std::endl; }
