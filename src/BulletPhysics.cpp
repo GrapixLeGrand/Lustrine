@@ -130,10 +130,16 @@ namespace Bullet {
 			delete simulation->rigidbodies[i]->getMotionState();
 			delete simulation->rigidbodies[i];
 		}
+		simulation->rigidbodies.clear();
+		simulation->num_bodies = 0;
 
 		for (int i = 0; i < simulation->collisionShapes.size(); i++) {
 			delete simulation->collisionShapes[i];
 		}
+		simulation->collisionShapes.clear();
+
+		simulation->allocated_particles_bounding_boxes = false; // in case we reuse the simulation after destroyed
+	
 	}
 
 	/**

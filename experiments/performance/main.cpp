@@ -7,11 +7,21 @@
 #include "profiling/Profiling.hpp"
 #include "Simulate.hpp"
 
-void benchmark_single_iter(Lustrine::Simulation* simulation, int iter) {
+void benchmark_single_iter(Lustrine::SimulationParameters* parameters, Lustrine::Simulation* simulation, int iter, Lustrine::Simulate_fun fun) {
+	
+	
 	long long total = 0;
 	std::vector<long long> cycles(Lustrine::Profiling::get_num_observation());
 	std::vector<double> durations(Lustrine::Profiling::get_num_observation());
 
+	std::vector<Lustrine::Grid> grids (1);
+	Lustrine::init_grid_box(parameters, &grids[0], 20, 20, 20, {1.0, 1.0, 1.0}, {0, 0, 0, 1.0}, Lustrine::MaterialType::SAND);
+	std::vector<Lustrine::Grid> solid_grids(1);
+	Lustrine::init_grid_box(parameters, &solid_grids[0], 20, 20, 20, { 20, 1, 20 }, { 0, 0, 0, 1.0 }, Lustrine::MaterialType::SOLID);
+
+	Lustrine::init_simulation(parameters, simulation, grids, solid_grids);
+
+	simulation->simulate_fun = fun;
 
 	for (int i = 0; i < iter; i++) {
 		Lustrine::simulate(simulation, 0.01f);
@@ -24,6 +34,8 @@ void benchmark_single_iter(Lustrine::Simulation* simulation, int iter) {
 	for (int i = 0; i < cycles.size(); i++) {
 		std::cout << i << ": " << (((double)cycles[i]) / iter) << " cylces\t" << (((double)durations[i]) / ((double)iter)) << " ms" << std::endl;
 	}
+
+	Lustrine::clean_simulation(simulation);
 }
 
 int main(int argc, char** args) {
@@ -39,26 +51,11 @@ int main(int argc, char** args) {
 	parameters.Z = 50;
 
 
-	std::vector<Lustrine::Grid> grids (1);
-	Lustrine::init_grid_box(&parameters, &grids[0], 20, 20, 20, {1.0, 1.0, 1.0}, {0, 0, 0, 1.0}, Lustrine::MaterialType::SAND);
-	std::vector<Lustrine::Grid> solid_grids(1);
-	Lustrine::init_grid_box(&parameters, &solid_grids[0], 20, 20, 20, { 20, 1, 20 }, { 0, 0, 0, 1.0 }, Lustrine::MaterialType::SOLID);
-
-	Lustrine::init_simulation(&parameters, &simulation, grids, solid_grids);
-
 	std::cout << "Inititalized simulation" << std::endl;
 	
 	//warm up
-	benchmark_single_iter(&simulation, 10);
-
-	simulation.simulate_fun = Lustrine::simulate_sand;
-	std::cout << "Simulate base" << std::endl;
-	benchmark_single_iter(&simulation, 10);
-	std::cout << "Simulate v1" << std::endl;
-	simulation.simulate_fun = Lustrine::simulate_sand_v1;
-	benchmark_single_iter(&simulation, 10);
-
-	Lustrine::clean_simulation(&simulation);
+	benchmark_single_iter(&parameters, &simulation, 10, Lustrine::simulate_sand);
+	benchmark_single_iter(&parameters, &simulation, 10, Lustrine::simulate_sand_v1);
 
 	return 0;
 }
