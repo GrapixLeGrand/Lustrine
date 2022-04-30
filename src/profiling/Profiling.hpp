@@ -48,7 +48,7 @@ namespace Lustrine {
 			raw_durations[index] = ((double)sub / frequency.QuadPart);
 		}
 #elif PLATFORM_UNIX
-
+		#define QUENTIN_FREQUENCY 2700000000.0 //hz
 		static unsigned long long start_cycles[LUSTRINE_MAX_NUM_MEASUREMENTS];
 
 		static void init_profiling() {
@@ -64,7 +64,8 @@ namespace Lustrine {
 
 		static inline void stop_counter(int index) {
 			myInt64 result = stop_tsc(start_cycles[index]);
-			raw_cycles[index] = result; 
+			raw_cycles[index] = result;
+			raw_durations[index] = result / QUENTIN_FREQUENCY;
 		}
 #else
 		static void init_profiling() { std::cout << "Lustrine::Profiling: disabled" << std::endl; }

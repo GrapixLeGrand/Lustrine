@@ -256,7 +256,10 @@ namespace Wrapper {
 	}
 
 	void simulate(float dt, Vec3 character_pos, bool attract_flag, bool blow_flag) {
-		Lustrine::simulate(simulation, dt, wrapper_to_glm(character_pos), attract_flag, blow_flag);
+		simulation->character_pos = wrapper_to_glm(character_pos);
+		simulation->attract_flag = attract_flag;
+		simulation->blow_flag = blow_flag;
+		Lustrine::simulate(simulation, dt); //, wrapper_to_glm(character_pos), attract_flag, blow_flag);
 	}
 
 	void cleanup_simulation() {
@@ -473,16 +476,10 @@ namespace Wrapper {
 	 * allocation.
 	 * @param num_particles 
 	 */
-<<<<<<< HEAD
-	//void allocate_particles_colliders(int num_particles) {
-	//	Lustrine::Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, num_particles, );
-	//}
-=======
 	/*
 	void allocate_particles_colliders() {
 		Lustrine::Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation);
 	}*/
->>>>>>> cec09dcf7d0348d9586ef58870ab02c8699b8aad
 
 	/**
 	 * @brief Set the bounding box (in bullet) of the particles to the particles

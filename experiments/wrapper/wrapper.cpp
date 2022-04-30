@@ -30,7 +30,8 @@ int main(void) {
 		sand_grids,
 		1,
 		solid_grids,
-		2
+		2,
+		1
 	);
 
 	int box = Lustrine::Wrapper::add_box({5.0f, 2.0f, 5.0f}, true, {0.5f, 0.5f, 0.5f});
@@ -47,12 +48,13 @@ int main(void) {
 	bool collide2 = Lustrine::Wrapper::do_collide(box);
 
 	float dt = 0.01;
+	Lustrine::Wrapper::Vec3 v {0, 0, 0};
 	for (int i = 0; i < 1000; i++) {
 		//std::cout << "simulate ! "<< std::endl;
 		Lustrine::Wrapper::Vec3 v = Lustrine::Wrapper::get_position(box);
 		//Lustrine::Wrapper::set_velocity(box, {0, 1, 0});
 		printf("{%f, %f, %f}\n", v.x, v.y, v.z);
-		Lustrine::Wrapper::simulate(dt);
+		Lustrine::Wrapper::simulate(dt, v, false, false);
 		Lustrine::Wrapper::check_collisions(box, indices, &actual);
 
 		if (actual > 0) {

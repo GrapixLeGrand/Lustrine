@@ -41,6 +41,22 @@ void init_simulation(const SimulationParameters* parameters, Simulation* simulat
     assert(false);
 }
 
+
+void init_simulation(
+    const SimulationParameters* parameters, 
+    Simulation* simulation, 
+    const std::vector<Grid>& grids_sand_arg,
+    const std::vector<Grid>& grids_solid_arg
+) {
+    init_simulation(
+        parameters, 
+        simulation, 
+        grids_sand_arg, 
+        grids_solid_arg,
+        1
+    );
+}
+
 void init_simulation(
     const SimulationParameters* parameters, 
     Simulation* simulation, 
@@ -229,7 +245,7 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation);
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->bullet_physics_simulation.num_particles_allocated, simulation->bullet_physics_simulation.player_box_radius);
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
@@ -313,7 +329,104 @@ void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, 
     }
 }
 
+
 void init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision) {
+
+    chunk->type = type;
+    chunk->num_particles = grid->num_occupied_grid_cells * subdivision * subdivision * subdivision; // 225
+    chunk->has_one_color_per_particles = grid->has_one_color_per_cell;
+
+    chunk->positions = std::vector<glm::vec3>(chunk->num_particles, { 0, 0, 0 });
+    if (chunk->has_one_color_per_particles) {
+        chunk->colors = std::vector<glm::vec4>(chunk->num_particles, { 0, 0, 0, 1 });
+    }
+    else {
+        chunk->color = grid->color;
+    }
+
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
+    glm::vec3 offset = glm::vec3(radius, radius, radius);
+    int X = grid->X * subdivision; int Y = grid->Y * subdivision; int Z = grid->Z * subdivision;
+    int counter = 0; //because chunk is disorganized we cannot use grid indices
+
+    for (int x = 0; x < X; x++) {
+        for (int y = 0; y < Y; y++) {
+            for (int z = 0; z < Z; z++) {
+                int cell_index = (x / subdivision) * grid->Y * grid->Z + (y / subdivision) * grid->Z + (z / subdivision);
+                if (grid->cells[cell_index] == true) { //a particle present at the current grid cell
+                    glm::vec3& particle_position = chunk->positions[counter];
+
+                    particle_position.x = x * diameter;
+                    particle_position.y = y * diameter;
+                    particle_position.z = z * diameter;
+
+                    particle_position += grid->position;
+
+                    if (chunk->has_one_color_per_particles == true) {
+                        const glm::vec4& grid_color = grid->colors[cell_index];
+                        glm::vec4& chunk_color = chunk->colors[counter];
+                        chunk_color = grid_color;
+                    }
+
+                    particle_position += offset;
+                    counter++;
+                }
+
+            }
+        }
+    }
+}
+
+void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type) {
+
+    chunk->type = type;
+    chunk->num_particles = grid->num_occupied_grid_cells; // 225
+    chunk->has_one_color_per_particles = grid->has_one_color_per_cell;
+
+    chunk->positions = std::vector<glm::vec3>(chunk->num_particles, { 0, 0, 0 });
+    if (chunk->has_one_color_per_particles) {
+        chunk->colors = std::vector<glm::vec4>(chunk->num_particles, { 0, 0, 0, 1 });
+    }
+    else {
+        chunk->color = grid->color;
+    }
+
+    const float diameter = 1.0f;
+    const float radius = 0.5f;
+    glm::vec3 offset = glm::vec3(radius, radius, radius);
+    int X = grid->X; int Y = grid->Y; int Z = grid->Z;
+    int counter = 0; //because chunk is disorganized we cannot use grid indices
+
+    for (int x = 0; x < X; x++) {
+        for (int y = 0; y < Y; y++) {
+            for (int z = 0; z < Z; z++) {
+
+                if (grid->cells[x * Y * Z + y * Z + z] == true) { //a particle present at the current grid cell
+                    glm::vec3& particle_position = chunk->positions[counter];
+
+                    particle_position.x = x * diameter;
+                    particle_position.y = y * diameter;
+                    particle_position.z = z * diameter;
+
+                    particle_position += grid->position;
+
+                    if (chunk->has_one_color_per_particles == true) {
+                        const glm::vec4& grid_color = grid->colors[x * Y * Z + y * Z + z];
+                        glm::vec4& chunk_color = chunk->colors[counter];
+                        chunk_color = grid_color;
+                    }
+
+                    particle_position += offset;
+                    counter++;
+                }
+
+            }
+        }
+    }
+}
+
+//void init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision) {
 
 
 void simulate(Simulation* simulation, float dt) {

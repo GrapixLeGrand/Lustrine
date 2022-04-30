@@ -11,7 +11,7 @@
 
 namespace Lustrine {
 
-bool check_index(int i, int min, int max) {
+inline bool check_index(int i, int min, int max) {
     return (i >= min && i < max);
 }
 

@@ -262,11 +262,7 @@ namespace Bullet {
 	 * @param simulation 
 	 * @param body_index 
 	 */
-<<<<<<< HEAD
 	void allocate_particles_colliders(Simulation* simulation, int num_particles, float radius) {
-=======
-	void allocate_particles_colliders(Simulation* simulation) {
->>>>>>> cec09dcf7d0348d9586ef58870ab02c8699b8aad
 		
 		assert(simulation->allocated_particles_bounding_boxes == false);
 		if (simulation->allocated_particles_bounding_boxes == true) {
