@@ -76,7 +76,8 @@ int main(int argc, char** args) {
 	parameters.X = 50;
 	parameters.Y = 40;
 	parameters.Z = 50;
-
+	parameters.particleRadius = 0.5f;
+    parameters.particleDiameter = 1.0f;
 
 	std::cout << "Inititalized simulation" << std::endl;
 	int iter = 100;
@@ -85,6 +86,6 @@ int main(int argc, char** args) {
 
 	benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand);
 	benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand_v1);
-	
+
 	return 0;
 }

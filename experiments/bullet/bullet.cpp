@@ -75,6 +75,8 @@ int main(void) {
     parameters.X = 30.0f;
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
+    parameters.particleRadius = 0.5f;
+    parameters.particleDiameter = 1.0f;
 
     std::vector<Lustrine::Grid> sand_grids (1);
     std::vector<glm::vec3> sand_grids_positions (1);
