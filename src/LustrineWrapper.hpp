@@ -136,5 +136,8 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void enable_particles_bounding_boxes();
 	extern "C" LUSTRINE_WRAPPER_EXPORT void disable_particles_bounding_boxes();
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_particles_bounding_spheres_radius_placement(float radius);
+
+
 } //Wrapper
 } //Lustrine

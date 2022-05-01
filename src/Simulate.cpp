@@ -138,7 +138,6 @@ namespace Lustrine {
 
 
 void simulate_sand(Simulation* simulation, float dt) {
-
     Profiling::start_counter(1);
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
     Profiling::stop_counter(1);
@@ -430,6 +429,13 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
     Profiling::stop_counter(6);
 
     Profiling::stop_counter(2);
+    /*
+    std::cout << "hello" << std::endl;
+    static bool perturbation = true;
+    if (perturbation) {
+        velocities[simulation->ptr_sand_start] += glm::vec3(0.1, 0.1, 0.1);
+        perturbation = false;
+    }*/
 }
 
 }

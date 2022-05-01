@@ -58,7 +58,7 @@ int main(void) {
     Levek::Model* model = meshLoader->loadFromFile(LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/billboard.obj");
     const Levek::Mesh* sphere = model->getMesh(0);
     //{20, 20, 45}
-    Levek::PerspectiveCamera camera({20, 20, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
+    Levek::PerspectiveCamera camera({20, 30, 45}, {0.2, 0.2, 0.2}, {0, 1, 0}, resolutionX, resolutionY);
     glm::mat4 projection = camera.getProjection();
     
     float particleScale = 1.0f;
@@ -87,7 +87,7 @@ int main(void) {
     std::vector<glm::vec3> solid_grids_positions (1);
     solid_grids_positions[0] = {0, 0, 0};
 
-    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/little_level.vox", { 0, 0, 0 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_10x10.vox", { 0, 0, 0 }, Lustrine::MaterialType::SOLID);
     
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 5, 10, 30, { 20.0f, 5.0f, 0.0f }, glm::vec4(0.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, Lustrine::MaterialType::SAND, glm::vec4(1.0, 0.2, 1.0, 1.0));
@@ -96,7 +96,8 @@ int main(void) {
         &parameters,
         &simulation,
         sand_grids,
-        solid_grids
+        solid_grids,
+        1
     );
 
     Lustrine::Bullet::Simulation* bulletPhysics = &simulation.bullet_physics_simulation;
@@ -110,7 +111,7 @@ int main(void) {
 
     
     
-    int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 15, 15}, 2.0f, 3.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
+    int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 30, 15}, 2.0f, 3.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
 
     int box_index_2 = Lustrine::Bullet::add_box(bulletPhysics, {16, 15, 16}, true);
     int box_index_3 = Lustrine::Bullet::add_box(bulletPhysics, {14, 15, 14}, true);

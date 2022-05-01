@@ -212,6 +212,10 @@ namespace Wrapper {
 
 	}
 
+	void set_player_particles_bounding_spheres_radius_placement(float radius) {
+		simulation->bullet_physics_simulation.player_box_radius = radius;
+	}
+
 	/**
 	 * @brief Get the current gravity of the bullet world
 	 * 
