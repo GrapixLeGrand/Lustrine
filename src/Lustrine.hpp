@@ -99,7 +99,7 @@ extern void LUSTRINE_EXPORT init_chunk_from_grid_unit_length(const SimulationPar
  * @param color 
  */
 extern void LUSTRINE_EXPORT init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type);
-void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
+extern void LUSTRINE_EXPORT init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);
