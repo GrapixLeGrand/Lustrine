@@ -68,7 +68,7 @@ void init_simulation(
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
     
-    simulation->simulate_fun = simulate_sand_v1;
+    simulation->simulate_fun = simulate_sand_friction;
 
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
@@ -245,7 +245,7 @@ void init_simulation(
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
     simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
 
-    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->bullet_physics_simulation.num_particles_allocated, simulation->bullet_physics_simulation.player_box_radius);
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->num_sand_particles, simulation->particleRadius);
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
