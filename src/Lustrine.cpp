@@ -106,10 +106,11 @@ void init_simulation(
     simulation->total_allocated = (size_t) std::max(initial_allocated_particles_num, first_guess_allocation);
     simulation->leftover_allocated = simulation->total_allocated - initial_allocated_particles_num;
 
-    simulation->positions = new glm::vec3[simulation->total_allocated];
-    simulation->positions_star = new glm::vec3[simulation->total_allocated];
-    simulation->colors = new glm::vec4[simulation->total_allocated];
-    simulation->positions_tmp = new glm::vec3[simulation->total_allocated];
+    std::align_val_t simd_vector_align{64};
+    simulation->positions = new (simd_vector_align)glm::vec3[simulation->total_allocated];
+    simulation->positions_star = new (simd_vector_align) glm::vec3[simulation->total_allocated];
+    simulation->colors = new (simd_vector_align) glm::vec4[simulation->total_allocated];
+    simulation->positions_tmp = new (simd_vector_align) glm::vec3[simulation->total_allocated];
 
     memset(simulation->positions, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
@@ -244,8 +245,8 @@ void init_simulation(
     //perf test
     simulation->uniform_grid_cells_static_saved = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
     simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
-    simulation->position_neighbor_tmp = new glm::vec3[simulation->num_sand_particles];
-    simulation->position_star_neighbor_tmp = new glm::vec3[simulation->num_sand_particles];
+    simulation->position_neighbor_tmp = new (simd_vector_align) glm::vec3[simulation->num_sand_particles];
+    simulation->position_star_neighbor_tmp = new (simd_vector_align) glm::vec3[simulation->num_sand_particles];
     simulation->velocity_tmp = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
     //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
     //perf test

@@ -8,6 +8,9 @@ include(CTest)
 include(GenerateExportHeader)
 enable_testing()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_C_STANDARD 17)
+
 if (UNIX)
     add_compile_definitions(PLATFORM_UNIX)
 endif()
