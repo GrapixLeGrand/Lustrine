@@ -139,6 +139,13 @@ struct Simulation {
 
     //uniform grid cells array
     std::vector<std::vector<int>> uniform_gird_cells;
+    std::vector<std::vector<int>> uniform_grid_cells_static_saved;
+    bool computed_static_particles = false;
+    std::vector<std::pair<int, int>> sand_particle_cell_id;
+    std::vector<glm::vec3> velocity_tmp;
+    glm::vec3* position_star_neighbor_tmp;
+    glm::vec3* position_neighbor_tmp;
+    //glm::vec4* colors_neighbor_tmp;
 
     //counting sort arrays
     std::vector<int> counts;

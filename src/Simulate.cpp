@@ -318,8 +318,6 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
     glm::vec3* positions_star = simulation->positions_star;
     std::vector<glm::vec3>& velocities = simulation->velocities;
 
-
-    std::vector<float>& lambdas = simulation->lambdas;
     std::vector<std::vector<int>>& neighbors = simulation->neighbors;
 
     //integration
@@ -331,7 +329,7 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
 
     //find_neighbors_counting_sort(simulation);
     Profiling::start_counter(3);
-    find_neighbors_uniform_grid(simulation);
+    find_neighbors_uniform_grid_v2(simulation);
     Profiling::stop_counter(3);
 
     float particleDiameter2 = simulation->particleDiameter * simulation->particleDiameter;
@@ -436,6 +434,12 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
         velocities[simulation->ptr_sand_start] += glm::vec3(0.1, 0.1, 0.1);
         perturbation = false;
     }*/
+
+    static bool perturbation = true;
+    if (perturbation) {
+        velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
+        perturbation = false;
+    }
 }
 
 }

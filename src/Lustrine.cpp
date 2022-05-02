@@ -221,7 +221,7 @@ void init_simulation(
     //sorting neighbor strategy with grid
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
-    simulation->kernelRadius = 3.1f * parameters->particleRadius;
+    simulation->kernelRadius = 2.5f * parameters->particleRadius;
     simulation->cell_size = 1.0f * simulation->kernelRadius;
 
     //for the kernel
@@ -240,6 +240,15 @@ void init_simulation(
 
     //uniform grid
     simulation->uniform_gird_cells = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
+
+    //perf test
+    simulation->uniform_grid_cells_static_saved = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
+    simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
+    simulation->position_neighbor_tmp = new glm::vec3[simulation->num_sand_particles];
+    simulation->position_star_neighbor_tmp = new glm::vec3[simulation->num_sand_particles];
+    simulation->velocity_tmp = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
+    //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
+    //perf test
 
     //counting sort
     simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
