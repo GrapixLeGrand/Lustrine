@@ -9,6 +9,7 @@
 #include <algorithm>
 #include "profiling/Profiling.hpp"
 #include "Simulate.hpp"
+#include "neighbors/Utils.hpp"
 
 namespace Lustrine {
 
@@ -68,7 +69,7 @@ void init_simulation(
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
     
-    simulation->simulate_fun = simulate_sand_v1;
+    simulation->simulate_fun = simulate_sand_v2;
 
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
@@ -223,7 +224,7 @@ void init_simulation(
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
     simulation->kernelRadius = 2.5f * parameters->particleRadius;
-    simulation->cell_size = 1.0f * simulation->kernelRadius;
+    simulation->cell_size = 0.7f * simulation->kernelRadius;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);
@@ -259,6 +260,7 @@ void init_simulation(
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
+    std::cout << "registered " << simulation->num_sand_particles << " sand particles and " << simulation->num_solid_particles << "\n";
 }
 
 void clean_simulation(Simulation* simulation) {
@@ -445,6 +447,41 @@ void simulate(Simulation* simulation, float dt) {
     Profiling::stop_counter(0);
 }
 
+
+int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+
+    int counter = 0;
+    int min_x = 0, min_y = 0, min_z = 0;
+    int max_x = 0, max_y = 0, max_z = 0;
+
+    min_pos = glm::clamp(min_pos, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
+    min_pos /= simulation->cell_size;
+
+    min_x = (int) min_pos.x;
+    min_y = (int) min_pos.y;
+    min_z = (int) min_pos.z;
+
+    max_pos = glm::clamp(max_pos, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
+    max_pos /= simulation->cell_size;
+
+    max_x = (int) max_pos.x;
+    max_y = (int) max_pos.y;
+    max_z = (int) max_pos.z;
+
+    for (int y = min_y; y < max_y; y++) {
+        for (int x = min_x; x < max_x; x++) {
+            for (int z = min_z; z < max_z; z++) {
+                int cell_id =
+                    y * simulation->gridX * simulation->gridZ +
+                    x * simulation->gridZ +
+                    z;
+                counter += simulation->uniform_gird_cells[cell_id].size();
+            }
+        }
+    }
+
+    return counter;
+}
 
 
 

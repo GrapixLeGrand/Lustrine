@@ -481,7 +481,7 @@ void simulate_sand_v2(Simulation* simulation, float dt) {
     const int lower_bound = simulation->ptr_sand_start;
     const int upper_bound = simulation->ptr_sand_end;
 
-    for (int substep = 0; substep < 4; ++substep) {
+    for (int substep = 0; substep < 3; ++substep) {
 
         for (int yy = 0; yy < simulation->gridY; yy++) {
             for (int xx = 0; xx < simulation->gridX; xx++) {

@@ -354,6 +354,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         glm::vec3& position = simulation->positions_star[i];
         simulation->uniform_gird_cells[cell_id].push_back(i);
     }
+    
     for (int yy = 0; yy < simulation->gridY; yy++) {
         for (int xx = 0; xx < simulation->gridX; xx++) {
             for (int zz = 0; zz < simulation->gridZ; zz++) {

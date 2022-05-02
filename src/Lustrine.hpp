@@ -87,6 +87,9 @@ extern void LUSTRINE_EXPORT clean_simulation(Simulation* simulation);
 extern void LUSTRINE_EXPORT init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
 extern void LUSTRINE_EXPORT init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision);
 extern void LUSTRINE_EXPORT init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
+
+extern int LUSTRINE_EXPORT query_cell_num_particles(Simulation* simulation, glm::vec3 min, glm::vec3 max);
+
 /**
  * @brief Init a grid full of partlices. A box full of particles with X * Y * Z particles.
  * 
