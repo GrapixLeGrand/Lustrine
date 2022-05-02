@@ -553,20 +553,20 @@ namespace Bullet {
 		for (int i = start_ptr; i < end_ptr; i++) {
 			glm::vec3 tmp = particles[i] - simulation->player_position;
 			if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {// (glm::dot(tmp, tmp) < simulation->player_box_radius * simulation->player_box_radius) {
-				simulation->rigidbodies[num_close]->setActivationState(ACTIVE_TAG);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setActivationState(ACTIVE_TAG);
 				btTransform t;
-				simulation->rigidbodies[num_close]->getMotionState()->getWorldTransform(t);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->getMotionState()->getWorldTransform(t);
 				t.setOrigin(glmToBullet(particles[i]));
-				simulation->rigidbodies[num_close]->getMotionState()->setWorldTransform(t);
-				simulation->rigidbodies[num_close]->setWorldTransform(t);
-				simulation->rigidbodies[num_close]->setInterpolationWorldTransform(t);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->getMotionState()->setWorldTransform(t);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setWorldTransform(t);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setInterpolationWorldTransform(t);
 
 				//simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
-				simulation->rigidbodies[num_close]->clearForces();
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setCollisionFlags(simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->clearForces();
 				btVector3 v(0.0, 0.0, 0.0);
-				simulation->rigidbodies[num_close]->setInterpolationLinearVelocity(v);
-				simulation->rigidbodies[num_close]->setLinearVelocity(v);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setInterpolationLinearVelocity(v);
+				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setLinearVelocity(v);
 				num_close++;
 				if (num_close >= simulation->num_particles_allocated) {
 					break;
@@ -576,7 +576,7 @@ namespace Bullet {
 		//std::cout << simulation->player_position.x << std::endl;
 		//std::cout << num_close << std::endl;
 		for (int i = num_close; i < simulation->num_particles_allocated; i++) {
-			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			simulation->rigidbodies[i + simulation->ptr_bounding_box_start]->setCollisionFlags(simulation->rigidbodies[i + simulation->ptr_bounding_box_start]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		}
 
 	}

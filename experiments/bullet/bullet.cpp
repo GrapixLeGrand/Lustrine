@@ -75,8 +75,10 @@ int main(void) {
     parameters.X = 30.0f;
     parameters.Y = 25.0f;
     parameters.Z = 30.0f;
-    parameters.particleRadius = 0.5f;
-    parameters.particleDiameter = 1.0f;
+
+    int subdivision = 1;
+    parameters.particleRadius = 0.5f / subdivision;
+    parameters.particleDiameter = 2.0f * parameters.particleRadius;
 
     std::vector<Lustrine::Grid> sand_grids (1);
     std::vector<glm::vec3> sand_grids_positions (1);
@@ -97,14 +99,14 @@ int main(void) {
         &simulation,
         sand_grids,
         solid_grids,
-        1
+        subdivision
     );
 
     Lustrine::Bullet::Simulation* bulletPhysics = &simulation.bullet_physics_simulation;
     
     glm::vec3 half_dims_box_4 = {3.0, 1.0, 1.0};
     glm::vec3 ground_dims = {parameters.X / 2, 1, parameters.Z / 2};
-    float speed = 200.0f;
+    float speed = 800.0f;
     float basic_impulse = 100.0f;
     glm::vec3 gravity = glm::vec3(0.0f, -25.0f, 0.0f);
     float gravity_y = -25.0f;
