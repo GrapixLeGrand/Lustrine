@@ -38,7 +38,7 @@ namespace Lustrine {
 
         //std::vector<glm::vec3>& positions = simulation->positions;
         //std::vector<glm::vec3>& positions_star = simulation->positions_star;
-        std::vector<glm::vec3>& velocities = simulation->velocities;
+        glm::vec3* velocities = simulation->velocities;
         std::vector<float>& lambdas = simulation->lambdas;
         std::vector<std::vector<int>>& neighbors = simulation->neighbors;
 
@@ -159,7 +159,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     glm::vec3* positions = simulation->positions;
     glm::vec3* positions_star = simulation->positions_star;
-    std::vector<glm::vec3>& velocities = simulation->velocities;
+    glm::vec3* velocities = simulation->velocities;
 
 
     std::vector<float>& lambdas = simulation->lambdas;
@@ -284,11 +284,11 @@ void simulate_sand(Simulation* simulation, float dt) {
     Profiling::stop_counter(6);
 
     //TODO: this perturbation is for test, remove this in the future
-    static bool perturbation = true;
+    /*static bool perturbation = true;
     if (perturbation) {
         velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
         perturbation = false;
-    }
+    }*/
 
     Profiling::stop_counter(2);
 }
@@ -316,7 +316,7 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
 
     glm::vec3* positions = simulation->positions;
     glm::vec3* positions_star = simulation->positions_star;
-    std::vector<glm::vec3>& velocities = simulation->velocities;
+    glm::vec3* velocities = simulation->velocities;
 
     std::vector<std::vector<int>>& neighbors = simulation->neighbors;
 
@@ -481,7 +481,7 @@ void simulate_sand_v2(Simulation* simulation, float dt) {
     const int lower_bound = simulation->ptr_sand_start;
     const int upper_bound = simulation->ptr_sand_end;
 
-    for (int substep = 0; substep < 3; ++substep) {
+    for (int substep = 0; substep < 4; ++substep) {
 
         for (int yy = 0; yy < simulation->gridY; yy++) {
             for (int xx = 0; xx < simulation->gridX; xx++) {
@@ -625,12 +625,12 @@ void simulate_sand_v2(Simulation* simulation, float dt) {
         velocities[simulation->ptr_sand_start] += glm::vec3(0.1, 0.1, 0.1);
         perturbation = false;
     }*/
-
+    /*
     static bool perturbation = true;
     if (perturbation) {
         simulation->velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
         perturbation = false;
-    }
+    }*/
 }
 
 }

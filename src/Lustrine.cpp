@@ -223,9 +223,10 @@ void init_simulation(
 
     int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
 
-    simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
-    simulation->lambdas = std::vector<float>(simulation->num_sand_particles, 0.0f);
-    simulation->neighbors = std::vector<std::vector<int>>(simulation->num_sand_particles, std::vector<int>{});
+    simulation->velocities = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    //simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
+    simulation->lambdas = std::vector<float>(total_possible_num_sand_particles, 0.0f);
+    simulation->neighbors = std::vector<std::vector<int>>(total_possible_num_sand_particles, std::vector<int>{});
 
     simulation->W = cubic_kernel;
     simulation->gradW = cubic_kernel_grad;
@@ -234,7 +235,7 @@ void init_simulation(
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
     simulation->kernelRadius = 2.5f * parameters->particleRadius;
-    simulation->cell_size = 0.7f * simulation->kernelRadius;
+    simulation->cell_size = 1.0f * simulation->kernelRadius;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);
@@ -246,9 +247,9 @@ void init_simulation(
     simulation->gridZ = (int) (simulation->domainZ / simulation->cell_size) + 1;
 
     simulation->num_grid_cells = (simulation->gridX) * (simulation->gridY) * (simulation->gridZ);
-    simulation->particle_cell_index_to_index = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
-    simulation->positions_star_copy = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
-    simulation->cell_indices = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
+    simulation->particle_cell_index_to_index = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
+    simulation->positions_star_copy = std::vector<glm::vec3>(total_possible_num_sand_particles, {0, 0, 0});
+    simulation->cell_indices = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
 
     //uniform grid
     simulation->uniform_gird_cells = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
@@ -256,9 +257,9 @@ void init_simulation(
     //perf test
     simulation->uniform_grid_cells_static_saved = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
     simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
-    simulation->position_neighbor_tmp = new (simd_vector_align) glm::vec3[simulation->num_sand_particles];
-    simulation->position_star_neighbor_tmp = new (simd_vector_align) glm::vec3[simulation->num_sand_particles];
-    simulation->velocity_tmp = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
+    simulation->position_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    simulation->position_star_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    simulation->velocity_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles]; //std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
     //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
     //perf test
 

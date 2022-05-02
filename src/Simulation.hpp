@@ -137,7 +137,7 @@ struct Simulation {
     float c_xsph = 0.1f;
     float epsilon_vorticity = 0.1f;
     
-    std::vector<glm::vec3> velocities;//array containing the velocities of each particles (sand only)
+    glm::vec3* velocities = nullptr;//array containing the velocities of each particles (sand only)
     std::vector<float> lambdas;
     std::vector<std::vector<int>> neighbors; //arrays of neighbor indices
     int gridX, gridY, gridZ; //sizes of the grid
@@ -154,7 +154,7 @@ struct Simulation {
     std::vector<std::vector<int>> uniform_grid_cells_static_saved;
     bool computed_static_particles = false;
     std::vector<std::pair<int, int>> sand_particle_cell_id;
-    std::vector<glm::vec3> velocity_tmp;
+    glm::vec3* velocity_tmp;
     glm::vec3* position_star_neighbor_tmp;
     glm::vec3* position_neighbor_tmp;
     //glm::vec4* colors_neighbor_tmp;

@@ -143,8 +143,8 @@ void find_neighbors_uniform_grid_v3(Simulation* simulation) {
     }
 
     counting_sort_v2(simulation);
-    /*
-    std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
+    
+    /*std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
         [](const auto& a, const auto& b)
         { 
             return a.second < b.second;
@@ -165,7 +165,8 @@ void find_neighbors_uniform_grid_v3(Simulation* simulation) {
     
     memcpy(simulation->positions, simulation->position_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->positions_star, simulation->position_star_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
-    simulation->velocities = simulation->velocity_tmp;
+    memcpy(simulation->velocities, simulation->velocity_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
+    //simulation->velocities = simulation->velocity_tmp;
     
 }
 
@@ -191,13 +192,13 @@ void find_neighbors_uniform_grid_v2(Simulation* simulation) {
         simulation->sand_particle_cell_id[i].second = cell_id;
     }
 
-    //counting_sort_v2(simulation);
-    std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
+    counting_sort_v2(simulation);
+    /*std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
         [](const auto& a, const auto& b)
         { 
             return a.second < b.second;
         }
-    );
+    );*/
 
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 
@@ -252,7 +253,7 @@ void find_neighbors_uniform_grid_v2(Simulation* simulation) {
     
     memcpy(simulation->positions, simulation->position_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->positions_star, simulation->position_star_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
-    simulation->velocities = simulation->velocity_tmp;
+    memcpy(simulation->velocities, simulation->velocity_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
     
 
     for (int yy = 0; yy < simulation->gridY; yy++) {
@@ -354,7 +355,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         glm::vec3& position = simulation->positions_star[i];
         simulation->uniform_gird_cells[cell_id].push_back(i);
     }
-    
+
     for (int yy = 0; yy < simulation->gridY; yy++) {
         for (int xx = 0; xx < simulation->gridX; xx++) {
             for (int zz = 0; zz < simulation->gridZ; zz++) {
