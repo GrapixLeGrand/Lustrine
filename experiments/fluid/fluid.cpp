@@ -50,10 +50,11 @@ int main(void) {
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (2);
-    std::vector<glm::vec3> sand_grids_positions (2);
+    std::vector<Lustrine::Grid> sand_grids (3);
+    std::vector<glm::vec3> sand_grids_positions (3);
     sand_grids_positions[0] = {0, 0, 0};
     sand_grids_positions[1] = {20, 0, 20};
+    sand_grids_positions[1] = {0, 0, 20};
     
 
     std::vector<Lustrine::Grid> solid_grids (1);
@@ -63,7 +64,8 @@ int main(void) {
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
     
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::init_grid_box(&parameters, &sand_grids[1], 10, 20, 10, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
 
     Lustrine::init_simulation(
         &parameters,

@@ -442,4 +442,195 @@ void simulate_sand_v1(Simulation* simulation, float dt) {
     }
 }
 
+
+void simulate_sand_v2(Simulation* simulation, float dt) {
+
+    Profiling::start_counter(1);
+    Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
+    Profiling::stop_counter(1);
+
+    Profiling::start_counter(2);
+
+    float collision_coeff = 0.9f;
+    float boundary_collision_coeff = 0.9f;
+    float friction_coeff = 0.5f;
+    float mu_s = 0.5f;
+    float mu_k = 0.8f;
+
+    dt = (1.0f / 30.0f);
+    simulation->time_step = dt;
+
+    int X = simulation->domainX;
+    int Y = simulation->domainY;
+    int Z = simulation->domainZ;
+
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        simulation->velocities[i] += simulation->gravity * dt;
+        simulation->positions_star[i] = simulation->positions[i] + simulation->velocities[i] * dt; // update both
+    }
+
+    //find_neighbors_counting_sort(simulation);
+    Profiling::start_counter(3);
+    find_neighbors_uniform_grid_v3(simulation);
+    Profiling::stop_counter(3);
+
+    float particleDiameter2 = simulation->particleDiameter * simulation->particleDiameter;
+        // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
+    float mass_inv = 1.0f / simulation->mass;
+    Profiling::start_counter(4);
+    const int lower_bound = simulation->ptr_sand_start;
+    const int upper_bound = simulation->ptr_sand_end;
+
+    for (int substep = 0; substep < 4; ++substep) {
+
+        for (int yy = 0; yy < simulation->gridY; yy++) {
+            for (int xx = 0; xx < simulation->gridX; xx++) {
+                for (int zz = 0; zz < simulation->gridZ; zz++) {
+
+                    int cell_id = 
+                        yy * simulation->gridX * simulation->gridZ +
+                        xx * simulation->gridZ + 
+                        zz;
+
+                    std::vector<int>& current_cell_indices = simulation->uniform_gird_cells[cell_id];
+
+                    if (current_cell_indices.empty() == true) {
+                        continue;
+                    }
+
+                    int y_lower = -1; int y_upper = 1;
+                    int x_lower = -1; int x_upper = 1;
+                    int z_lower = -1; int z_upper = 1;
+                    if (yy + y_lower < 0) y_lower = 0; if (yy + y_upper >= simulation->gridY) y_upper = 0;
+                    if (xx + x_lower < 0) x_lower = 0; if (xx + x_upper >= simulation->gridX) x_upper = 0;
+                    if (zz + z_lower < 0) z_lower = 0; if (zz + z_upper >= simulation->gridZ) z_upper = 0;
+
+                    for (int y = y_lower; y <= y_upper; y++) {
+                        for (int x = x_lower; x <= x_upper; x++) {
+                            for (int z = z_lower; z <= z_upper; z++) {
+
+                                int neighbor_cell_id =
+                                    (yy + y) * simulation->gridX * simulation->gridZ +
+                                    (xx + x) * simulation->gridZ + 
+                                    (zz + z);
+
+                                std::vector<int>& neighbor_cell_indices = simulation->uniform_gird_cells[neighbor_cell_id];
+
+                                if (neighbor_cell_indices.empty() == true) {
+                                    continue;
+                                }
+
+                                for (int ii = 0; ii < current_cell_indices.size(); ii++) {
+                                    const int i = current_cell_indices[ii];
+                                    if (i >= simulation->ptr_solid_start) {
+                                        continue;
+                                    }
+                                    //const glm::vec3& self = simulation->positions_star[current_index];
+                                    for (int jj = 0; jj < neighbor_cell_indices.size(); jj++) {                                        
+                                        const int j = neighbor_cell_indices[jj];
+                                        if (i >= j) continue;
+                                        glm::vec3 ij = simulation->positions_star[i] - simulation->positions_star[j];
+                                        float len2 = glm::dot(ij, ij); //glm::length(ij);
+                                        if (len2 < particleDiameter2) {
+
+                                            float len = glm::length(ij);
+
+                                            // TODO: can be optimized by using a single mass;
+                                            // i is always sand
+                                            float wi = mass_inv;
+                                            // compute j's mass
+                                            float wj = (j >= simulation->ptr_sand_start && j < simulation->ptr_sand_end) ? mass_inv : 0.0f;
+                                            float wi_wj_inv = 1.0f / (wi + wj);
+                                            float wi_wiPwj = wi * wi_wj_inv;
+                                            float wj_wiPwj = wj * wi_wj_inv;
+
+                                            glm::vec3 delta_ij = (len - simulation->particleDiameter) * ij / avoid0(len);
+                                            glm::vec3 delta_pi = -wi_wiPwj * delta_ij;
+                                            glm::vec3 delta_pj = +wj_wiPwj * delta_ij;
+                                            glm::vec3 positions_star_i = simulation->positions_star[i] + collision_coeff * delta_pi;
+                                            glm::vec3 positions_star_j = simulation->positions_star[j] + collision_coeff * delta_pj;
+
+                                            float d = simulation->particleDiameter - len;
+                                            glm::vec3 n = glm::normalize(positions_star_i - positions_star_j);
+                                            // FIXME: Should use initial positions but currently very unstable
+                                            // glm::vec3 delta_x_star_ij = (positions_star_i - positions[i]) - (positions_star_j - positions[j]);
+                                            glm::vec3 delta_x_star_ij = (positions_star_i - simulation->positions_star[i]) - (positions_star_j - simulation->positions_star[j]);
+                                            glm::vec3 delta_x_tangent = delta_x_star_ij - glm::dot(delta_x_star_ij, n) * n;
+                                            // https://mmacklin.com/uppfrta_preprint.pdf, eq(24)
+                                            glm::vec3 delta_pij_friction;
+                                            if (glm::length(delta_x_tangent) < mu_s * d) {
+                                                delta_pij_friction = delta_x_tangent;
+                                            }
+                                            else {
+                                                delta_pij_friction = delta_x_tangent * std::min(mu_k * d / avoid0(glm::length(delta_x_tangent)), 1.0f);
+                                            }
+                                            glm::vec3 delta_pi_friction = wi_wiPwj * delta_pij_friction;
+                                            glm::vec3 delta_pj_friction = -wj_wiPwj * delta_pij_friction;
+                                            positions_star_i += friction_coeff * delta_pi_friction;
+                                            positions_star_j += friction_coeff * delta_pi_friction;
+
+                                            simulation->positions_star[i] += positions_star_i - simulation->positions_star[i];
+                                            simulation->positions_star[j] += positions_star_j - simulation->positions_star[j];
+
+                                        }
+                                    } // end in neighbor cell 
+                                } // end in current cell 
+
+                            }
+                        }
+                    } //end neighbor cells checking 
+
+
+                }
+            }
+        } //end grid checking
+
+        Profiling::start_counter(5);
+        // particle-bounadry collision
+        for (int i = lower_bound; i < upper_bound; i++) {
+            glm::vec3 p = simulation->positions_star[i];
+            float r = simulation->particleRadius;
+
+            glm::vec3 dp = glm::vec3(0.0);
+            dp += solve_boundary_collision_constraint(glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), p, r);
+            dp += solve_boundary_collision_constraint(glm::vec3(-1, 0, 0), glm::vec3(X, 0, 0), p, r);
+            dp += solve_boundary_collision_constraint(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0), p, r);
+            dp += solve_boundary_collision_constraint(glm::vec3(0, -1, 0), glm::vec3(0, Y, 0), p, r);
+            dp += solve_boundary_collision_constraint(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), p, r);
+            dp += solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z), p, r);
+            simulation->positions_star[i] += boundary_collision_coeff * dp;
+        }
+        Profiling::stop_counter(5);
+        //memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
+
+
+    }
+    Profiling::stop_counter(4);
+
+
+    Profiling::start_counter(6);
+    float dt_inv = 1.0f / simulation->time_step;
+    //update velocities and sync positions
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        simulation->velocities[i] = (simulation->positions_star[i] - simulation->positions[i]) * dt_inv;
+        simulation->positions[i] = simulation->positions_star[i];
+    }
+    Profiling::stop_counter(6);
+
+    Profiling::stop_counter(2);
+    /*
+    std::cout << "hello" << std::endl;
+    static bool perturbation = true;
+    if (perturbation) {
+        velocities[simulation->ptr_sand_start] += glm::vec3(0.1, 0.1, 0.1);
+        perturbation = false;
+    }*/
+
+    static bool perturbation = true;
+    if (perturbation) {
+        simulation->velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
+        perturbation = false;
+    }
+}
+
 }

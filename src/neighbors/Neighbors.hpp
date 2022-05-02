@@ -4,6 +4,9 @@
 
 namespace Lustrine {
 
+static inline bool check_index(int i, int min, int max) {
+    return (i >= min && i < max);
+}
 extern void find_neighbors_brute_force(Simulation* simulation);
 extern void clear_neighbors(Simulation* simulation);
 extern void find_neighbors_uniform_grid(Simulation* simulation);

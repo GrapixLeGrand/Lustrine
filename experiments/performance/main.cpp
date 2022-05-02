@@ -56,13 +56,31 @@ benchmark_result benchmark_single_iter(Lustrine::SimulationParameters* parameter
 	return r;
 }
 
-void write_result_to_file(benchmark_result& result) {
-	std::ifstream f(out_file_name.c_str());
-    if (!f.good()) {
-		std::cout << "create file" << std::endl;
+static bool first_time = true;
 
+void write_result_to_file(benchmark_result& result, const std::string& version_name) {
+	
+	std::ofstream f;
+	if (first_time)  { 
+		f.open(out_file_name.c_str());
+		first_time = false;
+	} else {
+		f.open(out_file_name.c_str(), std::ios_base::app);
 	}
 	
+	if (!f.good()) {
+		std::cout << "problem with the file..." << std::endl;
+	}
+
+	for (int i = 0; i < result.num_measures; i++) {
+		f << version_name << "\t";
+		for (int j = 0; j < result.num_samples; j++) {
+			f << result.results[i][j] << "\t";
+		}
+		f << "\n";
+	}
+	f << std::flush;
+	f.close();
 }
 
 int main(int argc, char** args) {
@@ -84,8 +102,13 @@ int main(int argc, char** args) {
 	//warm up
 	benchmark_single_iter(&parameters, &simulation, 1000, Lustrine::simulate_sand);
 
-	benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand);
-	benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand_v1);
+	benchmark_result r1 = benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand);
+	benchmark_result r2 = benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand_v1);
+	benchmark_result r3 = benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand_v2);
 
+	write_result_to_file(r1, "base");
+	write_result_to_file(r2, "sand_v1");
+	write_result_to_file(r3, "sand_v2");
+	//write_result_to_file()
 	return 0;
 }

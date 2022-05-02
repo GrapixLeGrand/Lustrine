@@ -11,12 +11,10 @@
 #include <utility>
 
 namespace Lustrine {
-
-inline bool check_index(int i, int min, int max) {
+/*
+bool check_index(int i, int min, int max) {
     return (i >= min && i < max);
-}
-
-
+}*/
 
 void assign_particles_to_cells(Simulation* simulation) {
     simulation->particle_cell_index_to_index.clear();
@@ -125,7 +123,7 @@ void counting_sort_v2(Simulation* simulation) {
 
 void find_neighbors_uniform_grid_v3(Simulation* simulation) {
 
-    clear_neighbors(simulation);
+    //clear_neighbors(simulation);
 
     if (!simulation->computed_static_particles) {
         for (int i = simulation->ptr_solid_start; i < simulation->ptr_solid_end; i++) {
@@ -144,12 +142,14 @@ void find_neighbors_uniform_grid_v3(Simulation* simulation) {
         simulation->sand_particle_cell_id[i].second = cell_id;
     }
 
+    counting_sort_v2(simulation);
+    /*
     std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
         [](const auto& a, const auto& b)
         { 
             return a.second < b.second;
         }
-    );
+    );*/
 
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 
