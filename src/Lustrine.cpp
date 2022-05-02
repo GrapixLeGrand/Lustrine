@@ -68,9 +68,14 @@ void init_simulation(
 
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
-    
+
     simulation->simulate_fun = simulate_sand_v2;
 
+    simulation->subdivision = subdivision;
+    simulation->parameters_copy = *parameters;
+    simulation->spawner.num_sources = 0;
+    simulation->spawner.state = true;
+    
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
 
@@ -213,6 +218,11 @@ void init_simulation(
     
     }// end solids
 
+    simulation->num_remaining_sand_particles = simulation->ptr_solid_ordered_end - simulation->ptr_sand_end;//TODO check this
+    simulation->spawner.state = simulation->num_remaining_sand_particles > 0 ? true : false;
+
+    int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
+
     simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
     simulation->lambdas = std::vector<float>(simulation->num_sand_particles, 0.0f);
     simulation->neighbors = std::vector<std::vector<int>>(simulation->num_sand_particles, std::vector<int>{});
@@ -238,7 +248,7 @@ void init_simulation(
     simulation->num_grid_cells = (simulation->gridX) * (simulation->gridY) * (simulation->gridZ);
     simulation->particle_cell_index_to_index = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
     simulation->positions_star_copy = std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
-    simulation->cell_indices = std::vector<std::pair<int, int>>(simulation->num_grid_cells, std::make_pair(0, 0));
+    simulation->cell_indices = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
 
     //uniform grid
     simulation->uniform_gird_cells = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
@@ -442,13 +452,39 @@ void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Ch
 
 
 void simulate(Simulation* simulation, float dt) {
+
+    for (int i = 0; i < simulation->spawner.num_sources; i++) {
+        if (simulation->spawner.timers[i] > simulation->spawner.frequencies[i]) {
+            Chunk& pattern = simulation->spawner.patterns[i];
+            if (simulation->num_remaining_sand_particles < pattern.num_particles && simulation->spawner.source_state[i]) {
+                continue;
+            }
+            
+            memcpy(simulation->positions + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+            memcpy(simulation->positions_star + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+
+            int end_ptr_tmp = simulation->ptr_sand_end;
+            simulation->ptr_sand_end += pattern.num_particles;
+            simulation->num_remaining_sand_particles -= pattern.num_particles;
+
+            for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
+                simulation->velocities[j] = simulation->spawner.directions[i];
+            }
+
+        }
+    }
+
     Profiling::start_counter(0);
     simulation->simulate_fun(simulation, dt);
     Profiling::stop_counter(0);
+
+    for (int i = 0; i < simulation->spawner.num_sources; i++) {
+        simulation->spawner.timers[i] += dt;
+    }
 }
 
 
-int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos, bool include_solid) {
 
     int counter = 0;
     int min_x = 0, min_y = 0, min_z = 0;
@@ -468,14 +504,34 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
     max_y = (int) max_pos.y;
     max_z = (int) max_pos.z;
 
-    for (int y = min_y; y < max_y; y++) {
-        for (int x = min_x; x < max_x; x++) {
-            for (int z = min_z; z < max_z; z++) {
-                int cell_id =
-                    y * simulation->gridX * simulation->gridZ +
-                    x * simulation->gridZ +
-                    z;
-                counter += simulation->uniform_gird_cells[cell_id].size();
+    if (include_solid) {
+        for (int y = min_y; y < max_y; y++) {
+            for (int x = min_x; x < max_x; x++) {
+                for (int z = min_z; z < max_z; z++) {
+                    int cell_id =
+                        y * simulation->gridX * simulation->gridZ +
+                        x * simulation->gridZ +
+                        z;
+                    counter += simulation->uniform_gird_cells[cell_id].size();
+                }
+            }
+        }
+    } else {
+        for (int y = min_y; y < max_y; y++) {
+            for (int x = min_x; x < max_x; x++) {
+                for (int z = min_z; z < max_z; z++) {
+                    int cell_id =
+                        y * simulation->gridX * simulation->gridZ +
+                        x * simulation->gridZ +
+                        z;
+                    
+                    const int size = simulation->uniform_gird_cells[cell_id].size();
+                    for (int i = 0; i < size; i++) {
+                        if (simulation->uniform_gird_cells[cell_id][i] < simulation->ptr_sand_end) {
+                            counter++;
+                        }
+                    }
+                }
             }
         }
     }
@@ -483,6 +539,19 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
     return counter;
 }
 
+
+void add_particle_spawner(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq) {
+
+    Chunk chunk;
+    init_chunk_from_grid_subdivision(&simulation->parameters_copy, &chunk, pattern, Lustrine::MaterialType::SAND, simulation->subdivision);
+    simulation->spawner.num_sources++;
+    simulation->spawner.patterns.push_back(chunk);
+    simulation->spawner.directions.push_back(direction);
+    simulation->spawner.timers.push_back(0.0);
+    simulation->spawner.frequencies.push_back(freq);
+    simulation->spawner.source_state.push_back(true);
+
+}
 
 
 };

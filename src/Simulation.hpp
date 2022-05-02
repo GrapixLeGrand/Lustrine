@@ -89,6 +89,16 @@ struct SimulationParameters {
 
 };
 
+struct ParticleSpawner {
+    std::vector<Chunk> patterns;
+    std::vector<glm::vec3> directions;
+    std::vector<float> frequencies; //1/60 means 60 fps spawning
+    std::vector<float> timers;
+    std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
+    bool state;//whether or not the spawner is active RO!
+    int num_sources;
+};
+
 struct Simulation {
 
     Simulate_fun simulate_fun = nullptr;
@@ -96,6 +106,8 @@ struct Simulation {
     W_fun W = nullptr;//pointer to function representing the kernel
     gradW_fun gradW = nullptr;//pointer to function representing the gradient of the kernel
 
+    SimulationParameters parameters_copy;
+    int subdivision;
     float particleRadius;
     float particleDiameter;
     float kernelRadius;
@@ -186,7 +198,7 @@ struct Simulation {
     std::vector<Grid> grids_sand;
     std::vector<glm::vec3> grids_initial_positions_sand;
     std::vector<Chunk> chunks_sand;//all the chunks of sands
-
+    int num_remaining_sand_particles;
     //utils
     glm::vec3* positions_tmp = nullptr;
 
@@ -194,6 +206,8 @@ struct Simulation {
     glm::vec3 character_pos = glm::vec3(0.0f);
     bool attract_flag = false;
     bool blow_flag = false;
+
+    ParticleSpawner spawner;
 
 };
 

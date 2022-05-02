@@ -50,13 +50,13 @@ int main(void) {
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (5);
-    std::vector<glm::vec3> sand_grids_positions (5);
+    std::vector<Lustrine::Grid> sand_grids (4);
+    std::vector<glm::vec3> sand_grids_positions (4);
     sand_grids_positions[0] = {0, 0, 0};
     sand_grids_positions[1] = {20, 0, 20};
     sand_grids_positions[2] = {0, 0, 20};
     sand_grids_positions[3] = {20, 0, 0};
-    sand_grids_positions[4] = {10, 0, 10};
+    
 
     std::vector<Lustrine::Grid> solid_grids (1);
     std::vector<glm::vec3> solid_grids_positions (1);
@@ -87,13 +87,15 @@ int main(void) {
     //glm::mat4 planeModel = glm::mat4(1.0f);
     float factor = 1.0f;
 
-    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
+    Lustrine::Grid test_grid;
+    Lustrine::init_grid_box(&parameters, &test_grid, 5, 5, 5, {5, 20, 5}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::add_particle_spawner(&simulation, &test_grid, {0, -1, 0}, 1.0f / 60.f);
 
-        
+    while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
-        std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10)) << " particles detected :)\n";
+        std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
 
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
         solidParticlesPipeline.updatePositions(simulation.positions_solid, simulation.num_solid_particles);
