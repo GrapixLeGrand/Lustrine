@@ -64,7 +64,7 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
     
-    //Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
@@ -75,7 +75,7 @@ int main(void) {
         &parameters,
         &simulation,
         sand_grids,
-        solid_grids_tmp
+        solid_grids
     );
 
     ParticlesPipelineSate sandParticlesPipeline(engine, simulation.positions, simulation.colors, simulation.num_sand_particles);
@@ -89,15 +89,15 @@ int main(void) {
 
     Lustrine::Grid test_grid;
     init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
-    //Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 2.f, -1);
+    Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 8.f, -1);
     Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {60, 5, 60});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
-        std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
+        //std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
         std::cout << simulation.ptr_sand_end << std::endl;
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
         sandParticlesPipeline.updateColors(simulation.colors, simulation.num_sand_particles);
