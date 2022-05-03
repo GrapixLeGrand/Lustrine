@@ -506,6 +506,7 @@ void simulate(Simulation* simulation, float dt) {
                 simulation->positions_star[evicted] = simulation->positions_star[simulation->ptr_sand_end - 1];
                 simulation->velocities[evicted] = simulation->velocities[simulation->ptr_sand_end - 1];
                 simulation->ptr_sand_end--;
+                simulation->num_sand_particles--;
 
             }
         }
@@ -597,9 +598,9 @@ void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_
     max_y = (int) max_indices.y;
     max_z = (int) max_indices.z;
 
-    for (int y = min_y; y < max_y; y++) {
-        for (int x = min_x; x < max_x; x++) {
-            for (int z = min_z; z < max_z; z++) {
+    for (int y = min_y; y <= max_y; y++) {
+        for (int x = min_x; x <= max_x; x++) {
+            for (int z = min_z; z <= max_z; z++) {
                 int cell_id =
                     y * simulation->gridX * simulation->gridZ +
                     x * simulation->gridZ +

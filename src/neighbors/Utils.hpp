@@ -29,7 +29,7 @@ inline static int get_cell_id(const Simulation* simulation, glm::vec3 position) 
             ((int) position.y) * simulation->gridX * simulation->gridZ +
             ((int) position.x) * simulation->gridZ +
             ((int) position.z);
-            
+    cell_id = glm::clamp(cell_id, 0, simulation->num_grid_cells - 1);
     return cell_id;
 }
 

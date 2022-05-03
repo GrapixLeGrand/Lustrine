@@ -58,11 +58,11 @@ int main(void) {
     sand_grids_positions[3] = {20, 0, 0};
     
 
-    std::vector<Lustrine::Grid> solid_grids (0);
+    std::vector<Lustrine::Grid> solid_grids (1);
     std::vector<glm::vec3> solid_grids_positions (1);
-    solid_grids_positions[0] = {10, 0, 10};
+    solid_grids_positions[0] = {10, 1, 10};
 
-    //Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
     
     //Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
@@ -88,9 +88,9 @@ int main(void) {
     float factor = 1.0f;
 
     Lustrine::Grid test_grid;
-    Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {5, 30, 5}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 30.f, 10000);
-    Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {5, 2, 5});
+    Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {60, 5, 60});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 
