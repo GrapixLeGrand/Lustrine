@@ -192,13 +192,13 @@ void find_neighbors_uniform_grid_v2(Simulation* simulation) {
         simulation->sand_particle_cell_id[i].second = cell_id;
     }
 
-    counting_sort_v2(simulation);
-    /*std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
+    //counting_sort_v2(simulation);
+    std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(), 
         [](const auto& a, const auto& b)
         { 
             return a.second < b.second;
         }
-    );*/
+    );
 
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 

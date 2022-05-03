@@ -69,7 +69,7 @@ void init_simulation(
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
 
-    simulation->simulate_fun = simulate_sand_v2;
+    simulation->simulate_fun = simulate_sand;
 
     simulation->subdivision = subdivision;
     simulation->parameters_copy = *parameters;
@@ -235,7 +235,7 @@ void init_simulation(
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
     simulation->kernelRadius = 2.5f * parameters->particleRadius;
-    simulation->cell_size = 1.0f * simulation->kernelRadius;
+    simulation->cell_size = 2.5f * simulation->kernelRadius;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);
@@ -256,7 +256,7 @@ void init_simulation(
 
     //perf test
     simulation->uniform_grid_cells_static_saved = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
-    simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(simulation->num_sand_particles, std::make_pair(0, 0));
+    simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
     simulation->position_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
     simulation->position_star_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
     simulation->velocity_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles]; //std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
@@ -280,6 +280,14 @@ void clean_simulation(Simulation* simulation) {
     delete[] simulation->positions_star;
     delete[] simulation->colors;
     delete[] simulation->positions_tmp;
+
+    simulation->spawner.capacities.clear();
+    simulation->spawner.directions.clear();
+    simulation->spawner.frequencies.clear();
+    simulation->spawner.patterns.clear();
+    simulation->spawner.timers.clear();
+    simulation->spawner.num_sources = 0;
+
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type) {
@@ -463,14 +471,21 @@ void simulate(Simulation* simulation, float dt) {
             
             memcpy(simulation->positions + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
             memcpy(simulation->positions_star + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+            //memset(simulation->colors + simulation->ptr_sand_end, simulation->spawner.patterns[i].color);
 
             int end_ptr_tmp = simulation->ptr_sand_end;
             simulation->ptr_sand_end += pattern.num_particles;
             simulation->num_remaining_sand_particles -= pattern.num_particles;
+            simulation->num_sand_particles += pattern.num_particles;
 
+            glm::vec3& direction = simulation->spawner.directions[i];
             for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
-                simulation->velocities[j] = simulation->spawner.directions[i];
+                simulation->velocities[j] = direction;
+                simulation->colors[j] = simulation->spawner.patterns[i].color;
             }
+
+            simulation->velocities[end_ptr_tmp + pattern.num_particles / 2] += 0.001f * glm::vec3(1.0); //small pertuabation to avoid particles stacking
+            simulation->spawner.timers[i] = 0.0f;
 
         }
     }
@@ -541,7 +556,7 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
 }
 
 
-void add_particle_spawner(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq) {
+void add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity) {
 
     Chunk chunk;
     init_chunk_from_grid_subdivision(&simulation->parameters_copy, &chunk, pattern, Lustrine::MaterialType::SAND, simulation->subdivision);
@@ -551,6 +566,11 @@ void add_particle_spawner(Simulation* simulation, const Grid* pattern, glm::vec3
     simulation->spawner.timers.push_back(0.0);
     simulation->spawner.frequencies.push_back(freq);
     simulation->spawner.source_state.push_back(true);
+    simulation->spawner.capacities.push_back(capacity);
+
+}
+
+void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
 
 }
 

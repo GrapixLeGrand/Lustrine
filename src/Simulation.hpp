@@ -89,11 +89,17 @@ struct SimulationParameters {
 
 };
 
+struct ParticleSink {
+    std::vector<int> sink_cells;
+    bool enabled = false;
+};
+
 struct ParticleSpawner {
     std::vector<Chunk> patterns;
     std::vector<glm::vec3> directions;
     std::vector<float> frequencies; //1/60 means 60 fps spawning
     std::vector<float> timers;
+    std::vector<int> capacities;
     std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
     bool state;//whether or not the spawner is active RO!
     int num_sources;

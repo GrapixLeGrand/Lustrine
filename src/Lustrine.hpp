@@ -88,7 +88,8 @@ extern void LUSTRINE_EXPORT init_chunk_from_grid(const SimulationParameters* par
 extern void LUSTRINE_EXPORT init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision);
 extern void LUSTRINE_EXPORT init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
 
-extern void LUSTRINE_EXPORT add_particle_spawner(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq);
+extern void LUSTRINE_EXPORT add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity);
+extern void LUSTRINE_EXPORT add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos);
 
 /**
  * @brief returns how many particles are in a certain given AABB

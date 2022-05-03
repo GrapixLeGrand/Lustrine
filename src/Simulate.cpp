@@ -625,12 +625,12 @@ void simulate_sand_v2(Simulation* simulation, float dt) {
         velocities[simulation->ptr_sand_start] += glm::vec3(0.1, 0.1, 0.1);
         perturbation = false;
     }*/
-    /*
+    
     static bool perturbation = true;
     if (perturbation) {
         simulation->velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
         perturbation = false;
-    }*/
+    }
 }
 
 }
