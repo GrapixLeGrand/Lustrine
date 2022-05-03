@@ -104,6 +104,19 @@ struct ParticleSource {
     int num_sources;
 };
 
+struct WindSystem {
+    glm::vec3 direction;
+    float magnitude;//read only
+    float peak;//max magnitude reached by the wind
+    
+    float freq_blow;//frequency in seconds of interval between blows
+    float timer_blow;//dedicated timer
+
+    float t1;//time to reach peak magnitude
+    float t2;//time to reach 0 magniture again
+};
+
+
 struct Simulation {
 
     Simulate_fun simulate_fun = nullptr;
@@ -214,6 +227,8 @@ struct Simulation {
 
     ParticleSource* source;
     ParticleSink* sink;
+    WindSystem* wind_system;
+
 };
 
 

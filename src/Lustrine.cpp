@@ -77,7 +77,11 @@ void init_simulation(
     simulation->source = new ParticleSource();
     simulation->source->num_sources = 0;
     simulation->sink = new ParticleSink();
-    
+    simulation->wind_system = new WindSystem();
+    simulation->wind_system->direction = glm::vec3(0, 0, -1);
+    simulation->wind_system->magnitude = 1.0f;
+
+
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
 
@@ -284,6 +288,7 @@ void clean_simulation(Simulation* simulation) {
 
     delete simulation->source;
     delete simulation->sink;
+    delete simulation->wind_system;
 
 }
 
@@ -309,6 +314,42 @@ void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, in
     grid->dynamic_solid = false;
 
 }
+
+
+void init_grid_box_random(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type, float probability) {
+
+    grid->type = type;
+    grid->num_grid_cells = X * Y * Z;
+    grid->num_occupied_grid_cells = 0;
+    grid->X = X;
+    grid->Y = Y;
+    grid->Z = Z;
+    grid->has_one_color_per_cell = false;
+
+    grid->cells = std::vector<bool>(grid->num_grid_cells, true);
+
+    for (int y = 0; y < Y; y++) {
+        for (int x = 0; x < X; x++) {
+            for (int z = 0; z < Z; z++) {
+                float p = ((float) rand()) / RAND_MAX;
+                grid->cells[y * X * Z + x * Z + z] = p <= probability;
+                grid->num_occupied_grid_cells++;
+            }
+        }
+    }
+
+    grid->color = color;
+    
+    grid->position = position;
+
+    const float diameter = parameters->particleDiameter;
+    const float radius = parameters->particleRadius;
+
+    grid->sparse_solid = true;
+    grid->dynamic_solid = false;
+
+}
+
 
 void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type) {
     
@@ -579,6 +620,9 @@ void add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 
     simulation->source->timers.push_back(0.0);
     simulation->source->frequencies.push_back(freq);
     simulation->source->source_state.push_back(true);
+    if (capacity < 0) {
+        capacity = std::numeric_limits<int>::max();
+    }
     simulation->source->capacities.push_back(capacity);
     simulation->source->spawned.push_back(0);
 
@@ -657,5 +701,10 @@ void remove_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 m
 
 }
 
+void update_wind_system(WindSystem* wind_system, float dt) {
+
+    
+
+}
 
 };

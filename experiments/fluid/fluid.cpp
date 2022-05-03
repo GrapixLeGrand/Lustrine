@@ -57,7 +57,7 @@ int main(void) {
     sand_grids_positions[2] = {0, 0, 20};
     sand_grids_positions[3] = {20, 0, 0};
     
-
+    std::vector<Lustrine::Grid> solid_grids_tmp (0);
     std::vector<Lustrine::Grid> solid_grids (1);
     std::vector<glm::vec3> solid_grids_positions (1);
     solid_grids_positions[0] = {10, 1, 10};
@@ -75,7 +75,7 @@ int main(void) {
         &parameters,
         &simulation,
         sand_grids,
-        solid_grids
+        solid_grids_tmp
     );
 
     ParticlesPipelineSate sandParticlesPipeline(engine, simulation.positions, simulation.colors, simulation.num_sand_particles);
@@ -88,8 +88,9 @@ int main(void) {
     float factor = 1.0f;
 
     Lustrine::Grid test_grid;
-    Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 30.f, 10000);
+    init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
+    //Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 2.f, -1);
     Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {60, 5, 60});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {

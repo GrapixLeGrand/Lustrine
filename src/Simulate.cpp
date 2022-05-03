@@ -167,7 +167,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     //integration
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
-        velocities[i] += simulation->gravity * dt;
+        velocities[i] += (simulation->gravity + simulation->wind_system->direction * simulation->wind_system->magnitude) * dt;
         //        if (attract_flag) {
         //            glm::vec3 p_to_cp = character_pos - positions[i];
         ////        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
