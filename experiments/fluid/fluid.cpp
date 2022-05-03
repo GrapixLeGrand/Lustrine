@@ -89,7 +89,8 @@ int main(void) {
 
     Lustrine::Grid test_grid;
     Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {5, 30, 5}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::add_particle_spawner(&simulation, &test_grid, {0, -1, 0}, 1.0f / 30.f);
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 30.f, 10000);
+    Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {5, 2, 5});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 

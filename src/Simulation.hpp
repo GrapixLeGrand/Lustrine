@@ -12,7 +12,6 @@
 #include <vector> 
 #include "BulletPhysics.hpp"
 
-
 namespace Lustrine {
 
 struct Simulation;
@@ -91,15 +90,15 @@ struct SimulationParameters {
 
 struct ParticleSink {
     std::vector<int> sink_cells;
-    bool enabled = false;
 };
 
-struct ParticleSpawner {
+struct ParticleSource {
     std::vector<Chunk> patterns;
     std::vector<glm::vec3> directions;
     std::vector<float> frequencies; //1/60 means 60 fps spawning
     std::vector<float> timers;
     std::vector<int> capacities;
+    std::vector<int> spawned;
     std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
     bool state;//whether or not the spawner is active RO!
     int num_sources;
@@ -213,8 +212,8 @@ struct Simulation {
     bool attract_flag = false;
     bool blow_flag = false;
 
-    ParticleSpawner spawner;
-
+    ParticleSource* source;
+    ParticleSink* sink;
 };
 
 

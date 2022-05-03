@@ -73,8 +73,10 @@ void init_simulation(
 
     simulation->subdivision = subdivision;
     simulation->parameters_copy = *parameters;
-    simulation->spawner.num_sources = 0;
-    simulation->spawner.state = true;
+
+    simulation->source = new ParticleSource();
+    simulation->source->num_sources = 0;
+    simulation->sink = new ParticleSink();
     
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
@@ -219,7 +221,6 @@ void init_simulation(
     }// end solids
 
     simulation->num_remaining_sand_particles = simulation->ptr_solid_ordered_end - simulation->ptr_sand_end;//TODO check this
-    simulation->spawner.state = simulation->num_remaining_sand_particles > 0 ? true : false;
 
     int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
 
@@ -281,12 +282,8 @@ void clean_simulation(Simulation* simulation) {
     delete[] simulation->colors;
     delete[] simulation->positions_tmp;
 
-    simulation->spawner.capacities.clear();
-    simulation->spawner.directions.clear();
-    simulation->spawner.frequencies.clear();
-    simulation->spawner.patterns.clear();
-    simulation->spawner.timers.clear();
-    simulation->spawner.num_sources = 0;
+    delete simulation->source;
+    delete simulation->sink;
 
 }
 
@@ -462,10 +459,10 @@ void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Ch
 
 void simulate(Simulation* simulation, float dt) {
 
-    for (int i = 0; i < simulation->spawner.num_sources; i++) {
-        if (simulation->spawner.timers[i] > simulation->spawner.frequencies[i]) {
-            Chunk& pattern = simulation->spawner.patterns[i];
-            if (simulation->num_remaining_sand_particles < pattern.num_particles && simulation->spawner.source_state[i]) {
+    for (int i = 0; i < simulation->source->num_sources; i++) {
+        if (simulation->source->spawned[i] < simulation->source->capacities[i] && simulation->source->timers[i] > simulation->source->frequencies[i]) {
+            Chunk& pattern = simulation->source->patterns[i];
+            if (simulation->num_remaining_sand_particles < pattern.num_particles && simulation->source->source_state[i]) {
                 continue;
             }
             
@@ -478,15 +475,15 @@ void simulate(Simulation* simulation, float dt) {
             simulation->num_remaining_sand_particles -= pattern.num_particles;
             simulation->num_sand_particles += pattern.num_particles;
 
-            glm::vec3& direction = simulation->spawner.directions[i];
+            glm::vec3& direction = simulation->source->directions[i];
             for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
                 simulation->velocities[j] = direction;
-                simulation->colors[j] = simulation->spawner.patterns[i].color;
+                simulation->colors[j] = simulation->source->patterns[i].color;
             }
 
             simulation->velocities[end_ptr_tmp + pattern.num_particles / 2] += 0.001f * glm::vec3(1.0); //small pertuabation to avoid particles stacking
-            simulation->spawner.timers[i] = 0.0f;
-
+            simulation->source->timers[i] = 0.0f;
+            simulation->source->spawned[i] += pattern.num_particles;
         }
     }
 
@@ -494,9 +491,27 @@ void simulate(Simulation* simulation, float dt) {
     simulation->simulate_fun(simulation, dt);
     Profiling::stop_counter(0);
 
-    for (int i = 0; i < simulation->spawner.num_sources; i++) {
-        simulation->spawner.timers[i] += dt;
+    for (int i = 0; i < simulation->source->num_sources; i++) {
+        simulation->source->timers[i] += dt;
     }
+
+    for (int i = 0; i < simulation->sink->sink_cells.size(); i++) {
+
+        std::vector<int>& cell = simulation->uniform_gird_cells[i];
+        for (int j = 0; j < cell.size(); j++) {
+            int evicted = cell[j];
+            if (cell[j] < simulation->ptr_sand_end) {
+
+                simulation->positions[evicted] = simulation->positions[simulation->ptr_sand_end - 1];
+                simulation->positions_star[evicted] = simulation->positions_star[simulation->ptr_sand_end - 1];
+                simulation->velocities[evicted] = simulation->velocities[simulation->ptr_sand_end - 1];
+                simulation->ptr_sand_end--;
+
+            }
+        }
+
+    }
+
 }
 
 
@@ -506,19 +521,16 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
     int min_x = 0, min_y = 0, min_z = 0;
     int max_x = 0, max_y = 0, max_z = 0;
 
-    min_pos = glm::clamp(min_pos, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
-    min_pos /= simulation->cell_size;
+    CellIndices min_indices = get_cell_indices(simulation, min_pos);
+    min_x = (int) min_indices.x;
+    min_y = (int) min_indices.y;
+    min_z = (int) min_indices.z;
 
-    min_x = (int) min_pos.x;
-    min_y = (int) min_pos.y;
-    min_z = (int) min_pos.z;
+    CellIndices max_indices = get_cell_indices(simulation, max_pos);
 
-    max_pos = glm::clamp(max_pos, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
-    max_pos /= simulation->cell_size;
-
-    max_x = (int) max_pos.x;
-    max_y = (int) max_pos.y;
-    max_z = (int) max_pos.z;
+    max_x = (int) max_indices.x;
+    max_y = (int) max_indices.y;
+    max_z = (int) max_indices.z;
 
     if (include_solid) {
         for (int y = min_y; y < max_y; y++) {
@@ -560,17 +572,87 @@ void add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 
 
     Chunk chunk;
     init_chunk_from_grid_subdivision(&simulation->parameters_copy, &chunk, pattern, Lustrine::MaterialType::SAND, simulation->subdivision);
-    simulation->spawner.num_sources++;
-    simulation->spawner.patterns.push_back(chunk);
-    simulation->spawner.directions.push_back(direction);
-    simulation->spawner.timers.push_back(0.0);
-    simulation->spawner.frequencies.push_back(freq);
-    simulation->spawner.source_state.push_back(true);
-    simulation->spawner.capacities.push_back(capacity);
+    simulation->source->num_sources++;
+    simulation->source->patterns.push_back(chunk);
+    simulation->source->directions.push_back(direction);
+    simulation->source->timers.push_back(0.0);
+    simulation->source->frequencies.push_back(freq);
+    simulation->source->source_state.push_back(true);
+    simulation->source->capacities.push_back(capacity);
+    simulation->source->spawned.push_back(0);
 
 }
 
 void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+    int min_x = 0, min_y = 0, min_z = 0;
+    int max_x = 0, max_y = 0, max_z = 0;
+
+    CellIndices min_indices = get_cell_indices(simulation, min_pos);
+    min_x = (int) min_indices.x;
+    min_y = (int) min_indices.y;
+    min_z = (int) min_indices.z;
+
+    CellIndices max_indices = get_cell_indices(simulation, max_pos);
+    max_x = (int) max_indices.x;
+    max_y = (int) max_indices.y;
+    max_z = (int) max_indices.z;
+
+    for (int y = min_y; y < max_y; y++) {
+        for (int x = min_x; x < max_x; x++) {
+            for (int z = min_z; z < max_z; z++) {
+                int cell_id =
+                    y * simulation->gridX * simulation->gridZ +
+                    x * simulation->gridZ +
+                    z;
+                simulation->sink->sink_cells.push_back(cell_id);
+            }
+        }
+    }
+
+    std::sort(simulation->sink->sink_cells.begin(), simulation->sink->sink_cells.end());
+
+}
+
+void remove_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+    int min_x = 0, min_y = 0, min_z = 0;
+    int max_x = 0, max_y = 0, max_z = 0;
+
+    CellIndices min_indices = get_cell_indices(simulation, min_pos);
+    min_x = (int) min_indices.x;
+    min_y = (int) min_indices.y;
+    min_z = (int) min_indices.z;
+
+    CellIndices max_indices = get_cell_indices(simulation, max_pos);
+
+    max_x = (int) max_indices.x;
+    max_y = (int) max_indices.y;
+    max_z = (int) max_indices.z;
+
+    std::vector<int> temp;
+    std::vector<int> sink_cells_diff;
+    sink_cells_diff.reserve(simulation->sink->sink_cells.size());
+    for (int y = min_y; y < max_y; y++) {
+        for (int x = min_x; x < max_x; x++) {
+            for (int z = min_z; z < max_z; z++) {
+                int cell_id =
+                    y * simulation->gridX * simulation->gridZ +
+                    x * simulation->gridZ +
+                    z;
+                temp.push_back(cell_id);
+            }
+        }
+    }
+
+    std::sort(temp.begin(), temp.end());
+    std::set_difference(
+        simulation->sink->sink_cells.begin(),
+        simulation->sink->sink_cells.end(), 
+        temp.begin(),
+        temp.end(),
+        std::back_inserter(sink_cells_diff)
+    );
+
+    simulation->sink->sink_cells = sink_cells_diff;
 
 }
 

@@ -11,6 +11,5 @@ namespace Lustrine {
         position.z = (int) position.z;
         return position;
     }
-
     
 }
