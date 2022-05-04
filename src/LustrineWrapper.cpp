@@ -372,6 +372,15 @@ namespace Wrapper {
 		return Lustrine::Bullet::get_body_lin_damping(&simulation->bullet_physics_simulation, body);
 	}
 
+	/**
+	 * @brief set player's bullet id
+	 *
+	 */
+	void set_player_id(int id)
+	{
+		simulation->bullet_physics_simulation.player_id = id;
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

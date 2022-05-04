@@ -69,7 +69,7 @@ void init_simulation(
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
 
-    simulation->simulate_fun = simulate_sand_v2;
+    simulation->simulate_fun = simulate_sand;
 
     simulation->subdivision = subdivision;
     simulation->parameters_copy = *parameters;
@@ -234,7 +234,7 @@ void init_simulation(
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
     simulation->kernelRadius = 2.5f * parameters->particleRadius;
-    simulation->cell_size = 0.7f * simulation->kernelRadius;
+    simulation->cell_size = 3.1f * simulation->kernelRadius;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);

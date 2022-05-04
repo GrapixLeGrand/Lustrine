@@ -129,6 +129,8 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_damping(int body, float linear, float angular);
 	extern "C" LUSTRINE_WRAPPER_EXPORT float get_body_damping(int body);
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_id(int id);
+
 	/**
 	 * @brief For particles interactions
 	 */
