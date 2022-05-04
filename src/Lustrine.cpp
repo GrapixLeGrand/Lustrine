@@ -79,7 +79,7 @@ void init_simulation(
     simulation->sink = new ParticleSink();
     simulation->wind_system = new WindSystem();
     simulation->wind_system->direction = glm::vec3(0, 0, -1);
-    simulation->wind_system->magnitude = 1.0f;
+    simulation->wind_system->magnitude = 5.0f;
 
 
     std::vector<glm::vec3> grids_sand_positions_arg;
@@ -548,6 +548,7 @@ void simulate(Simulation* simulation, float dt) {
                 simulation->velocities[evicted] = simulation->velocities[simulation->ptr_sand_end - 1];
                 simulation->ptr_sand_end--;
                 simulation->num_sand_particles--;
+                simulation->num_remaining_sand_particles++;
 
             }
         }

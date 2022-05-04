@@ -88,9 +88,9 @@ int main(void) {
     float factor = 1.0f;
 
     Lustrine::Grid test_grid;
-    init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
-    Lustrine::init_grid_box(&parameters, &test_grid, 5, 1, 5, {30, 30, 30}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 8.f, -1);
+    //init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
+    Lustrine::init_grid_box(&parameters, &test_grid, 20, 1, 20, {25, 30, 25}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 16.f, -1);
     Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {60, 5, 60});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
