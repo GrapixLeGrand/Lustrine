@@ -203,7 +203,6 @@ struct Simulation {
     glm::vec3* positions_tmp = nullptr;
 
     //for blowing, attracting sand
-    glm::vec3 character_pos = glm::vec3(0.0f);
     bool attract_flag = false;
     bool blow_flag = false;
 

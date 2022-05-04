@@ -259,8 +259,7 @@ namespace Wrapper {
 		grid_to_grid_wrapper(&original_grid, wrapped);
 	}
 
-	void simulate(float dt, Vec3 character_pos, bool attract_flag, bool blow_flag) {
-		simulation->character_pos = wrapper_to_glm(character_pos);
+	void simulate(float dt, bool attract_flag, bool blow_flag) {
 		simulation->attract_flag = attract_flag;
 		simulation->blow_flag = blow_flag;
 		Lustrine::simulate(simulation, dt); //, wrapper_to_glm(character_pos), attract_flag, blow_flag);
