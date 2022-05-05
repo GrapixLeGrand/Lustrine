@@ -380,6 +380,11 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.player_id = id;
 	}
 
+	void set_player_box_scale(Vec3 scale)
+	{
+		simulation->bullet_physics_simulation.player_box_scale = wrapper_to_glm(scale);
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

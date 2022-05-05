@@ -539,6 +539,13 @@ namespace Bullet {
 		//simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
 	}
 
+	bool particle_collide_with_player(Simulation* simulation, glm::vec3 particle_position, glm::vec3 player_position) {
+
+		// FIXME: very ad-hoc
+		float particle_radius = 0.1f * 0.625f;
+		glm::vec3 possible_collision_scale = simulation->player_box_scale + glm::vec3(particle_radius * 4.0f);
+		return glm::all(glm::lessThanEqual(glm::abs(particle_position - player_position), possible_collision_scale * 0.5f)); // - simulation->particleRadius;
+	}
 	/**
 	 * @brief Set the particles box colliders positions object (those that are allocated)
 	 * 
@@ -552,8 +559,8 @@ namespace Bullet {
 		simulation->player_position = Lustrine::Bullet::get_body_position(simulation, simulation->player_id);
 		int num_close = 0;
 		for (int i = start_ptr; i < end_ptr; i++) {
-			glm::vec3 tmp = particles[i] - simulation->player_position;
-			if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {// (glm::dot(tmp, tmp) < simulation->player_box_radius * simulation->player_box_radius) {
+			// if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {
+			if (particle_collide_with_player(simulation, particles[i], simulation->player_position)) {
 				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setActivationState(ACTIVE_TAG);
 				btTransform t;
 				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->getMotionState()->getWorldTransform(t);

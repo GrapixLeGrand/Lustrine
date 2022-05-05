@@ -27,10 +27,13 @@ namespace Bullet {
 		btBoxShape* unit_box_shape; //unit box shape
 		
 		int num_bodies = 0;
+		
+		// for dynamically adding boxes to particles around player
 		int num_particles_allocated = 100;//number of boxes colliders around the player
 		int player_id = 0;
 		glm::vec3 player_position = glm::vec3(0.0f);
 		float player_box_radius = 4.0f;//radius up to which we try to add boxes
+		glm::vec3 player_box_scale;
 
 
 		bool allocated_particles_bounding_boxes = false;//FOR NOW A SINGLE ALLOCATION IS POSSIBLE
