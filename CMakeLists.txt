@@ -20,12 +20,25 @@ if (WIN32)
 endif()
 
 if (WIN32)
-#set(CMAKE_CXX_FLAGS "-ffast-math ${CMAKE_CXX_FLAGS}")
-#message(${CMAKE_CXX_FLAGS})
-#add_compile_options(-ffast-math)
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    message(FATAL "cannot use MSCV")
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
+    else()
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2 /arch:AVX2 /fp:fast /FA") #-mfma -ffp-contract=fast") #
+    endif()
+
+endif()
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("using predefined flags")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /clang:-ffast-math -mavx2 ") #-mfma -ffp-contract=fast") #
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
+    else()
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-ffast-math /clang:-mavx2 /clang:-mfma") #-mfma -ffp-contract=fast") #
+    endif()
+   
 endif()
 endif()
 

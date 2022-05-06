@@ -50,7 +50,7 @@ int main(void) {
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (2);
+    std::vector<Lustrine::Grid> sand_grids (0);
     std::vector<glm::vec3> sand_grids_positions (4);
     sand_grids_positions[0] = {0, 0, 0};
     sand_grids_positions[1] = {20, 0, 20};
@@ -64,8 +64,8 @@ int main(void) {
 
     Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
     
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[4], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
@@ -98,7 +98,7 @@ int main(void) {
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
         //std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
-        std::cout << simulation.ptr_sand_end << std::endl;
+        //std::cout << simulation.ptr_sand_end << std::endl;
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
         sandParticlesPipeline.updateColors(simulation.colors, simulation.num_sand_particles);
         solidParticlesPipeline.updatePositions(simulation.positions_solid, simulation.num_solid_particles);
