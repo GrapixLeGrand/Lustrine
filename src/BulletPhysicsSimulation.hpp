@@ -34,6 +34,7 @@ namespace Bullet {
 		glm::vec3 player_position = glm::vec3(0.0f);
 		float player_box_radius = 4.0f;//radius up to which we try to add boxes
 		glm::vec3 player_box_scale;
+		float particle_radius = 0.1f;
 
 
 		bool allocated_particles_bounding_boxes = false;//FOR NOW A SINGLE ALLOCATION IS POSSIBLE

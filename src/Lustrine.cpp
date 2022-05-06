@@ -75,7 +75,8 @@ void init_simulation(
     simulation->parameters_copy = *parameters;
     simulation->spawner.num_sources = 0;
     simulation->spawner.state = true;
-    
+    simulation->bullet_physics_simulation.particle_radius = parameters->particleRadius;
+
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
 

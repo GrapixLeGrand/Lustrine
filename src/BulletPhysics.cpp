@@ -541,9 +541,7 @@ namespace Bullet {
 
 	bool particle_collide_with_player(Simulation* simulation, glm::vec3 particle_position, glm::vec3 player_position) {
 
-		// FIXME: very ad-hoc
-		float particle_radius = 0.1f * 0.625f;
-		glm::vec3 possible_collision_scale = simulation->player_box_scale + glm::vec3(particle_radius * 4.0f);
+		glm::vec3 possible_collision_scale = simulation->player_box_scale + glm::vec3(simulation->particle_radius * 4.0f);
 		return glm::all(glm::lessThanEqual(glm::abs(particle_position - player_position), possible_collision_scale * 0.5f)); // - simulation->particleRadius;
 	}
 	/**
