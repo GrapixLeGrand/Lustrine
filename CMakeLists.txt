@@ -36,7 +36,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
     else()
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-ffast-math /clang:-mavx2 /clang:-mfma") #-mfma -ffp-contract=fast") #
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 -ffast-math -mavx2 -mfma -march=skylake") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
     endif()
    
 endif()
