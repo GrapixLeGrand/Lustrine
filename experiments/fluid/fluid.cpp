@@ -44,30 +44,30 @@ int main(void) {
     //////////////////////////////////////////////////////////////////////////////////////////
     Lustrine::Simulation simulation;
     Lustrine::SimulationParameters parameters;
-    parameters.X = 60.0f;
-    parameters.Y = 40.0f;
-    parameters.Z = 60.0f;
+    parameters.X = 40.0f;
+    parameters.Y = 30.0f;
+    parameters.Z = 40.0f;
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (4);
+    std::vector<Lustrine::Grid> sand_grids (2);
     std::vector<glm::vec3> sand_grids_positions (4);
     sand_grids_positions[0] = {0, 0, 0};
     sand_grids_positions[1] = {20, 0, 20};
     sand_grids_positions[2] = {0, 0, 20};
     sand_grids_positions[3] = {20, 0, 0};
     
-
+    std::vector<Lustrine::Grid> solid_grids_tmp (0);
     std::vector<Lustrine::Grid> solid_grids (1);
     std::vector<glm::vec3> solid_grids_positions (1);
-    solid_grids_positions[0] = {10, 0, 10};
+    solid_grids_positions[0] = {10, 1, 10};
 
-    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/fluid/models/chr_knight.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
     
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    //Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[4], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
 
 
@@ -88,16 +88,19 @@ int main(void) {
     float factor = 1.0f;
 
     Lustrine::Grid test_grid;
-    Lustrine::init_grid_box(&parameters, &test_grid, 5, 5, 5, {5, 20, 5}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    //Lustrine::add_particle_spawner(&simulation, &test_grid, {0, -1, 0}, 1.0f / 60.f);
+    //init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
+    Lustrine::init_grid_box(&parameters, &test_grid, 20, 1, 20, {25, 30, 25}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, -1, 0}, 1.0f / 16.f, -1);
+    Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {60, 5, 60});
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 
         //sim here
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
-        std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
-
+        //std::cout << Lustrine::query_cell_num_particles(&simulation, glm::vec3(0.0), glm::vec3(10), false) << " particles detected :)\n";
+        std::cout << simulation.ptr_sand_end << std::endl;
         sandParticlesPipeline.updatePositions(simulation.positions, simulation.num_sand_particles);
+        sandParticlesPipeline.updateColors(simulation.colors, simulation.num_sand_particles);
         solidParticlesPipeline.updatePositions(simulation.positions_solid, simulation.num_solid_particles);
 
         renderer->clear();

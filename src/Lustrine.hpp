@@ -88,7 +88,9 @@ extern void LUSTRINE_EXPORT init_chunk_from_grid(const SimulationParameters* par
 extern void LUSTRINE_EXPORT init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type, int subdivision);
 extern void LUSTRINE_EXPORT init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Chunk* chunk, const Grid* grid, MaterialType type);
 
-extern void LUSTRINE_EXPORT add_particle_spawner(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq);
+extern void LUSTRINE_EXPORT add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity);
+extern void LUSTRINE_EXPORT add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos);
+
 
 /**
  * @brief returns how many particles are in a certain given AABB
@@ -114,6 +116,7 @@ extern int LUSTRINE_EXPORT query_cell_num_particles(Simulation* simulation, glm:
  */
 extern void LUSTRINE_EXPORT init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type);
 extern void LUSTRINE_EXPORT init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 position, MaterialType type);
+extern void LUSTRINE_EXPORT init_grid_box_random(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type, float probability);
 
 //extern void fill_grid(Simulation* simulation);
 //extern float s_coor(const Simulation* simulation, float rl);
@@ -130,6 +133,8 @@ extern void LUSTRINE_EXPORT simulate(Simulation* simulation, float dt);
 
 //extern LUSTRINE_EXPORT int add_physics_grid_sparse_body();
 
+
+void update_wind_system(WindSystem* wind_system, float dt);
 
 
 };
