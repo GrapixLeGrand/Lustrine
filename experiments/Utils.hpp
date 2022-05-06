@@ -88,7 +88,19 @@ struct ParticlesPipelineSate {
 	 * @param new_size in num of particles (NOT bytes)
 	 */
 	void updatePositions(const glm::vec3* positions, size_t new_size) {
+		this->size = new_size;
 		particlesPositionsVBO->Update((const void*) positions, (size_t) new_size * 3 * 4);
+	}
+
+	/**
+	 * @brief 
+	 * 
+	 * @param positions 
+	 * @param new_size in num of particles (NOT bytes)
+	 */
+	void updateColors(const glm::vec4* colors, size_t new_size) {
+		this->size = new_size;
+		particlesColorsVBO->Update((const void*) colors, (size_t) new_size * sizeof(glm::vec4));
 	}
 
 	void draw(Levek::Renderer* renderer) {

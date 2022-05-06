@@ -12,7 +12,6 @@
 #include <vector> 
 #include "BulletPhysics.hpp"
 
-
 namespace Lustrine {
 
 struct Simulation;
@@ -89,15 +88,34 @@ struct SimulationParameters {
 
 };
 
-struct ParticleSpawner {
+struct ParticleSink {
+    std::vector<int> sink_cells;
+};
+
+struct ParticleSource {
     std::vector<Chunk> patterns;
     std::vector<glm::vec3> directions;
     std::vector<float> frequencies; //1/60 means 60 fps spawning
     std::vector<float> timers;
+    std::vector<int> capacities;
+    std::vector<int> spawned;
     std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
     bool state;//whether or not the spawner is active RO!
     int num_sources;
 };
+
+struct WindSystem {
+    glm::vec3 direction;
+    float magnitude;//read only
+    float peak;//max magnitude reached by the wind
+    
+    float freq_blow;//frequency in seconds of interval between blows
+    float timer_blow;//dedicated timer
+
+    float t1;//time to reach peak magnitude
+    float t2;//time to reach 0 magniture again
+};
+
 
 struct Simulation {
 
@@ -137,7 +155,7 @@ struct Simulation {
     float c_xsph = 0.1f;
     float epsilon_vorticity = 0.1f;
     
-    std::vector<glm::vec3> velocities;//array containing the velocities of each particles (sand only)
+    glm::vec3* velocities = nullptr;//array containing the velocities of each particles (sand only)
     std::vector<float> lambdas;
     std::vector<std::vector<int>> neighbors; //arrays of neighbor indices
     int gridX, gridY, gridZ; //sizes of the grid
@@ -154,7 +172,7 @@ struct Simulation {
     std::vector<std::vector<int>> uniform_grid_cells_static_saved;
     bool computed_static_particles = false;
     std::vector<std::pair<int, int>> sand_particle_cell_id;
-    std::vector<glm::vec3> velocity_tmp;
+    glm::vec3* velocity_tmp;
     glm::vec3* position_star_neighbor_tmp;
     glm::vec3* position_neighbor_tmp;
     //glm::vec4* colors_neighbor_tmp;
@@ -206,7 +224,9 @@ struct Simulation {
     bool attract_flag = false;
     bool blow_flag = false;
 
-    ParticleSpawner spawner;
+    ParticleSource* source;
+    ParticleSink* sink;
+    WindSystem* wind_system;
 
 };
 
