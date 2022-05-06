@@ -233,8 +233,8 @@ void init_simulation(
     //sorting neighbor strategy with grid
     simulation->particleRadius = parameters->particleRadius;
     simulation->particleDiameter = parameters->particleDiameter;
-    simulation->kernelRadius = 2.5f * parameters->particleRadius;
-    simulation->cell_size = 3.1f * simulation->kernelRadius;
+    simulation->kernelRadius = 3.1f * parameters->particleRadius;//be careful with these parameters they affect both stabiliy and performance! Do not change without checking performance and stability
+    simulation->cell_size = 1.0f * simulation->kernelRadius;
 
     //for the kernel
     float h3 = std::pow(simulation->kernelRadius, 3);

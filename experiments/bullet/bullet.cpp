@@ -110,7 +110,8 @@ int main(void) {
     float gravity_y = -25.0f;
 
     
-    
+    float capsule_radius = 2.0f;
+    float capsule_height = 3.0f;
     int box_index = Lustrine::Bullet::add_capsule(bulletPhysics, {15, 30, 15}, 2.0f, 3.0f); //Lustrine::Bullet::add_box(bulletPhysics, {15, 15, 15}, true);
 
     int box_index_2 = Lustrine::Bullet::add_box(bulletPhysics, {16, 15, 16}, true);
@@ -147,6 +148,9 @@ int main(void) {
     SkyBoxPipelineState skybox (getSkyBoxPaths());
     //WARINING BUG IN TEXTURE INIT
     GroundPipelineState groundPipelineState(engine);
+       
+    simulation.bullet_physics_simulation.player_id = box_index;
+    simulation.bullet_physics_simulation.player_box_scale = glm::vec3(2.0f * capsule_radius, 2.0f * capsule_radius + capsule_height, 2.0f * capsule_radius);
 
     float factor = 1.0f;
 
@@ -154,8 +158,8 @@ int main(void) {
 
         //simulation.time_step = windowController->getDeltaTime();
         //sim here
-
-        simulation.bullet_physics_simulation.player_position = Lustrine::Bullet::get_body_position(&simulation.bullet_physics_simulation, box_index);
+        
+        //simulation.bullet_physics_simulation.player_position = Lustrine::Bullet::get_body_position(&simulation.bullet_physics_simulation, box_index);
         Lustrine::simulate(&simulation, windowController->getDeltaTime());
         //if (areParticlesDisabled == false) 
         //Lustrine::Bullet::set_particles_box_colliders_positions(bulletPhysics, simulation.positions);

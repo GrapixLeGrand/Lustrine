@@ -559,7 +559,7 @@ namespace Bullet {
 		simulation->player_position = Lustrine::Bullet::get_body_position(simulation, simulation->player_id);
 		int num_close = 0;
 		for (int i = start_ptr; i < end_ptr; i++) {
-			// if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {
+			//if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {
 			if (particle_collide_with_player(simulation, particles[i], simulation->player_position)) {
 				simulation->rigidbodies[num_close + simulation->ptr_bounding_box_start]->setActivationState(ACTIVE_TAG);
 				btTransform t;

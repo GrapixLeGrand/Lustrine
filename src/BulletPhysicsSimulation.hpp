@@ -30,11 +30,10 @@ namespace Bullet {
 		
 		// for dynamically adding boxes to particles around player
 		int num_particles_allocated = 100;//number of boxes colliders around the player
-		int player_id = 0;
+		int player_id = 0;//the id of the player in the simulation
 		glm::vec3 player_position = glm::vec3(0.0f);
 		float player_box_radius = 4.0f;//radius up to which we try to add boxes
 		glm::vec3 player_box_scale;
-
 
 		bool allocated_particles_bounding_boxes = false;//FOR NOW A SINGLE ALLOCATION IS POSSIBLE
 		bool particles_bounding_box_requested_state = true;//By default the particles are enabled

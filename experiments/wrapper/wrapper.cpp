@@ -54,7 +54,7 @@ int main(void) {
 		Lustrine::Wrapper::Vec3 v = Lustrine::Wrapper::get_position(box);
 		//Lustrine::Wrapper::set_velocity(box, {0, 1, 0});
 		printf("{%f, %f, %f}\n", v.x, v.y, v.z);
-		Lustrine::Wrapper::simulate(dt, v, false, false);
+		Lustrine::Wrapper::simulate(dt, false, false); // , v, false, false);
 		Lustrine::Wrapper::check_collisions(box, indices, &actual);
 
 		if (actual > 0) {
