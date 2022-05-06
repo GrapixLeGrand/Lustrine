@@ -81,6 +81,7 @@ void init_simulation(
     simulation->wind_system->direction = glm::vec3(0, 0, -1);
     simulation->wind_system->magnitude = 5.0f;
 
+    simulation->bullet_physics_simulation.particle_radius = parameters->particleRadius;
 
     std::vector<glm::vec3> grids_sand_positions_arg;
     std::vector<glm::vec3> grids_solid_positions_arg;
