@@ -2,30 +2,31 @@
 #include "Sorting.hpp"
 #include "Utils.hpp"
 #include "Simulation.hpp"
+#include <string.h>
 
 namespace Lustrine {
     namespace Sorting {
-        
-        void counting_sort(Simulation* simulation) {
+          
+        void counting_sort(
+            int* counts,
+            int* initial_indices,
+            const size_t num_positions,
+            const size_t num_cells,
+            int* sorted_indices
+        ) {
 
-            std::fill(simulation->counts.begin(), simulation->counts.end(), 0);
-            std::fill(simulation->particle_cell_index_to_index.begin(), simulation->particle_cell_index_to_index.end(), std::make_pair(0, 0));
-
-            for (int i = 0; i < simulation->num_particles; i++) {
-                int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
-                simulation->counts[cell_id]++;
+            memset(counts, 0, num_cells * sizeof(int));
+            for (int i = 0; i < num_positions; i++) {
+                counts[initial_indices[i]]++;
             }
 
-            for (int i = 1; i < simulation->counts.size(); i++) {
-                simulation->counts[i] += simulation->counts[i - 1];
+            for (int i = 1; i < num_cells; i++) {
+                counts[i] += counts[i - 1];
             }
 
-            for (int i = simulation->num_particles - 1; i >= 0; i--) {
-                int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
-                simulation->counts[cell_id]--;
-                simulation->particle_cell_index_to_index[simulation->counts[cell_id]].first = cell_id;
-                simulation->particle_cell_index_to_index[simulation->counts[cell_id]].second = i;
-                simulation->positions_star_copy[simulation->counts[cell_id]] = simulation->positions_star[i];
+            for (int i = num_positions - 1; i >= 0; i--) {
+                sorted_indices[counts[initial_indices[i]] - 1] = i;
+                counts[initial_indices[i]]--;
             }
 
         }

@@ -34,9 +34,9 @@ endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("using predefined flags")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ") #-fsanitize=undefined
     else()
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 -ffast-math -mavx2 -mfma -march=skylake") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 /clang:-ffast-math /clang:-mavx2 /clang:-mfma /clang:-march=skylake") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
     endif()
    
 endif()

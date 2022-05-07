@@ -252,12 +252,8 @@ void init_simulation(
     simulation->gridY = (int) (simulation->domainY / simulation->cell_size) + 1;
     simulation->gridZ = (int) (simulation->domainZ / simulation->cell_size) + 1;
 
-    simulation->num_grid_cells = (simulation->gridX) * (simulation->gridY) * (simulation->gridZ);
-    simulation->particle_cell_index_to_index = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
-    simulation->positions_star_copy = std::vector<glm::vec3>(total_possible_num_sand_particles, {0, 0, 0});
-    simulation->cell_indices = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
-
     //uniform grid
+    simulation->num_grid_cells = simulation->gridX * simulation->gridY * simulation->gridZ;
     simulation->uniform_gird_cells = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
 
     //perf test
@@ -269,9 +265,13 @@ void init_simulation(
     //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
     //perf test
 
-    //counting sort
-    simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
-    simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
+    {
+        //used in the counting sort
+        simulation->counting_sort_arrays = new CountingSortArrays();
+        simulation->counting_sort_arrays->counts = new (simd_vector_align) int[simulation->num_grid_cells + 1];
+        simulation->counting_sort_arrays->particles_unsorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+        simulation->counting_sort_arrays->particles_sorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+    }
 
     Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->bullet_physics_simulation.num_particles_allocated, simulation->particleRadius);
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
