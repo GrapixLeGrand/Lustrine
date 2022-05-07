@@ -37,6 +37,7 @@ struct Chunk {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec4> colors;
     glm::vec4 color;
+    std::vector<int> cells;
 
     bool has_one_color_per_particles = false;
 
@@ -54,7 +55,7 @@ similar to a voxel grid but with particles
 */
 struct Grid {
 
-    std::vector<bool> cells;
+    std::vector<int> cells;
     std::vector<glm::vec4> colors;
     glm::vec4 color;
     bool has_one_color_per_cell;

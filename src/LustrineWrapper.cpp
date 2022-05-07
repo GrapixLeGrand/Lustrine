@@ -80,9 +80,9 @@ namespace Wrapper {
 	 * @param color 
 	 * @return glm::vec4 
 	 */
-	void grid_wrapper_to_grid(const Grid* wrapped, Lustrine::Grid* original) {
+	void grid_wrapper_to_grid(const GridWrapper* wrapped, Lustrine::Grid* original) {
 
-		original->cells = std::vector<bool>(wrapped->num_grid_cells);
+		original->cells = std::vector<int>(wrapped->num_grid_cells);
 		original->has_one_color_per_cell = wrapped->has_one_color_per_cell;
 		original->X = wrapped->X;
 		original->Y = wrapped->Y;
@@ -112,9 +112,9 @@ namespace Wrapper {
 	 * @param color 
 	 * @return glm::vec4 
 	 */
-	void grid_to_grid_wrapper(const Lustrine::Grid* original, Grid* wrapped) {
+	void grid_to_grid_wrapper(const Lustrine::Grid* original, GridWrapper* wrapped) {
 
-		wrapped->cells = new bool[original->num_grid_cells];
+		wrapped->cells = new int[original->num_grid_cells];
 		wrapped->has_one_color_per_cell = original->has_one_color_per_cell;
 		wrapped->X = original->X;
 		wrapped->Y = original->Y;
@@ -137,7 +137,7 @@ namespace Wrapper {
 
 	}
 
-	void init_grid_magikavoxel(Grid* grid, const char* path, Vec3 position) {
+	void init_grid_magikavoxel(GridWrapper* grid, const char* path, Vec3 position) {
 		std::cout << "LustrineWrapper: init grid with magika at " << path << std::endl;
 		Lustrine::Grid tmp;
 		Lustrine::init_grid_from_magika_voxel(&tmp, path, wrapper_to_glm(position), Lustrine::MaterialType::SOLID);
@@ -159,9 +159,9 @@ namespace Wrapper {
 	void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const Grid* sand_grid,
+		const GridWrapper* sand_grid,
 		int num_sand_grids,
-		const Grid* solid_grids, 
+		const GridWrapper* solid_grids, 
 		int num_solid_grids,
 		int subdivision
 	) {
@@ -252,7 +252,7 @@ namespace Wrapper {
 		return Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
 	}
 
-	void init_grid_box(const SimulationParameters* parameters, Grid* wrapped, int X, int Y, int Z, Vec3 position, Color color, int type) {
+	void init_grid_box(const SimulationParameters* parameters, GridWrapper* wrapped, int X, int Y, int Z, Vec3 position, Color color, int type) {
 		std::cout << "init grid called" << std::endl;
 		Lustrine::Grid original_grid;
 		Lustrine::init_grid_box(parameters, &original_grid, X, Y, Z, wrapper_to_glm(position), wrapper_to_glm(color), (Lustrine::MaterialType)type);
@@ -394,7 +394,7 @@ namespace Wrapper {
 		Lustrine::Bullet::set_body_no_rotation(&simulation->bullet_physics_simulation, body);
 	}
 
-	void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen) {
+	void create_grid(GridWrapper* grid, const wchar_t* path, int type, int pathlen) {
 		
 		// Rewrite of init_grid_from_magika_voxel
 		char* newpath = (char*)malloc(pathlen + 1);
@@ -448,7 +448,7 @@ namespace Wrapper {
 
 		grid->type = type;
 		grid->num_grid_cells = model->size_x * model->size_y * model->size_z;
-		grid->cells = (bool*)calloc(grid->num_grid_cells,sizeof(bool)); //std::vector<bool>(grid->num_grid_cells, false);
+		grid->cells = (int*)calloc(grid->num_grid_cells,sizeof(bool)); //std::vector<bool>(grid->num_grid_cells, false);
 		grid->colors = (Color*)calloc(grid->num_grid_cells, sizeof(Color));  //std::vector<glm::vec4>(grid->num_grid_cells, { 0, 0, 0, 0 });
 		grid->has_one_color_per_cell = true;
 		

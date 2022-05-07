@@ -10,10 +10,10 @@ int main(void) {
 	parameters.Z = 30;
 
 	Lustrine::Wrapper::SimulationData data;
-	Lustrine::Wrapper::Grid sand_grids[1];
+	Lustrine::Wrapper::GridWrapper sand_grids[1];
 	Lustrine::Wrapper::Vec3 sand_positions[1];
 
-	Lustrine::Wrapper::Grid solid_grids[2];
+	Lustrine::Wrapper::GridWrapper solid_grids[2];
 	Lustrine::Wrapper::Vec3 solid_positions[2];
 
 	sand_positions[0] = {0, 0, 0};

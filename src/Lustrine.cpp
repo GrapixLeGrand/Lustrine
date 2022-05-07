@@ -22,7 +22,7 @@ void add_physics_static_grid(Simulation* simulation, const Grid* grid) {
         for (int y = 0; y < grid->Y; y++) {
             for (int z = 0; z < grid->Z; z++) {
                 int index = grid->Y * grid->Z * x + grid->Z * y + z;
-                if (grid->cells[index] == true) {
+                if (grid->cells[index]) {
                     glm::vec3 position = {x, y, z};
                     if (grid->has_one_color_per_cell) {
                        add_box(&simulation->bullet_physics_simulation, position, false);     
@@ -184,9 +184,6 @@ void init_simulation(
                 assert(simulation->grids_solid[i].dynamic_solid == false);
                 int bullet_body_index = Bullet::add_box(&simulation->bullet_physics_simulation, chunk_boxes.positions[j], simulation->grids_solid[i].dynamic_solid);
             }
-            for (int i = 0; i < 10; ++i) {
-                std::cout << chunk.positions[i].x << " " << chunk.positions[i].y << " " << chunk.positions[i].z << std::endl;
-            }
 
             for (int j = 0; j < chunk.num_particles; j++) {
                 
@@ -303,7 +300,7 @@ void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, in
     grid->Z = Z;
     grid->has_one_color_per_cell = false;
 
-    grid->cells = std::vector<bool>(grid->num_grid_cells, true);
+    grid->cells = std::vector<int>(grid->num_grid_cells, true);
     grid->color = color;
     
     grid->position = position;
@@ -327,13 +324,13 @@ void init_grid_box_random(const SimulationParameters* parameters, Grid* grid, in
     grid->Z = Z;
     grid->has_one_color_per_cell = false;
 
-    grid->cells = std::vector<bool>(grid->num_grid_cells, true);
+    grid->cells = std::vector<int>(grid->num_grid_cells, true);
 
     for (int y = 0; y < Y; y++) {
         for (int x = 0; x < X; x++) {
             for (int z = 0; z < Z; z++) {
                 float p = ((float) rand()) / RAND_MAX;
-                grid->cells[y * X * Z + x * Z + z] = p <= probability;
+                grid->cells[y * X * Z + x * Z + z] = (p <= probability);
                 grid->num_occupied_grid_cells++;
             }
         }
@@ -375,7 +372,7 @@ void init_chunk_from_grid(const SimulationParameters* parameters, Chunk* chunk, 
         for (int y = 0; y < Y; y++) {
             for (int z = 0; z < Z; z++) {
                 
-                if (grid->cells[x * Y * Z + y * Z + z] == true) { //a particle present at the current grid cell
+                if (grid->cells[x * Y * Z + y * Z + z]) { //a particle present at the current grid cell
                     glm::vec3& particle_position = chunk->positions[counter];
 
                     particle_position.x = x * diameter;
@@ -424,7 +421,7 @@ void init_chunk_from_grid_subdivision(const SimulationParameters* parameters, Ch
         for (int y = 0; y < Y; y++) {
             for (int z = 0; z < Z; z++) {
                 int cell_index = (x / subdivision) * grid->Y * grid->Z + (y / subdivision) * grid->Z + (z / subdivision);
-                if (grid->cells[cell_index] == true) { //a particle present at the current grid cell
+                if (grid->cells[cell_index] && grid->cells[cell_index] != 1) { //a particle present at the current grid cell
                     glm::vec3& particle_position = chunk->positions[counter];
 
                     particle_position.x = x * diameter;
@@ -472,7 +469,7 @@ void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Ch
         for (int y = 0; y < Y; y++) {
             for (int z = 0; z < Z; z++) {
 
-                if (grid->cells[x * Y * Z + y * Z + z] == true) { //a particle present at the current grid cell
+                if (grid->cells[x * Y * Z + y * Z + z]) { //a particle present at the current grid cell
                     glm::vec3& particle_position = chunk->positions[counter];
 
                     particle_position.x = x * diameter;
@@ -482,9 +479,10 @@ void init_chunk_from_grid_unit_length(const SimulationParameters* parameters, Ch
                     particle_position += grid->position;
 
                     if (chunk->has_one_color_per_particles == true) {
-                        const glm::vec4& grid_color = grid->colors[x * Y * Z + y * Z + z];
-                        glm::vec4& chunk_color = chunk->colors[counter];
-                        chunk_color = grid_color;
+                        //const glm::vec4& grid_color = grid->colors[x * Y * Z + y * Z + z];
+                        //glm::vec4& chunk_color = chunk->colors[counter];
+                        //chunk_color = grid_color;
+                        chunk->colors[counter] = grid->colors[x * Y * Z + y * Z + z];
                     }
 
                     particle_position += offset;
