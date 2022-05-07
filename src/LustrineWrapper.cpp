@@ -390,6 +390,23 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.player_box_scale = wrapper_to_glm(scale);
 	}
 
+	bool is_grounded(int id)
+	{
+		glm::vec3 pos = Bullet::get_body_position(&simulation->bullet_physics_simulation, id);
+		btVector3 btFrom(pos.x, pos.y, pos.z);
+		btVector3 btTo(pos.x, pos.y - 0.55f, pos.z);
+		btCollisionWorld::ClosestRayResultCallback res(btFrom, btTo);
+		simulation->bullet_physics_simulation.dynamicWorld->rayTest(btFrom, btTo, res);
+
+		if (res.hasHit()) {
+			printf("Collision at: <%.2f, %.2f, %.2f>\n", res.m_hitPointWorld.getX(), res.m_hitPointWorld.getY(), res.m_hitPointWorld.getZ());
+		}
+		else {
+			printf("no collision\n");
+		}
+		return res.hasHit();
+	}
+
 	
 	/**
 	 * @brief remove body's rotation

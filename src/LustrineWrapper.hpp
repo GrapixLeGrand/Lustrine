@@ -131,6 +131,7 @@ namespace Wrapper {
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_id(int id);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_box_scale(Vec3 scale);
+	extern "C" LUSTRINE_WRAPPER_EXPORT bool is_grounded(int id);
 	/**
 	 * @brief For particles interactions
 	 */
