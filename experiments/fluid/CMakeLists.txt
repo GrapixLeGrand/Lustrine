@@ -19,10 +19,18 @@ if (WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             $<TARGET_FILE:Lustrine> $<TARGET_FILE_DIR:fluid>
             )
-    add_custom_command(TARGET fluid POST_BUILD
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        add_custom_command(TARGET fluid POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${LevekGL_SOURCE_DIR}/thirdparty/windows/assimp/MDd/assimpd.dll $<TARGET_FILE_DIR:fluid>
+            )
+    else()
+         add_custom_command(TARGET fluid POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${LevekGL_SOURCE_DIR}/thirdparty/windows/assimp/MD/assimp.dll $<TARGET_FILE_DIR:fluid>
             )
+    endif()
+    
     add_custom_command(TARGET fluid POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${LevekGL_SOURCE_DIR}/thirdparty/windows/zlib-1.2.11/zlib.dll $<TARGET_FILE_DIR:fluid>

@@ -230,6 +230,7 @@ void init_simulation(
     int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
 
     simulation->velocities = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    memset(simulation->velocities, 0, total_possible_num_sand_particles);
     //simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
     simulation->lambdas = std::vector<float>(total_possible_num_sand_particles, 0.0f);
     simulation->neighbors = std::vector<std::vector<int>>(total_possible_num_sand_particles, std::vector<int>{});

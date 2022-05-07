@@ -45,7 +45,7 @@ int main(void) {
     Lustrine::Simulation simulation;
     Lustrine::SimulationParameters parameters;
     parameters.X = 40.0f;
-    parameters.Y = 30.0f;
+    parameters.Y = 40.0f;
     parameters.Z = 40.0f;
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;

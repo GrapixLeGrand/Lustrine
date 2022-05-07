@@ -66,10 +66,10 @@ void save_vox_scene(const char* pcFilename, const ogt_vox_scene* scene)
 }
 
 #define NUM_CHAR_PATH 200
-static char input_path[NUM_CHAR_PATH] = LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox";
-static char output_path[NUM_CHAR_PATH] = "out.vox";
+static char input_path[NUM_CHAR_PATH] = "C:/Users/miste/Desktop/gamelab2022-hyrule-team4/Source/game/Catrine/Content/vox_files/level2.vox";//LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox";
+static char output_path[NUM_CHAR_PATH] = "C:/Users/miste/Desktop/gamelab2022-hyrule-team4/Source/game/Catrine/Content/vox_files/level2.vox";
 double target_density = 0.01;
-uint32_t subdivision = 5;
+uint32_t subdivision = 1;
 
 uint32_t count_voxels(const uint8_t* data, uint32_t size) {
     uint32_t counter = 0;
@@ -105,9 +105,9 @@ int main(int argc, char** args) {
     std::cout << "\tsubdivision:\t" << subdivision << "\n";
 
 	std::cout << "level maker start" << std::endl;
-    std::cout << "model at path " << LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox" << std::endl;
+    std::cout << "model at path " << input_path << std::endl;//LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox" << std::endl;
 
-	const ogt_vox_scene* scene = load_vox_scene(LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_model.vox");
+	const ogt_vox_scene* scene = load_vox_scene(input_path);
     assert(scene != nullptr);
 
     std::cout << "scene properties:" << std::endl;
@@ -238,7 +238,7 @@ int main(int argc, char** args) {
 
     //saving the subdivided model
     scene->models[0] = subdivided_model;
-    save_vox_scene("out.vox", scene);
+    save_vox_scene(output_path, scene);
 
     std::cout << "written scene" << std::endl;
 
