@@ -15,12 +15,12 @@ namespace Lustrine {
             int* sorted_indices
         ) {
 
-            memset(counts, 0, num_cells * sizeof(int));
+            memset(counts, 0, (num_cells + 1) * sizeof(int));
             for (int i = 0; i < num_positions; i++) {
                 counts[initial_indices[i]]++;
             }
 
-            for (int i = 1; i < num_cells; i++) {
+            for (int i = 1; i <= num_cells; i++) {
                 counts[i] += counts[i - 1];
             }
 
