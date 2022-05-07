@@ -292,11 +292,11 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     int* sorted_indices = simulation->counting_sort_arrays->particles_sorted_indices;
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
 
-        simulation->positions[i] = simulation->position_neighbor_tmp[sorted_indices[i]];
-        simulation->positions_star[i] = simulation->position_star_neighbor_tmp[sorted_indices[i]];
-        simulation->velocities[i] = simulation->velocity_tmp[sorted_indices[i]];
-        int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
-        simulation->uniform_gird_cells[cell_id].push_back(i);
+        simulation->positions[sorted_indices[i]] = simulation->position_neighbor_tmp[i];
+        simulation->positions_star[sorted_indices[i]] = simulation->position_star_neighbor_tmp[i];
+        simulation->velocities[sorted_indices[i]] = simulation->velocity_tmp[i];
+        int cell_id = get_cell_id(simulation, simulation->positions_star[sorted_indices[i]]);
+        simulation->uniform_gird_cells[cell_id].push_back(sorted_indices[i]);
 
         /*
         int new_index = simulation->sand_particle_cell_id[i].first;
