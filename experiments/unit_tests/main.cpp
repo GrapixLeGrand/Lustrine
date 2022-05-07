@@ -47,15 +47,15 @@ void test_1() {
 
 	std::cout << "Test 1 start" << std::endl;
 
-	size_t num = 20;
-	size_t num_cells = 5;
+	size_t num = 20000;
+	size_t num_cells = 1987;
 	std::vector<int> cell_indices = generate_random_ints(num, num_cells);
 
 	int* cell_indices_to_sort = (int*)malloc(num * sizeof(int));
 	std::vector<int> counts(num_cells);
 
 	std::cout << "initial: ";
-	print_int_array(cell_indices.data(), num);
+	//print_int_array(cell_indices.data(), num);
 
 	int* tmp = (int*)malloc(num * sizeof(int));
 	memcpy(tmp, cell_indices.data(), num * sizeof(int));
