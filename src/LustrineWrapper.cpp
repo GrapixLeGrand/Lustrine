@@ -216,6 +216,11 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.player_box_radius = radius;
 	}
 
+	int query_cell_num_particles(Vec3 min, Vec3 max, bool include_solid)
+	{
+		return Lustrine::query_cell_num_particles(simulation, wrapper_to_glm(min), wrapper_to_glm(max), include_solid);
+	}
+
 	/**
 	 * @brief Get the current gravity of the bullet world
 	 * 

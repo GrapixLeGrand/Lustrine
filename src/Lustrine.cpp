@@ -473,9 +473,9 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
     max_z = (int) max_indices.z;
 
     if (include_solid) {
-        for (int y = min_y; y < max_y; y++) {
-            for (int x = min_x; x < max_x; x++) {
-                for (int z = min_z; z < max_z; z++) {
+        for (int y = min_y; y <= max_y; y++) {
+            for (int x = min_x; x <= max_x; x++) {
+                for (int z = min_z; z <= max_z; z++) {
                     int cell_id =
                         y * simulation->gridX * simulation->gridZ +
                         x * simulation->gridZ +
@@ -485,9 +485,9 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
             }
         }
     } else {
-        for (int y = min_y; y < max_y; y++) {
-            for (int x = min_x; x < max_x; x++) {
-                for (int z = min_z; z < max_z; z++) {
+        for (int y = min_y; y <= max_y; y++) {
+            for (int x = min_x; x <= max_x; x++) {
+                for (int z = min_z; z <= max_z; z++) {
                     int cell_id =
                         y * simulation->gridX * simulation->gridZ +
                         x * simulation->gridZ +

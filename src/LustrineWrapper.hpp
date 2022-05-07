@@ -139,6 +139,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void disable_particles_bounding_boxes();
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_particles_bounding_spheres_radius_placement(float radius);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int query_cell_num_particles(Vec3 min, Vec3 max, bool include_solid);
 
 
 } //Wrapper
