@@ -84,7 +84,7 @@ extern void LUSTRINE_EXPORT clean_simulation(Simulation* simulation);
  * @param cell_size
  * @param subdivision
  */
-extern void LUSTRINE_EXPORT init_chunk_from_grid(Chunk* chunk, const Grid* grid, MaterialType type, float cell_size, int subdivision);
+extern void LUSTRINE_EXPORT init_chunk_from_grid(Chunk* chunk, const Grid* grid, MaterialType type, float cell_size, int subdivision, bool for_bullet);
 
 extern void LUSTRINE_EXPORT add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity);
 extern void LUSTRINE_EXPORT add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos);
