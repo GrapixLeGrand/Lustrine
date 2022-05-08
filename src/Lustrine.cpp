@@ -434,8 +434,9 @@ void simulate(Simulation* simulation, float dt) {
             simulation->num_sand_particles += pattern.num_particles;
 
             glm::vec3& direction = simulation->source->directions[i];
+            float factor = simulation->source->frequencies[i] > 0.0f ? 1.5f * (simulation->particleRadius * 2.0f) / simulation->source->frequencies[i] : 1.0f;
             for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
-                simulation->velocities[j] = direction;
+                simulation->velocities[j] = direction * factor;
                 simulation->colors[j] = simulation->source->patterns[i].color;
             }
 
@@ -567,6 +568,7 @@ int add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 d
     int index = simulation->source->num_sources;
     simulation->source->num_sources++;
     simulation->source->patterns.push_back(chunk);
+    direction /= glm::length(direction);
     simulation->source->directions.push_back(direction);
     simulation->source->timers.push_back(0.0);
     simulation->source->frequencies.push_back(freq);

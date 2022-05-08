@@ -46,7 +46,7 @@ int main(void) {
     Lustrine::SimulationParameters parameters;
     parameters.X = 40.0f;
     parameters.Y = 40.0f;
-    parameters.Z = 40.0f;
+    parameters.Z = 80.0f;
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
@@ -91,9 +91,13 @@ int main(void) {
     float factor = 1.0f;
 
     Lustrine::Grid test_grid;
+    Lustrine::Grid test_grid2;
     //init_grid_box_random(&parameters, &test_grid, 30, 1, 30, {15, 35, 15}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND, 0.2f);
     Lustrine::init_grid_box(&parameters, &test_grid, 4, 4, 1, {25, 30, 25}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    Lustrine::add_particle_source(&simulation, &test_grid, {0, 0, -1}, 1.0f / 16.f, 8000);
+    Lustrine::init_grid_box(&parameters, &test_grid2, 5, 5, 1, {35, 25, 25}, glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    
+    Lustrine::add_particle_source(&simulation, &test_grid, {0, 0, 1}, 1.0f / 30.f, -1);
+    Lustrine::add_particle_source(&simulation, &test_grid2, {0, 0, 1}, 1.0f / 15.f, -1);
 
     Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {40, 5, 40}, 0.0f);
 
