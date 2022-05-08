@@ -283,7 +283,7 @@ namespace Bullet {
 			float mass = 0.0f; //particles must not be moving at first
 			size_t index = old_size + simulation->num_bodies;
 
-			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btSphereShape(radius), index);
+			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btBoxShape(btVector3(radius, radius, radius)), index);
 			//simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btBoxShape(btVector3(radius, radius, radius)), index);
 			simulation->dynamicWorld->addRigidBody(simulation->rigidbodies[index]); //, simulation->collision_group_1, simulation->collision_mask_1);
 		}
@@ -553,7 +553,7 @@ namespace Bullet {
 	 * @param start 
 	 * @param end 
 	 */
-	void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start_ptr, int end_ptr) {
+void set_particles_box_colliders_positions(Simulation* simulation, glm::vec3* particles, int start_ptr, int end_ptr) {
 		
 		simulation->player_position = Lustrine::Bullet::get_body_position(simulation, simulation->player_id);
 		int num_close = simulation->ptr_bounding_box_start;

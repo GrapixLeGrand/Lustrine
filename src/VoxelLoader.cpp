@@ -59,7 +59,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 
 
     grid->type = type;
     grid->num_grid_cells = model->size_x * model->size_y * model->size_z;
-    grid->cells = std::vector<bool>(grid->num_grid_cells, false);
+    grid->cells = std::vector<int>(grid->num_grid_cells, 0);
     grid->colors = std::vector<glm::vec4>(grid->num_grid_cells, {0, 0, 0, 0});
     grid->has_one_color_per_cell = true;
 
@@ -76,7 +76,7 @@ void init_grid_from_magika_voxel(Grid* grid, const std::string& path, glm::vec3 
                 }
 
                 ogt_vox_rgba voxel_color = scene->palette.color[color_index];
-                grid->cells[grid_index] = true;
+                grid->cells[grid_index] = color_index;
                 glm::vec4& grid_color = grid->colors[grid_index];
 
                 grid_color.r = voxel_color.r;   

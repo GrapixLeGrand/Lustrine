@@ -59,8 +59,8 @@ namespace Wrapper {
 	 * Simulation.hpp. This Grid has NO managed memory and MUST never have some to stay compatible
 	 * with the binding.
 	 */
-	struct Grid {
-		bool* cells;
+	struct GridWrapper {
+		int* cells;
 		Color* colors;
 		Color color;
 		Vec3 position;
@@ -82,9 +82,9 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const Grid* sand_grids,
+		const GridWrapper* sand_grids,
 		int num_sand_grids,
-		const Grid* solid_grids,
+		const GridWrapper* solid_grids,
 		int num_solid_grids,
 		int subdivision
 	);
@@ -97,11 +97,11 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate(float dt, bool attract_flag, bool blow_flag);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions_copy(float* position_ptr);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void cleanup_simulation();
-	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, Vec3 position, Color color, int type);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, GridWrapper* grid, int X, int Y, int Z, Vec3 position, Color color, int type);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void read_vox_scene(BindingString *data, const uint8_t *buffer, int64_t size);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(Grid* grid, const wchar_t* path, int type, int pathlen);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_magikavoxel(Grid* grid, const char* path, Vec3 position);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(GridWrapper* grid, const wchar_t* path, int type, int pathlen);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_magikavoxel(GridWrapper* grid, const char* path, Vec3 position);
 
 	/**
 	 * @brief bullet physics functions. doc in cpp. 
@@ -131,6 +131,7 @@ namespace Wrapper {
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_id(int id);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_box_scale(Vec3 scale);
+	extern "C" LUSTRINE_WRAPPER_EXPORT bool is_grounded(int id);
 	/**
 	 * @brief For particles interactions
 	 */
@@ -139,6 +140,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void disable_particles_bounding_boxes();
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_particles_bounding_spheres_radius_placement(float radius);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int query_cell_num_particles(Vec3 min, Vec3 max, bool include_solid);
 
 
 } //Wrapper
