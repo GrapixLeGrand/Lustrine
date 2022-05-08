@@ -11,6 +11,10 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 17)
 
+#the following macros break the code (at least the rendering :))
+#add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+#add_compile_definitions(GLM_FORCE_SIMD_AVX2)
+
 if (UNIX)
     add_compile_definitions(PLATFORM_UNIX)
 endif()
@@ -34,9 +38,9 @@ endif()
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     message("using predefined flags")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ") #-fsanitize=undefined
     else()
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-ffast-math /clang:-mavx2 /clang:-mfma") #-mfma -ffp-contract=fast") #
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 /clang:-ffast-math /clang:-mavx2 /clang:-mfma /clang:-march=skylake") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
     endif()
    
 endif()
@@ -48,7 +52,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=undefined")
     else()
-        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O3 -ffast-math -fsanitize=undefined  -mfma") #-ffast-math
+        set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O3 -mavx2 -ffast-math  -mfma -march=skylake") #-ffast-math
     endif()
     #target_compile_options(Lustrine PRIVATE -fsanitize=address)
     #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address)")

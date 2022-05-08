@@ -22,8 +22,7 @@ static inline CellIndices get_cell_indices(const Simulation* simulation, glm::ve
 
 inline glm::vec3 get_cell_id_comp(const Simulation* simulation, glm::vec3 position, int i);
 inline static int get_cell_id(const Simulation* simulation, glm::vec3 position) {
-
-    position = glm::clamp(position, glm::vec3(simulation->cell_size * 0.5), glm::vec3(simulation->domainX - simulation->cell_size * 0.5, simulation->domainY - simulation->cell_size * 0.5, simulation->domainZ - simulation->cell_size * 0.5));
+    position = glm::clamp(position, glm::vec3(simulation->cell_size * 0.5f), glm::vec3(simulation->domainX - simulation->cell_size * 0.5f, simulation->domainY - simulation->cell_size * 0.5f, simulation->domainZ - simulation->cell_size * 0.5f));
     position /= simulation->cell_size;
     int cell_id =
             ((int) position.y) * simulation->gridX * simulation->gridZ +

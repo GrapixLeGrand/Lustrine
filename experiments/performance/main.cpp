@@ -98,9 +98,9 @@ int main(int argc, char** args) {
     parameters.particleDiameter = 1.0f;
 
 	std::cout << "Inititalized simulation" << std::endl;
-	int iter = 100;
+	int iter = 1;
 	//warm up
-	benchmark_single_iter(&parameters, &simulation, 1000, Lustrine::simulate_sand);
+	benchmark_single_iter(&parameters, &simulation, 1, Lustrine::simulate_sand);
 
 	benchmark_result r1 = benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand);
 	benchmark_result r2 = benchmark_single_iter(&parameters, &simulation, iter, Lustrine::simulate_sand_v1);

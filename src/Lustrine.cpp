@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <chrono>
-
+#include <set>
 #include <cmath>
 #include <iostream>
 #include <utility>
@@ -77,6 +77,8 @@ void init_simulation(
     simulation->source = new ParticleSource();
     simulation->source->num_sources = 0;
     simulation->sink = new ParticleSink();
+    simulation->sink->num_sinks = 0;
+    simulation->sink->temp_removal.reserve(100000);//safe amount to avoid resize
     simulation->wind_system = new WindSystem();
     simulation->wind_system->direction = glm::vec3(0, 0, -1);
     simulation->wind_system->magnitude = 5.0f;
@@ -229,6 +231,7 @@ void init_simulation(
     int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
 
     simulation->velocities = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    memset(simulation->velocities, 0, total_possible_num_sand_particles);
     //simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
     simulation->lambdas = std::vector<float>(total_possible_num_sand_particles, 0.0f);
     simulation->neighbors = std::vector<std::vector<int>>(total_possible_num_sand_particles, std::vector<int>{});
@@ -251,12 +254,8 @@ void init_simulation(
     simulation->gridY = (int) (simulation->domainY / simulation->cell_size) + 1;
     simulation->gridZ = (int) (simulation->domainZ / simulation->cell_size) + 1;
 
-    simulation->num_grid_cells = (simulation->gridX) * (simulation->gridY) * (simulation->gridZ);
-    simulation->particle_cell_index_to_index = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
-    simulation->positions_star_copy = std::vector<glm::vec3>(total_possible_num_sand_particles, {0, 0, 0});
-    simulation->cell_indices = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
-
     //uniform grid
+    simulation->num_grid_cells = simulation->gridX * simulation->gridY * simulation->gridZ;
     simulation->uniform_gird_cells = std::vector<std::vector<int>> (simulation->num_grid_cells, std::vector<int>{});
 
     //perf test
@@ -268,28 +267,49 @@ void init_simulation(
     //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
     //perf test
 
-    //counting sort
-    simulation->counts = std::vector<int>(simulation->num_grid_cells + 1, 0);
-    simulation->counting_sort_sorted_indices = std::vector<int>(simulation->num_particles, 0);
+    {
+        //used in the counting sort
+        simulation->counting_sort_arrays = new CountingSortArrays();
+        simulation->counting_sort_arrays->counts = new (simd_vector_align) int[simulation->num_grid_cells + 1];
+        simulation->counting_sort_arrays->particles_unsorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+        simulation->counting_sort_arrays->particles_sorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+    }
 
     Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->bullet_physics_simulation.num_particles_allocated, simulation->particleRadius);
     Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
     Bullet::print_resume(&simulation->bullet_physics_simulation);
 
-    std::cout << "registered " << simulation->num_sand_particles << " sand particles and " << simulation->num_solid_particles << "\n";
+    std::cout << "registered " << simulation->num_sand_particles << " sand particles and " << simulation->num_solid_particles << " solid particles\n";
+    std::cout << "registered (at start at lease)" << simulation->bullet_physics_simulation.ptr_bounding_box_end - simulation->bullet_physics_simulation.ptr_bounding_box_start << " boxes for colliding with the player\n";
+    std::cout << "sand start " << simulation->ptr_sand_start << "\n";
+    std::cout << "sand end " << simulation->ptr_sand_end << "\n";
+    std::cout << "solid start " << simulation->ptr_solid_start << "\n";
+    std::cout << "solid end " << simulation->ptr_solid_end << "\n";
+
 }
 
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
-    delete[] simulation->positions;
-    delete[] simulation->positions_star;
-    delete[] simulation->colors;
-    delete[] simulation->positions_tmp;
+
+    std::align_val_t simd_vector_align{64};
+    ::operator delete[] (simulation->positions, simd_vector_align);
+    ::operator delete[] (simulation->positions_star, simd_vector_align);
+    ::operator delete[] (simulation->colors, simd_vector_align);
+    ::operator delete[] (simulation->positions_tmp, simd_vector_align);
+    ::operator delete[] (simulation->velocities, simd_vector_align);
+
+    ::operator delete[] (simulation->position_neighbor_tmp, simd_vector_align);
+    ::operator delete[] (simulation->position_star_neighbor_tmp, simd_vector_align);
+    ::operator delete[] (simulation->velocity_tmp, simd_vector_align);
 
     delete simulation->source;
     delete simulation->sink;
     delete simulation->wind_system;
 
+    ::operator delete[] (simulation->counting_sort_arrays->counts, simd_vector_align);
+    ::operator delete[] (simulation->counting_sort_arrays->particles_sorted_indices, simd_vector_align);
+    ::operator delete[] (simulation->counting_sort_arrays->particles_unsorted_indices, simd_vector_align);
+    delete simulation->counting_sort_arrays;
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type) {
@@ -417,8 +437,9 @@ void simulate(Simulation* simulation, float dt) {
             simulation->num_sand_particles += pattern.num_particles;
 
             glm::vec3& direction = simulation->source->directions[i];
+            float factor = simulation->source->frequencies[i] > 0.0f ? 1.5f * (simulation->particleRadius * 2.0f) / simulation->source->frequencies[i] : 1.0f;
             for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
-                simulation->velocities[j] = direction;
+                simulation->velocities[j] = direction * factor;
                 simulation->colors[j] = simulation->source->patterns[i].color;
             }
 
@@ -432,13 +453,39 @@ void simulate(Simulation* simulation, float dt) {
     simulation->simulate_fun(simulation, dt);
     Profiling::stop_counter(0);
 
-    for (int i = 0; i < simulation->source->num_sources; i++) {
-        simulation->source->timers[i] += dt;
+    for (int i = 0; i < simulation->sink->num_sinks; i++) {
+
+        if (simulation->sink->state[i] && simulation->sink->timers[i] >= simulation->sink->frequencies[i]) {
+            int current_despawned = 0;
+            const int sink_cells_size = simulation->sink->sink_cells[i].size();
+            for (int j = 0; j < sink_cells_size; j++) {
+                int cell_id = simulation->sink->sink_cells[i][j];
+                int cell_size = simulation->uniform_gird_cells[cell_id].size();
+                for (int k = 0; k < cell_size; k++) {
+                    int evicted_id = simulation->uniform_gird_cells[cell_id][k];
+                    if (evicted_id < simulation->ptr_sand_end)
+                        simulation->sink->temp_removal.push_back(evicted_id);
+                }
+                current_despawned += cell_size;
+            }
+        }
+
     }
 
-    for (int i = 0; i < simulation->sink->sink_cells.size(); i++) {
+    for (int i = 0; i < simulation->sink->temp_removal.size(); i++) {
+        int evicted = simulation->sink->temp_removal[i];
+        simulation->positions[evicted] = simulation->positions[simulation->ptr_sand_end - 1];
+        simulation->positions_star[evicted] = simulation->positions_star[simulation->ptr_sand_end - 1];
+        simulation->velocities[evicted] = simulation->velocities[simulation->ptr_sand_end - 1];
+        simulation->ptr_sand_end--;
+        simulation->num_sand_particles--;
+        simulation->num_remaining_sand_particles++;
+    }
 
-        std::vector<int>& cell = simulation->uniform_gird_cells[i];
+    simulation->sink->temp_removal.clear();
+
+    /*
+            std::vector<int>& cell = simulation->uniform_gird_cells[i];
         for (int j = 0; j < cell.size(); j++) {
             int evicted = cell[j];
             if (cell[j] < simulation->ptr_sand_end) {
@@ -451,8 +498,14 @@ void simulate(Simulation* simulation, float dt) {
                 simulation->num_remaining_sand_particles++;
 
             }
-        }
+        }*/
 
+    for (int i = 0; i < simulation->source->num_sources; i++) {
+        simulation->source->timers[i] += dt;
+    }
+
+    for (int i = 0; i < simulation->sink->num_sinks; i++) {
+        simulation->sink->timers[i] += dt;
     }
 
 }
@@ -511,12 +564,14 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
 }
 
 
-void add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity) {
+int add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity) {
 
     Chunk chunk;
     init_chunk_from_grid(&chunk, pattern, Lustrine::MaterialType::SAND, simulation->particleDiameter, simulation->subdivision, false);
+    int index = simulation->source->num_sources;
     simulation->source->num_sources++;
     simulation->source->patterns.push_back(chunk);
+    direction /= glm::length(direction);
     simulation->source->directions.push_back(direction);
     simulation->source->timers.push_back(0.0);
     simulation->source->frequencies.push_back(freq);
@@ -526,10 +581,11 @@ void add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 
     }
     simulation->source->capacities.push_back(capacity);
     simulation->source->spawned.push_back(0);
-
+    return index;
 }
 
-void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+int add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos, float frequency) {
+    
     int min_x = 0, min_y = 0, min_z = 0;
     int max_x = 0, max_y = 0, max_z = 0;
 
@@ -543,6 +599,13 @@ void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_
     max_y = (int) max_indices.y;
     max_z = (int) max_indices.z;
 
+    int index = simulation->sink->num_sinks;
+    simulation->sink->sink_cells.push_back(std::vector<int>{});
+    simulation->sink->despawned.push_back(0);
+    simulation->sink->frequencies.push_back(frequency);
+    simulation->sink->state.push_back(true);
+    simulation->sink->timers.push_back(0.0f);
+
     for (int y = min_y; y <= max_y; y++) {
         for (int x = min_x; x <= max_x; x++) {
             for (int z = min_z; z <= max_z; z++) {
@@ -550,16 +613,61 @@ void add_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_
                     y * simulation->gridX * simulation->gridZ +
                     x * simulation->gridZ +
                     z;
-                simulation->sink->sink_cells.push_back(cell_id);
+                simulation->sink->sink_cells[index].push_back(cell_id);
             }
         }
     }
 
-    std::sort(simulation->sink->sink_cells.begin(), simulation->sink->sink_cells.end());
-
+    simulation->sink->num_sinks++;
+    std::sort(simulation->sink->sink_cells[index].begin(), simulation->sink->sink_cells[index].end());
+    return index;
 }
 
-void remove_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 max_pos) {
+
+
+int add_particle_sink(Simulation* simulation, const Grid* pattern, float frequency) {
+
+    int index = simulation->sink->num_sinks;
+    simulation->sink->sink_cells.push_back(std::vector<int>{});
+    simulation->sink->despawned.push_back(0);
+    simulation->sink->frequencies.push_back(frequency);
+    simulation->sink->state.push_back(true);
+    simulation->sink->timers.push_back(0.0f);
+
+    std::set<int> indices;
+
+    std::cout << "sink add with grid not implemented yet!" << std::endl;
+
+    /*
+    for (int x = 0; x < pattern->X; x++) {
+        for (int y = 0; y < pattern->Y; y++) {
+            for (int z = 0; z < pattern->Z; z++) {
+                int index = 
+                pattern->
+            }
+        }
+    }*/
+    return 0;
+}
+
+void set_source_state(Simulation* simulation, int index, bool state) {
+    simulation->source->source_state[index] = state;
+}
+
+void set_sink_state(Simulation* simulation, int index, bool state) {
+    simulation->sink->state[index] = state;
+}
+
+int get_source_spawned(Simulation* simulation, int index) {
+    return simulation->source->spawned[index];
+}
+
+int get_sink_despawned(Simulation* simulation, int index) {
+    return simulation->sink->despawned[index];
+}
+
+/*
+void remove_particle_sink(Simulation* simulation, int index, glm::vec3 min_pos, glm::vec3 max_pos) {
     int min_x = 0, min_y = 0, min_z = 0;
     int max_x = 0, max_y = 0, max_z = 0;
 
@@ -577,9 +685,9 @@ void remove_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 m
     std::vector<int> temp;
     std::vector<int> sink_cells_diff;
     sink_cells_diff.reserve(simulation->sink->sink_cells.size());
-    for (int y = min_y; y < max_y; y++) {
-        for (int x = min_x; x < max_x; x++) {
-            for (int z = min_z; z < max_z; z++) {
+    for (int y = min_y; y <= max_y; y++) {
+        for (int x = min_x; x <= max_x; x++) {
+            for (int z = min_z; z <= max_z; z++) {
                 int cell_id =
                     y * simulation->gridX * simulation->gridZ +
                     x * simulation->gridZ +
@@ -600,7 +708,7 @@ void remove_particle_sink(Simulation* simulation, glm::vec3 min_pos, glm::vec3 m
 
     simulation->sink->sink_cells = sink_cells_diff;
 
-}
+}*/
 
 void update_wind_system(WindSystem* wind_system, float dt) {
 

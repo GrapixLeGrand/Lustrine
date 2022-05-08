@@ -1,4 +1,5 @@
 add_subdirectory(performance)
+add_subdirectory(unit_tests)
 #if (UNIX)
 	add_subdirectory(bullet)
 #endif()

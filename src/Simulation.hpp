@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 #ifdef PLATFORM_WINDOWS
 #include "../thirdparty/glm-0.9.9.8/glm/glm.hpp"
 #endif
@@ -90,7 +92,14 @@ struct SimulationParameters {
 };
 
 struct ParticleSink {
-    std::vector<int> sink_cells;
+    std::vector<bool> state;
+    std::vector<float> timers;
+    std::vector<float> frequencies;
+    std::vector<int> despawned;
+    std::vector<std::vector<int>> sink_cells;
+    int num_sinks = 0;
+
+    std::vector<int> temp_removal;
 };
 
 struct ParticleSource {
@@ -101,8 +110,7 @@ struct ParticleSource {
     std::vector<int> capacities;
     std::vector<int> spawned;
     std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
-    bool state;//whether or not the spawner is active RO!
-    int num_sources;
+    int num_sources = 0;
 };
 
 struct WindSystem {
@@ -115,6 +123,12 @@ struct WindSystem {
 
     float t1;//time to reach peak magnitude
     float t2;//time to reach 0 magniture again
+};
+
+struct CountingSortArrays {
+    int* counts = nullptr; //size num_grid_cells + 1
+    int* particles_unsorted_indices = nullptr;//size num_sand_particles
+    int* particles_sorted_indices = nullptr;
 };
 
 
@@ -162,25 +176,16 @@ struct Simulation {
     int gridX, gridY, gridZ; //sizes of the grid
     float cell_size; //size of side length of a single grid cell
     int num_grid_cells; //total amount of grid cells
-    
-    //convignent arrays for the grid based methods
-    std::vector<std::pair<int, int>> particle_cell_index_to_index;
-    std::vector<std::pair<int, int>> cell_indices;
-    std::vector<glm::vec3> positions_star_copy;
-
+   
     //uniform grid cells array
     std::vector<std::vector<int>> uniform_gird_cells;
-    std::vector<std::vector<int>> uniform_grid_cells_static_saved;
-    bool computed_static_particles = false;
+    std::vector<std::vector<int>> uniform_grid_cells_static_saved;//stores the static particles indices (cache them)
+    bool computed_static_particles = false;//whether or not we computed the stored indices
     std::vector<std::pair<int, int>> sand_particle_cell_id;
-    glm::vec3* velocity_tmp;
-    glm::vec3* position_star_neighbor_tmp;
-    glm::vec3* position_neighbor_tmp;
-    //glm::vec4* colors_neighbor_tmp;
+    glm::vec3* velocity_tmp = nullptr;
+    glm::vec3* position_star_neighbor_tmp = nullptr;
+    glm::vec3* position_neighbor_tmp = nullptr;
 
-    //counting sort arrays
-    std::vector<int> counts;
-    std::vector<int> counting_sort_sorted_indices;
 
     // TODO Everything for the sand goes bellow /////////////////////////////7
     int num_particles = 0; // total amount of particles in the system
@@ -229,6 +234,7 @@ struct Simulation {
     ParticleSource* source;
     ParticleSink* sink;
     WindSystem* wind_system;
+    CountingSortArrays* counting_sort_arrays;
 
 };
 
