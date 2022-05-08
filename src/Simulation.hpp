@@ -231,6 +231,11 @@ struct Simulation {
     bool blow_flag = false;
     std::vector<bool> attracted;
 
+    float attract_radius = 1.5f;
+    float blow_radius = 2.0f;
+    float attract_coeff = 1000.0f;
+    float blow_coeff = 500.0f;
+
     ParticleSource* source;
     ParticleSink* sink;
     WindSystem* wind_system;

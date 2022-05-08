@@ -132,6 +132,8 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_id(int id);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_box_scale(Vec3 scale);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int is_grounded(int id);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_attract_blow_parameters(float attract_radius, float blow_radius, float attract_coeff, float blow_coeff);
+
 
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_particle_source(GridWrapper* pattern, Vec3 direction, float freq, int capacity);

@@ -182,8 +182,6 @@ void simulate_sand(Simulation* simulation, float dt) {
     float kernelRadius = simulation->kernelRadius;
 
     static bool prev_attract_flag = false;
-    const float attract_radius = 1.5f;
-    const float blow_radius = 2.0f;
     //integration
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
@@ -192,18 +190,18 @@ void simulate_sand(Simulation* simulation, float dt) {
             simulation->attracted[i] = false;
         }
         if (simulation->attract_flag) {
-            if (glm::length(simulation->bullet_physics_simulation.player_position - positions[i]) < attract_radius) {
+            if (glm::length(simulation->bullet_physics_simulation.player_position - positions[i]) < simulation->attract_radius) {
                 simulation->attracted[i] = true;
             }
             if (simulation->attracted[i]) {
-                glm::vec3 particle_to_attraction_origin = (simulation->bullet_physics_simulation.player_position + glm::vec3(0.0f, 1.5f, 0.0f)) - positions[i];
-                velocities[i] += glm::normalize(particle_to_attraction_origin)* attract_kernel(glm::length(particle_to_attraction_origin)) * 1000.0f * simulation->particleRadius * dt * w;
+                glm::vec3 particle_to_attraction_origin = (simulation->bullet_physics_simulation.player_position + glm::vec3(0.0f, 1.5f, 0.0f)) - positions[i]; // above player's head
+                velocities[i] += glm::normalize(particle_to_attraction_origin)* attract_kernel(glm::length(particle_to_attraction_origin)) * simulation->attract_coeff * simulation->particleRadius * dt * w;
             }
         }
         if (simulation->blow_flag) {
             glm::vec3 particle_to_blow_origin = simulation->bullet_physics_simulation.player_position - positions[i];
-            if (glm::length(particle_to_blow_origin) < blow_radius) {
-                velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), blow_radius) * 500.0f * simulation->particleRadius * w;
+            if (glm::length(particle_to_blow_origin) < simulation->blow_radius) {
+                velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), simulation->blow_radius) * simulation->blow_coeff * simulation->particleRadius * w;
             }
             
         }

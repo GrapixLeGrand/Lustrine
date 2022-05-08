@@ -402,6 +402,15 @@ namespace Wrapper {
 		return (int)rayCallback.hasHit();
 	}
 
+	void set_attract_blow_parameters(float attract_radius, float blow_radius, float attract_coeff, float blow_coeff)
+	{
+		simulation->attract_radius = attract_radius;
+		simulation->blow_radius = blow_radius;
+		simulation->attract_coeff = attract_coeff;
+		simulation->blow_coeff = blow_coeff;
+	}
+
+
 	void set_body_gravity(int id, Vec3 gravity)
 	{
 		glm::vec3 gravity_tmp = wrapper_to_glm(gravity);
