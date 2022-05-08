@@ -43,6 +43,7 @@ namespace Bullet {
 		glm::vec3* foreign_sand_positions = nullptr; //ptr not owned
 		size_t ptr_bounding_box_start = 0;//inclusive
 		size_t ptr_bounding_box_end = 0;//exclusive
+		bool bounding_box_activated = true;
 
 		std::vector<btTransform> transforms;
 		std::vector<btRigidBody*> rigidbodies; //store all registered bodies

@@ -279,7 +279,7 @@ namespace Bullet {
 			tmpTransform.setIdentity();
 			btVector3 pos (0.0f, 0.0f, 0.0f);
 			tmpTransform.setOrigin(pos);
-			float mass = 0.0f; //particles must not be moving at first
+			float mass = 1.0f; //particles must not be moving at first
 			size_t index = old_size + simulation->num_bodies;
 
 			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btSphereShape(radius), index);
@@ -556,29 +556,33 @@ namespace Bullet {
 		
 		simulation->player_position = Lustrine::Bullet::get_body_position(simulation, simulation->player_id);
 		int num_close = simulation->ptr_bounding_box_start;
-		for (int i = start_ptr; i < end_ptr; i++) {
-			//if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {
-			if (particle_collide_with_player(simulation, particles[i], simulation->player_position)) {
-				simulation->rigidbodies[num_close]->setActivationState(ACTIVE_TAG);
-				btTransform t;
-				simulation->rigidbodies[num_close]->getMotionState()->getWorldTransform(t);
-				t.setOrigin(glmToBullet(particles[i]));
-				simulation->rigidbodies[num_close]->getMotionState()->setWorldTransform(t);
-				simulation->rigidbodies[num_close]->setWorldTransform(t);
-				simulation->rigidbodies[num_close]->setInterpolationWorldTransform(t);
 
-				//simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-				simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
-				simulation->rigidbodies[num_close]->clearForces();
-				btVector3 v(0.0, 0.0, 0.0);
-				simulation->rigidbodies[num_close]->setInterpolationLinearVelocity(v);
-				simulation->rigidbodies[num_close]->setLinearVelocity(v);
-				num_close++;
-				if (num_close - simulation->ptr_bounding_box_start >= simulation->num_particles_allocated) {
-					break;
+		if (simulation->bounding_box_activated) {
+			for (int i = start_ptr; i < end_ptr; i++) {
+				//if (glm::distance(particles[i], simulation->player_position) < simulation->player_box_radius) {
+				if (particle_collide_with_player(simulation, particles[i], simulation->player_position)) {
+					simulation->rigidbodies[num_close]->setActivationState(ACTIVE_TAG);
+					btTransform t;
+					simulation->rigidbodies[num_close]->getMotionState()->getWorldTransform(t);
+					t.setOrigin(glmToBullet(particles[i]));
+					simulation->rigidbodies[num_close]->getMotionState()->setWorldTransform(t);
+					simulation->rigidbodies[num_close]->setWorldTransform(t);
+					simulation->rigidbodies[num_close]->setInterpolationWorldTransform(t);
+
+					//simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+					simulation->rigidbodies[num_close]->setCollisionFlags(simulation->rigidbodies[num_close]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
+					simulation->rigidbodies[num_close]->clearForces();
+					btVector3 v(0.0, 0.0, 0.0);
+					simulation->rigidbodies[num_close]->setInterpolationLinearVelocity(v);
+					simulation->rigidbodies[num_close]->setLinearVelocity(v);
+					num_close++;
+					if (num_close - simulation->ptr_bounding_box_start >= simulation->num_particles_allocated) {
+						break;
+					}
 				}
 			}
 		}
+
 		//std::cout << simulation->player_position.x << std::endl;
 		//std::cout << num_close << std::endl;
 		for (int i = num_close; i < simulation->ptr_bounding_box_end; i++) {
@@ -597,24 +601,11 @@ namespace Bullet {
 	 * @param simulation 
 	 */
 	void disable_particles_bounding_boxes(Simulation* simulation) {
-		std::cout << "moving out particles bounding boxes" << std::endl;
-		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
-			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
-			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
-        	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
-			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
-			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		}
+		simulation->bounding_box_activated = false;
 	}
 
 	void enable_particles_bounding_boxes(Simulation* simulation) {
-		for (int i = simulation->ptr_bounding_box_start; i < simulation->ptr_bounding_box_end; i++) {
-			//btTransform& t = simulation->sand_particles_colliders[i]->getWorldTransform();
-			//t.setOrigin(btVector3(-100.0f, -100.0f, -100.0f)); //TODO HACKY use
-        	//simulation->sand_particles_colliders[i]->getMotionState()->setWorldTransform(t);
-			//simulation->sand_particles_colliders[i]->setActivationState(DISABLE_SIMULATION);
-			simulation->rigidbodies[i]->setCollisionFlags(simulation->rigidbodies[i]->getCollisionFlags() & ~btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		}
+		simulation->bounding_box_activated = true;
 	}
 
 	/**
