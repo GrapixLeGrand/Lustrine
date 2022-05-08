@@ -95,6 +95,8 @@ namespace Wrapper {
 	 */
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate(float dt, bool attract_flag, bool blow_flag);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void simulate_no_flags(float dt);
+
 	extern "C" LUSTRINE_WRAPPER_EXPORT void simulation_bind_positions_copy(float* position_ptr);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void cleanup_simulation();
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_box(const SimulationParameters* parameters, GridWrapper* grid, int X, int Y, int Z, Vec3 position, Color color, int type);

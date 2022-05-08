@@ -275,7 +275,11 @@ namespace Wrapper {
 		simulation->blow_flag = blow_flag;
 		Lustrine::simulate(simulation, dt); //, wrapper_to_glm(character_pos), attract_flag, blow_flag);
 	}
-
+	
+	void simulate_no_flags(float dt) {
+		Lustrine::simulate(simulation, dt);
+	}
+		
 	void cleanup_simulation() {
 		std::cout << "clean up simulation" << std::endl;
 		Lustrine::clean_simulation(simulation);
