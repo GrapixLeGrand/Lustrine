@@ -271,19 +271,18 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         simulation->computed_static_particles = true;
     }
 
-    simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
+    //simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         simulation->counting_sort_arrays->particles_unsorted_indices[i] = cell_id;
-        simulation->uniform_gird_cells[cell_id].push_back(i);
     }
 
     Sorting::counting_sort(
         simulation->counting_sort_arrays->counts,
-        simulation->counting_sort_arrays->particles_unsorted_indices,
+        simulation->counting_sort_arrays->particles_unsorted_indices,//cell indices
         simulation->num_sand_particles,
         simulation->num_grid_cells,
-        simulation->counting_sort_arrays->particles_sorted_indices
+        simulation->counting_sort_arrays->particles_sorted_indices //particles indices of sorted particles by cell indices
     );
 
     memcpy(simulation->position_neighbor_tmp, simulation->positions, simulation->num_sand_particles * sizeof(glm::vec3));
@@ -291,20 +290,6 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     memcpy(simulation->velocity_tmp, simulation->velocities, simulation->num_sand_particles * sizeof(glm::vec3));
     
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
-    /*
-    std::vector<std::pair<int, int>> sand_particle_cell_id (simulation->num_sand_particles, std::make_pair(0, 0));
-
-    for (int i = 0; i < simulation->num_sand_particles; i++) {
-        sand_particle_cell_id[i].first = i;
-        sand_particle_cell_id[i].second = simulation->counting_sort_arrays->particles_unsorted_indices[i];
-    }
-
-    std::sort(simulation->sand_particle_cell_id.begin(), simulation->sand_particle_cell_id.end(),
-        [](const auto& a, const auto& b)
-        {
-            return a.second < b.second;
-        }
-    );*/
 
     int* sorted_indices = simulation->counting_sort_arrays->particles_sorted_indices;
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
@@ -315,28 +300,20 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         int cell_id = get_cell_id(simulation, simulation->positions_star[sand_particle_cell_id[i].first]);
         simulation->uniform_gird_cells[cell_id].push_back(sand_particle_cell_id[i].first);*/
         
-        simulation->positions[sorted_indices[i]] = simulation->position_neighbor_tmp[i];
-        simulation->positions_star[sorted_indices[i]] = simulation->position_star_neighbor_tmp[i];
-        simulation->velocities[sorted_indices[i]] = simulation->velocity_tmp[i];
-        int cell_id = get_cell_id(simulation, simulation->positions_star[sorted_indices[i]]);
-        simulation->uniform_gird_cells[cell_id].push_back(sorted_indices[i]);
-        /*
-        simulation->positions[i] = simulation->position_neighbor_tmp[i];
-        simulation->positions_star[i] = simulation->position_star_neighbor_tmp[i];
-        simulation->velocities[i] = simulation->velocity_tmp[i];
+        simulation->positions[i] = simulation->position_neighbor_tmp[sorted_indices[i]];
+        simulation->positions_star[i] = simulation->position_star_neighbor_tmp[sorted_indices[i]];
+        simulation->velocities[i] = simulation->velocity_tmp[sorted_indices[i]];
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         simulation->uniform_gird_cells[cell_id].push_back(i);
-        */
-        
-        /*
-        int new_index = simulation->sand_particle_cell_id[i].first;
-        int cell_index = simulation->sand_particle_cell_id[i].second;
-        simulation->position_neighbor_tmp[i] = simulation->positions[new_index];
-        simulation->position_star_neighbor_tmp[i] = simulation->positions_star[new_index];
-        simulation->velocity_tmp[i] = simulation->velocities[new_index];
-        simulation->uniform_gird_cells[cell_index].push_back(i);
-        */
+
     }
+
+    /*simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
+        simulation->uniform_gird_cells[cell_id].push_back(i);
+        //simulation->counting_sort_arrays->particles_unsorted_indices[i] = cell_id;
+    }*/
 
     //memcpy(simulation->positions, simulation->position_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
     //memcpy(simulation->positions_star, simulation->position_star_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));

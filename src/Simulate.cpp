@@ -183,9 +183,10 @@ void simulate_sand(Simulation* simulation, float dt) {
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
     //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
-    memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
-
+    
+    
     find_neighbors_uniform_grid_v1(simulation);
+    memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
 
         // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
     for (int substep = 0; substep < 4; ++substep) {
