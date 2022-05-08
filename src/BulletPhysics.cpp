@@ -121,14 +121,14 @@ namespace Bullet {
 
 		std::cout << "Lustrine::info Exiting bullet" << std::endl;
 
-		delete simulation->dynamicWorld;
-		delete simulation->solver;
-		delete simulation->broadPhase;
-		delete simulation->dispatcher;
-		delete simulation->collisionConfiguration;
-
 		for (int i = 0; i < simulation->rigidbodies.size(); i++) {
+			simulation->dynamicWorld->removeRigidBody(simulation->rigidbodies[i]);
 			delete simulation->rigidbodies[i]->getMotionState();
+
+			/*if (i >= simulation->ptr_bounding_box_start && i < simulation->ptr_bounding_box_end) {
+				delete 
+			}*/
+
 			delete simulation->rigidbodies[i];
 		}
 		simulation->rigidbodies.clear();
@@ -139,7 +139,13 @@ namespace Bullet {
 		}
 		simulation->collisionShapes.clear();
 		simulation->allocated_particles_bounding_boxes = false; // in case we reuse the simulation after destroyed
-	
+
+		delete simulation->dynamicWorld;
+		delete simulation->solver;
+		delete simulation->broadPhase;
+		delete simulation->dispatcher;
+		delete simulation->collisionConfiguration;
+
 	}
 
 	/**
@@ -274,6 +280,8 @@ namespace Bullet {
 
 		simulation->ptr_bounding_box_start = simulation->num_bodies;
 
+		btCollisionShape* collider = new btBoxShape(btVector3(radius, radius, radius));
+		simulation->collisionShapes.push_back(collider);
 		for (size_t old_size = 0; old_size < simulation->num_particles_allocated; old_size++) {
 			btTransform tmpTransform;
 			tmpTransform.setIdentity();
@@ -282,7 +290,7 @@ namespace Bullet {
 			float mass = 0.0f; //particles must not be moving at first
 			size_t index = old_size + simulation->num_bodies;
 
-			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btBoxShape(btVector3(radius, radius, radius)), index);
+			simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, collider, index);
 			//simulation->rigidbodies[index] = bullet_create_rigidbody(simulation, KINEMATIC, mass, tmpTransform, new btBoxShape(btVector3(radius, radius, radius)), index);
 			simulation->dynamicWorld->addRigidBody(simulation->rigidbodies[index]); //, simulation->collision_group_1, simulation->collision_mask_1);
 		}

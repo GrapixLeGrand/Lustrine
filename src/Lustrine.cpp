@@ -287,14 +287,26 @@ void init_simulation(
 
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
-    delete[] simulation->positions;
-    delete[] simulation->positions_star;
-    delete[] simulation->colors;
-    delete[] simulation->positions_tmp;
+
+    std::align_val_t simd_vector_align{64};
+    ::operator delete[] (simulation->positions, simd_vector_align);
+    ::operator delete[] (simulation->positions_star, simd_vector_align);
+    ::operator delete[] (simulation->colors, simd_vector_align);
+    ::operator delete[] (simulation->positions_tmp, simd_vector_align);
+    ::operator delete[] (simulation->velocities, simd_vector_align);
+
+    ::operator delete[] (simulation->position_neighbor_tmp, simd_vector_align);
+    ::operator delete[] (simulation->position_star_neighbor_tmp, simd_vector_align);
+    ::operator delete[] (simulation->velocity_tmp, simd_vector_align);
 
     delete simulation->source;
     delete simulation->sink;
     delete simulation->wind_system;
+
+    ::operator delete[] (simulation->counting_sort_arrays->counts, simd_vector_align);
+    ::operator delete[] (simulation->counting_sort_arrays->particles_sorted_indices, simd_vector_align);
+    ::operator delete[] (simulation->counting_sort_arrays->particles_unsorted_indices, simd_vector_align);
+    delete simulation->counting_sort_arrays;
 }
 
 void init_grid_box(const SimulationParameters* parameters, Grid* grid, int X, int Y, int Z, glm::vec3 position, glm::vec4 color, MaterialType type) {
@@ -466,6 +478,8 @@ void simulate(Simulation* simulation, float dt) {
         simulation->num_remaining_sand_particles++;
     }
 
+    simulation->sink->temp_removal.clear();
+
     /*
             std::vector<int>& cell = simulation->uniform_gird_cells[i];
         for (int j = 0; j < cell.size(); j++) {
@@ -628,7 +642,7 @@ int add_particle_sink(Simulation* simulation, const Grid* pattern, float frequen
             }
         }
     }*/
-
+    return 0;
 }
 
 void set_source_state(Simulation* simulation, int index, bool state) {

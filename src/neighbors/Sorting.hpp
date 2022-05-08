@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Lustrine_Export.h"
+#include <cstddef>
 
 namespace Lustrine {
     namespace Sorting {
