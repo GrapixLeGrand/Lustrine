@@ -92,7 +92,14 @@ struct SimulationParameters {
 };
 
 struct ParticleSink {
-    std::vector<int> sink_cells;
+    std::vector<bool> state;
+    std::vector<float> timers;
+    std::vector<float> frequencies;
+    std::vector<int> despawned;
+    std::vector<std::vector<int>> sink_cells;
+    int num_sinks = 0;
+
+    std::vector<int> temp_removal;
 };
 
 struct ParticleSource {
@@ -103,8 +110,7 @@ struct ParticleSource {
     std::vector<int> capacities;
     std::vector<int> spawned;
     std::vector<bool> source_state;//true=ongoing, false=stop (irrevlantly of the capacity)
-    bool state;//whether or not the spawner is active RO!
-    int num_sources;
+    int num_sources = 0;
 };
 
 struct WindSystem {

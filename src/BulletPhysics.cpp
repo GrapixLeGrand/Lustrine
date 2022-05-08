@@ -138,7 +138,6 @@ namespace Bullet {
 			delete simulation->collisionShapes[i];
 		}
 		simulation->collisionShapes.clear();
-
 		simulation->allocated_particles_bounding_boxes = false; // in case we reuse the simulation after destroyed
 	
 	}

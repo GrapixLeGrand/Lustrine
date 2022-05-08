@@ -545,6 +545,11 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.particles_bounding_box_requested_state = false;
 	}
 
+
+	int add_source(Grid* pattern, Vec3 direction, float freq, int capacity) {
+
+	}
+
 	
 }	
 }
