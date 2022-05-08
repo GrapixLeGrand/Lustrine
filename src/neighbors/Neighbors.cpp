@@ -288,7 +288,8 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     memcpy(simulation->position_neighbor_tmp, simulation->positions, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->position_star_neighbor_tmp, simulation->positions_star, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->velocity_tmp, simulation->velocities, simulation->num_sand_particles * sizeof(glm::vec3));
-    
+    memcpy(simulation->attracted_tmp, simulation->attracted, simulation->num_sand_particles * sizeof(bool));
+
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 
     int* sorted_indices = simulation->counting_sort_arrays->particles_sorted_indices;
@@ -296,6 +297,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         simulation->positions[i] = simulation->position_neighbor_tmp[sorted_indices[i]];
         simulation->positions_star[i] = simulation->position_star_neighbor_tmp[sorted_indices[i]];
         simulation->velocities[i] = simulation->velocity_tmp[sorted_indices[i]];
+        simulation->attracted[i] = simulation->attracted_tmp[sorted_indices[i]];
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         sorted_indices[i] = cell_id;
         simulation->uniform_gird_cells[cell_id].push_back(i);

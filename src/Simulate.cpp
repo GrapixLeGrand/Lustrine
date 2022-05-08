@@ -203,14 +203,11 @@ void simulate_sand(Simulation* simulation, float dt) {
             if (glm::length(particle_to_blow_origin) < simulation->blow_radius) {
                 velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), simulation->blow_radius) * simulation->blow_coeff * simulation->particleRadius * w;
             }
-            
         }
 
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
     }
     //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
-    
-    
     find_neighbors_uniform_grid_v1(simulation);
     memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
 

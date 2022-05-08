@@ -128,8 +128,10 @@ void init_simulation(
     simulation->positions_tmp = new (simd_vector_align) glm::vec3[simulation->total_allocated];
 
     // for attraction
-    simulation->attracted = std::vector<bool>(simulation->total_allocated);
+    simulation->attracted = new (simd_vector_align) bool[simulation->total_allocated]; //std::vector<bool>(simulation->total_allocated);
+    simulation->attracted_tmp = new (simd_vector_align) bool[simulation->total_allocated];
 
+    memset(simulation->attracted, 0, simulation->total_allocated * sizeof(bool));
     memset(simulation->positions, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->colors, 0, simulation->total_allocated * 4 * 4);
@@ -297,6 +299,8 @@ void clean_simulation(Simulation* simulation) {
     ::operator delete[] (simulation->colors, simd_vector_align);
     ::operator delete[] (simulation->positions_tmp, simd_vector_align);
     ::operator delete[] (simulation->velocities, simd_vector_align);
+    ::operator delete[](simulation->attracted, simd_vector_align);
+    ::operator delete[](simulation->attracted_tmp, simd_vector_align);
 
     ::operator delete[] (simulation->position_neighbor_tmp, simd_vector_align);
     ::operator delete[] (simulation->position_star_neighbor_tmp, simd_vector_align);
