@@ -67,7 +67,7 @@ int main(void) {
     Lustrine::init_grid_from_magika_voxel(&solid_grids[2], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 30, 0, 0 }, Lustrine::MaterialType::SOLID);
     Lustrine::init_grid_from_magika_voxel(&solid_grids[3], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 0, 0, 30 }, Lustrine::MaterialType::SOLID);
     */
-    Lustrine::init_grid_box(&parameters, &sand_grids[0], 10, 10, 10, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 30, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);

@@ -8,6 +8,7 @@
 #include <cstring>
 #include <filesystem>
 #include <string>
+#include "Simulate.hpp"
 
 namespace Lustrine {
 namespace Wrapper {
@@ -545,9 +546,43 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.particles_bounding_box_requested_state = false;
 	}
 
+	void set_simulate_function(int index) {
+		switch (index) {
+			case 0:
+			simulation->simulate_fun = simulate_sand;
+			break;
+			case 1:
+			simulation->simulate_fun = simulate_sand_v3;
+			break;
+			default:
+			std::cout << "Unreckognized input for simulate func " << index << "\n";
+		}
+	}
 
-	int add_source(Grid* pattern, Vec3 direction, float freq, int capacity) {
+	int add_particle_source(GridWrapper* pattern, Vec3 direction, float freq, int capacity) {
+		Lustrine::Grid tmp;
+		grid_wrapper_to_grid(pattern, &tmp);
+		return Lustrine::add_particle_source(simulation, &tmp, wrapper_to_glm(direction), freq, capacity);
+	}
 
+	int add_particle_sink(Vec3 min_pos, Vec3 max_pos, float frequency) {
+		return Lustrine::add_particle_sink(simulation, wrapper_to_glm(min_pos), wrapper_to_glm(max_pos), frequency);
+	}
+
+	void set_source_state(int index, int state) {
+		Lustrine::set_source_state(simulation, index, state != 0 ? true : false);
+	}
+
+	void set_sink_state(int index, bool state) {
+		Lustrine::set_sink_state(simulation, index, state != 0 ? true : false);
+	}
+
+	int get_source_spawned(int index) {
+		return Lustrine::get_source_spawned(simulation, index);
+	}
+
+	int get_sink_despawned(int index) {
+		return Lustrine::get_sink_despawned(simulation, index);
 	}
 
 	

@@ -655,6 +655,14 @@ void set_sink_state(Simulation* simulation, int index, bool state) {
     simulation->sink->state[index] = state;
 }
 
+int get_source_spawned(Simulation* simulation, int index) {
+    return simulation->source->spawned[index];
+}
+
+int get_sink_despawned(Simulation* simulation, int index) {
+    return simulation->sink->despawned[index];
+}
+
 /*
 void remove_particle_sink(Simulation* simulation, int index, glm::vec3 min_pos, glm::vec3 max_pos) {
     int min_x = 0, min_y = 0, min_z = 0;
