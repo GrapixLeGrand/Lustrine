@@ -125,6 +125,9 @@ void init_simulation(
     simulation->colors = new (simd_vector_align) glm::vec4[simulation->total_allocated];
     simulation->positions_tmp = new (simd_vector_align) glm::vec3[simulation->total_allocated];
 
+    // for attraction
+    simulation->attracted = std::vector<bool>(simulation->total_allocated);
+
     memset(simulation->positions, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
     memset(simulation->colors, 0, simulation->total_allocated * 4 * 4);

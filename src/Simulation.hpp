@@ -224,6 +224,7 @@ struct Simulation {
     //for blowing, attracting sand
     bool attract_flag = false;
     bool blow_flag = false;
+    std::vector<bool> attracted;
 
     ParticleSource* source;
     ParticleSink* sink;

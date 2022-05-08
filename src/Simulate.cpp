@@ -135,7 +135,23 @@ namespace Lustrine {
         return x + 1e-9f;
     }
 
+    float attract_kernel(float x) {
+        return 1.0f;
+    }
 
+
+    float blow_kernel(float x, float kernel_radius) {
+        float alpha = 0.75f;
+        if (x > kernel_radius) {
+            return 0.0f;
+        }
+        else {
+            float value = 1.0f - x / kernel_radius;
+
+            return value;
+        }
+        //return x;
+    }
 
 void simulate_sand(Simulation* simulation, float dt) {
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
@@ -165,19 +181,31 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     float kernelRadius = simulation->kernelRadius;
 
+    static bool prev_attract_flag = false;
+    const float attract_radius = 1.5f;
+    const float blow_radius = 2.0f;
     //integration
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
         velocities[i] += simulation->gravity * dt;
+        if (prev_attract_flag && !simulation->attract_flag) {
+            simulation->attracted[i] = false;
+        }
         if (simulation->attract_flag) {
-            glm::vec3 p_to_cp = simulation->bullet_physics_simulation.player_position - positions[i];
-            //        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
-            velocities[i] += glm::normalize(p_to_cp) * simulation->particleRadius * 1000.0f * dt * w;
+            if (glm::length(simulation->bullet_physics_simulation.player_position - positions[i]) < attract_radius) {
+                simulation->attracted[i] = true;
+            }
+            if (simulation->attracted[i]) {
+                glm::vec3 particle_to_attraction_origin = (simulation->bullet_physics_simulation.player_position + glm::vec3(0.0f, 1.5f, 0.0f)) - positions[i];
+                velocities[i] += glm::normalize(particle_to_attraction_origin)* attract_kernel(glm::length(particle_to_attraction_origin)) * 1000.0f * simulation->particleRadius * dt * w;
+            }
         }
         if (simulation->blow_flag) {
-            glm::vec3 p_to_cp = simulation->bullet_physics_simulation.player_position - positions[i];
-            //        float force_magnitude = 10 * std::min(1.0, 1.0/ glm::dot(p_to_gs, p_to_gs));
-            velocities[i] += -glm::normalize(p_to_cp) * simulation->particleRadius * 200.0f * w;
+            glm::vec3 particle_to_blow_origin = simulation->bullet_physics_simulation.player_position - positions[i];
+            if (glm::length(particle_to_blow_origin) < blow_radius) {
+                velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), blow_radius) * 500.0f * simulation->particleRadius * w;
+            }
+            
         }
 
         positions_star[i] = positions[i] + velocities[i] * dt; // update both
@@ -278,12 +306,8 @@ void simulate_sand(Simulation* simulation, float dt) {
     }
     Profiling::stop_counter(6);
 
-    //TODO: this perturbation is for test, remove this in the future
-    /*static bool perturbation = true;
-    if (perturbation) {
-        velocities[simulation->ptr_sand_start] += glm::vec3(0.01, 0.01, 0.01);
-        perturbation = false;
-    }*/
+
+    prev_attract_flag = simulation->attract_flag;
 
 }
 
