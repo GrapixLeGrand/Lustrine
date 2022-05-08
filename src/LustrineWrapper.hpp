@@ -102,6 +102,7 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT void free_string(BindingString* data);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void create_grid(GridWrapper* grid, const wchar_t* path, int type, int pathlen);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_grid_magikavoxel(GridWrapper* grid, const char* path, Vec3 position);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int get_num_sand_particles();
 
 	/**
 	 * @brief bullet physics functions. doc in cpp. 

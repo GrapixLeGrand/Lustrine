@@ -138,6 +138,11 @@ namespace Wrapper {
 
 	}
 
+
+	int get_num_sand_particles() {
+		return simulation->num_sand_particles;
+	}
+
 	void init_grid_magikavoxel(GridWrapper* grid, const char* path, Vec3 position) {
 		std::cout << "LustrineWrapper: init grid with magika at " << path << std::endl;
 		Lustrine::Grid tmp;
