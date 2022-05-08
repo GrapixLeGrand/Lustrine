@@ -414,6 +414,8 @@ void init_chunk_from_grid(Chunk* chunk, const Grid* grid, MaterialType type, flo
             }
         }
     }
+
+    std::cout << "Grid chunk init with " << counter << " particles\n";
 }
 
 
