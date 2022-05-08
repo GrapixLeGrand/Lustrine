@@ -55,7 +55,7 @@ namespace Bullet {
 			//btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
 			body = new btRigidBody(mass, myMotionState, shape, localInertia);
 			//body->setActivationState(ISLAND_SLEEPING);
-			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			body->setCollisionFlags(body->getCollisionFlags() |  btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		} else {	
 			assert(false);
 		}
@@ -535,8 +535,11 @@ namespace Bullet {
 		btTransform t;
 		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
 		t.setOrigin(glmToBullet(new_position));
+		simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
+
+		btTransform t2 = simulation->rigidbodies[body]->getWorldTransform();
+		t2.setOrigin(glmToBullet(new_position));
 		simulation->rigidbodies[body]->setWorldTransform(t);
-		//simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
 	}
 
 	bool particle_collide_with_player(Simulation* simulation, glm::vec3 particle_position, glm::vec3 player_position) {

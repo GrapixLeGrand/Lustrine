@@ -21,7 +21,7 @@ namespace Bullet {
 		btConstraintSolver* solver;
 		btDefaultCollisionConfiguration* collisionConfiguration;
 		btDiscreteDynamicsWorld* dynamicWorld;
-		btVector3 gravity = btVector3(0.0f, -25.0f, 0.0f);
+		btVector3 gravity = btVector3(0.0f, -10.0f, 0.0f);
 
 		btAlignedObjectArray<btCollisionShape*> collisionShapes;//seems to be auto managed memory
 		btBoxShape* unit_box_shape; //unit box shape
