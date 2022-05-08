@@ -44,9 +44,9 @@ int main(void) {
     //////////////////////////////////////////////////////////////////////////////////////////
     Lustrine::Simulation simulation;
     Lustrine::SimulationParameters parameters;
-    parameters.X = 40.0f;
+    parameters.X = 80.0f;
     parameters.Y = 40.0f;
-    parameters.Z = 40.0f;
+    parameters.Z = 80.0f;
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
@@ -58,12 +58,15 @@ int main(void) {
     sand_grids_positions[3] = {20, 0, 0};
     
     std::vector<Lustrine::Grid> solid_grids_tmp (0);
-    std::vector<Lustrine::Grid> solid_grids (1);
+    std::vector<Lustrine::Grid> solid_grids (4);
     std::vector<glm::vec3> solid_grids_positions (1);
     solid_grids_positions[0] = {10, 1, 10};
 
-    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 10, 0, 10 }, Lustrine::MaterialType::SOLID);
-    
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[0], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 0, 0, 0 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[1], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 30, 0, 30 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[2], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 30, 0, 0 }, Lustrine::MaterialType::SOLID);
+    Lustrine::init_grid_from_magika_voxel(&solid_grids[3], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 0, 0, 30 }, Lustrine::MaterialType::SOLID);
+
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 20, 20, 20, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
