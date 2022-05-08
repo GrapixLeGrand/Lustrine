@@ -249,6 +249,9 @@ void simulate_sand(Simulation* simulation, float dt) {
                 }
             }
             positions_star[i] = simulation->positions_tmp[i] + deltap;
+
+
+            //here
         }
 
 
