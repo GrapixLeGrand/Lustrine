@@ -10,6 +10,7 @@
 //#endif
 
 #include "Lustrine.hpp"
+#include "Simulate.hpp"
 #include "../Utils.hpp"
 #include "LevekGL.hpp"
 
@@ -98,7 +99,7 @@ int main(void) {
     
     Lustrine::add_particle_source(&simulation, &test_grid, {0, 0, 1}, 1.0f / 30.f, -1);
     Lustrine::add_particle_source(&simulation, &test_grid2, {0, 0, 1}, 1.0f / 15.f, -1);
-
+            
     Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {40, 5, 40}, 0.0f);
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
