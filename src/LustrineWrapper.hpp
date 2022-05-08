@@ -131,7 +131,7 @@ namespace Wrapper {
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_id(int id);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_player_box_scale(Vec3 scale);
-	extern "C" LUSTRINE_WRAPPER_EXPORT bool is_grounded(int id);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int is_grounded(int id);
 
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_particle_source(GridWrapper* pattern, Vec3 direction, float freq, int capacity);
@@ -145,6 +145,9 @@ namespace Wrapper {
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void set_simulate_function(int index);
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_gravity(int id, Vec3 gravity);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_body_no_collision_response(int id);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int collide_with_player(int id);
 	/**
 	 * @brief For particles interactions
 	 */

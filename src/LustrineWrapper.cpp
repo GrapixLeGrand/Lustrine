@@ -364,7 +364,6 @@ namespace Wrapper {
 		Lustrine::Bullet::set_body_position(&simulation->bullet_physics_simulation, body, wrapper_to_glm(position));
 	}
 
-
 	void set_body_frixion(int body, float frixion) {
 		Lustrine::Bullet::set_body_frixion(&simulation->bullet_physics_simulation, body, frixion);
 	}
@@ -384,6 +383,7 @@ namespace Wrapper {
 	void set_player_id(int id)
 	{
 		simulation->bullet_physics_simulation.player_id = id;
+		simulation->bullet_physics_simulation.rigidbodies[id]->setGravity(btVector3(0.0f, -25.0f, 0.0f));
 	}
 
 	void set_player_box_scale(Vec3 scale)
@@ -391,24 +391,32 @@ namespace Wrapper {
 		simulation->bullet_physics_simulation.player_box_scale = wrapper_to_glm(scale);
 	}
 
-	bool is_grounded(int id)
+	int is_grounded(int id)
 	{
 		glm::vec3 pos = Bullet::get_body_position(&simulation->bullet_physics_simulation, id);
 		btVector3 btFrom(pos.x, pos.y, pos.z);
 		btVector3 btTo(pos.x, pos.y - 0.55f, pos.z);
-		btCollisionWorld::ClosestRayResultCallback res(btFrom, btTo);
-		simulation->bullet_physics_simulation.dynamicWorld->rayTest(btFrom, btTo, res);
+		btCollisionWorld::ClosestRayResultCallback rayCallback(btFrom, btTo);
+		simulation->bullet_physics_simulation.dynamicWorld->rayTest(btFrom, btTo, rayCallback);
 
-		if (res.hasHit()) {
-			printf("Collision at: <%.2f, %.2f, %.2f>\n", res.m_hitPointWorld.getX(), res.m_hitPointWorld.getY(), res.m_hitPointWorld.getZ());
-		}
-		else {
-			printf("no collision\n");
-		}
-		return res.hasHit();
+		return (int)rayCallback.hasHit();
 	}
 
-	
+	void set_body_gravity(int id, Vec3 gravity)
+	{
+		glm::vec3 gravity_tmp = wrapper_to_glm(gravity);
+		simulation->bullet_physics_simulation.rigidbodies[id]->setGravity(btVector3(gravity_tmp.x, gravity_tmp.y, gravity_tmp.z));
+	}
+
+	void set_body_no_collision_response(int id)
+	{
+		simulation->bullet_physics_simulation.rigidbodies[id]->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	}
+
+	int collide_with_player(int id)
+	{
+		return check_collision(id, simulation->bullet_physics_simulation.player_id);
+	}
 	/**
 	 * @brief remove body's rotation
 	 * 

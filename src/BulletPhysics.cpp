@@ -38,12 +38,12 @@ namespace Bullet {
 
 		btAssert((!shape || shape->getShapeType() != INVALID_SHAPE_PROXYTYPE));
 		//rigidbody is dynamic if and only if mass is non zero, otherwise static
-		bool isDynamic = (mass != 0.f);
 		btVector3 localInertia(0, 0, 0);
 		btRigidBody* body = nullptr;
 		btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
+		shape->calculateLocalInertia(mass, localInertia);
 		if (type == DYNAMIC) {
-			shape->calculateLocalInertia(mass, localInertia);
+			
 			//using motionstate is recommended, it provides interpolation capabilities, and only synchronizes 'active' objects
 			btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
 			body = new btRigidBody(cInfo);
@@ -54,9 +54,10 @@ namespace Bullet {
 			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);// CF_STATIC_OBJECT);
 		} else if (type == DETECTOR) {
 			//btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
-			body = new btRigidBody(mass, myMotionState, shape, localInertia);
+			btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
+			body = new btRigidBody(cInfo);
 			//body->setActivationState(ISLAND_SLEEPING);
-			body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			body->setCollisionFlags(body->getCollisionFlags() |btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 		} else {	
 			assert(false);
 		}
@@ -252,12 +253,13 @@ namespace Bullet {
 		btRigidBody* newBody = bullet_create_rigidbody(simulation, DETECTOR, 0.0f, tmpTransform, shape, simulation->num_bodies);
 		newBody->setFriction(simulation->default_body_friction);
 		
-		simulation->rigidbodies.push_back(newBody);
+		simulation->rigidbodies.emplace_back(newBody);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
 		simulation->bodies_collisions.resize(simulation->num_bodies, {});
 		simulation->dynamicWorld->addRigidBody(newBody);//, group, mask);
+		//simulation->rigidbodies[simulation->num_bodies]->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		return result;
 	}
 
@@ -543,8 +545,11 @@ namespace Bullet {
 		btTransform t;
 		simulation->rigidbodies[body]->getMotionState()->getWorldTransform(t);
 		t.setOrigin(glmToBullet(new_position));
+		simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
+
+		btTransform t2 = simulation->rigidbodies[body]->getWorldTransform();
+		t2.setOrigin(glmToBullet(new_position));
 		simulation->rigidbodies[body]->setWorldTransform(t);
-		//simulation->rigidbodies[body]->getMotionState()->setWorldTransform(t);
 	}
 
 	bool particle_collide_with_player(Simulation* simulation, glm::vec3 particle_position, glm::vec3 player_position) {
