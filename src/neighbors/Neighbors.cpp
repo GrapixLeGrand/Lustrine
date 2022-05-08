@@ -293,96 +293,72 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
 
     int* sorted_indices = simulation->counting_sort_arrays->particles_sorted_indices;
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
-        
-        /*simulation->positions[sand_particle_cell_id[i].first] = simulation->position_neighbor_tmp[i];
-        simulation->positions_star[sand_particle_cell_id[i].first] = simulation->position_star_neighbor_tmp[i];
-        simulation->velocities[sand_particle_cell_id[i].first] = simulation->velocity_tmp[i];
-        int cell_id = get_cell_id(simulation, simulation->positions_star[sand_particle_cell_id[i].first]);
-        simulation->uniform_gird_cells[cell_id].push_back(sand_particle_cell_id[i].first);*/
-        
         simulation->positions[i] = simulation->position_neighbor_tmp[sorted_indices[i]];
         simulation->positions_star[i] = simulation->position_star_neighbor_tmp[sorted_indices[i]];
         simulation->velocities[i] = simulation->velocity_tmp[sorted_indices[i]];
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
+        sorted_indices[i] = cell_id;
         simulation->uniform_gird_cells[cell_id].push_back(i);
+    }
+
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+
+        int cell_id = sorted_indices[i];
+        std::vector<int>& current_cell_indices = simulation->uniform_gird_cells[cell_id];
+
+        int yy = cell_id / (simulation->gridX * simulation->gridZ);
+        int tmp = cell_id - yy * simulation->gridX * simulation->gridZ;
+        int zz = tmp % simulation->gridZ;
+        int xx = tmp / simulation->gridZ;
+        
+        int y_lower = -1; int y_upper = 1;
+        int x_lower = -1; int x_upper = 1;
+        int z_lower = -1; int z_upper = 1;
+        if (yy + y_lower < 0) y_lower = 0; if (yy + y_upper >= simulation->gridY) y_upper = 0;
+        if (xx + x_lower < 0) x_lower = 0; if (xx + x_upper >= simulation->gridX) x_upper = 0;
+        if (zz + z_lower < 0) z_lower = 0; if (zz + z_upper >= simulation->gridZ) z_upper = 0;
+
+        const glm::vec3& self = simulation->positions_star[i];
+
+        for (int y = y_lower; y <= y_upper; y++) {
+            for (int x = x_lower; x <= x_upper; x++) {
+                for (int z = z_lower; z <= z_upper; z++) {
+
+                    int neighbor_cell_id =
+                        (yy + y) * simulation->gridX * simulation->gridZ +
+                        (xx + x) * simulation->gridZ +
+                        (zz + z);
+
+                    std::vector<int>& neighbor_cell_indices = simulation->uniform_gird_cells[neighbor_cell_id];
+
+                    if (neighbor_cell_indices.empty() == true) {
+                        continue;
+                    }
+
+                    for (int j = 0; j < neighbor_cell_indices.size(); j++) {
+                        const int neighbor_index = neighbor_cell_indices[j];
+
+                        if (neighbor_index < i) {
+                            continue;
+                        }
+
+                        const glm::vec3& other = simulation->positions_star[neighbor_index];
+                        const glm::vec3 tmp = self - other;
+                        if (glm::dot(tmp, tmp) <= simulation->kernelRadius * simulation->kernelRadius) {
+                            simulation->neighbors[i].push_back(neighbor_index);
+                            if (neighbor_index < simulation->ptr_solid_start)
+                                simulation->neighbors[neighbor_index].push_back(i);
+                        }
+                    }
+
+                }
+            }
+        } //end neighbor cells checking 
+
 
     }
 
-    /*simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
-    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
-        int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
-        simulation->uniform_gird_cells[cell_id].push_back(i);
-        //simulation->counting_sort_arrays->particles_unsorted_indices[i] = cell_id;
-    }*/
-
-    //memcpy(simulation->positions, simulation->position_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
-    //memcpy(simulation->positions_star, simulation->position_star_neighbor_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
-    //memcpy(simulation->velocities, simulation->velocity_tmp, simulation->num_sand_particles * sizeof(glm::vec3));
-
-
-    for (int yy = 0; yy < simulation->gridY; yy++) {
-        for (int xx = 0; xx < simulation->gridX; xx++) {
-            for (int zz = 0; zz < simulation->gridZ; zz++) {
-
-                int cell_id =
-                    yy * simulation->gridX * simulation->gridZ +
-                    xx * simulation->gridZ +
-                    zz;
-
-                std::vector<int>& current_cell_indices = simulation->uniform_gird_cells[cell_id];
-
-                if (current_cell_indices.empty() == true) {
-                    continue;
-                }
-
-                for (int y = -1; y <= 1; y++) {
-                    for (int x = -1; x <= 1; x++) {
-                        for (int z = -1; z <= 1; z++) {
-
-                            if (
-                                check_index(xx + x, 0, simulation->gridX) == false ||
-                                check_index(yy + y, 0, simulation->gridY) == false ||
-                                check_index(zz + z, 0, simulation->gridZ) == false
-                                )
-                            {
-                                continue;
-                            }
-
-                            int neighbor_cell_id =
-                                (yy + y) * simulation->gridX * simulation->gridZ +
-                                (xx + x) * simulation->gridZ +
-                                (zz + z);
-
-                            std::vector<int>& neighbor_cell_indices = simulation->uniform_gird_cells[neighbor_cell_id];
-
-                            if (neighbor_cell_indices.empty() == true) {
-                                continue;
-                            }
-
-                            for (int i = 0; i < current_cell_indices.size(); i++) {
-                                const int current_index = current_cell_indices[i];
-                                if (current_index >= simulation->ptr_solid_start) {
-                                    continue;
-                                }
-                                const glm::vec3& self = simulation->positions_star[current_index];
-                                for (int j = 0; j < neighbor_cell_indices.size(); j++) {
-                                    const int neighbor_index = neighbor_cell_indices[j];
-                                    const glm::vec3& other = simulation->positions_star[neighbor_index];
-                                    const glm::vec3 tmp = self - other;
-                                    if (glm::dot(tmp, tmp) <= simulation->kernelRadius * simulation->kernelRadius) {
-                                        simulation->neighbors[current_index].push_back(neighbor_index);
-                                    }
-                                }
-                            } //end distance check
-
-                        }
-                    }
-                } //end neighbor cells checking 
-
-
-            }
-        }
-    } //end grid checking
+    
 }
 
 void find_neighbors_uniform_grid(Simulation* simulation) {
