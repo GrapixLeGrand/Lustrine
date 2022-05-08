@@ -11,6 +11,10 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 17)
 
+#the following macros break the code (at least the rendering :))
+#add_compile_definitions(GLM_FORCE_DEFAULT_ALIGNED_GENTYPES)
+#add_compile_definitions(GLM_FORCE_SIMD_AVX2)
+
 if (UNIX)
     add_compile_definitions(PLATFORM_UNIX)
 endif()

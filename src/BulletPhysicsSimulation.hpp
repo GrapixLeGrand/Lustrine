@@ -6,6 +6,7 @@
 #endif
 #ifdef PLATFORM_UNIX
 #include "glm/glm.hpp"
+//#include "thirdparty/glm-0.9.9.8/glm/glm.hpp"
 #endif
 
 #include "btBulletDynamicsCommon.h"
