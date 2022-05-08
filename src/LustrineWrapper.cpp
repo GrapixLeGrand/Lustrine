@@ -401,7 +401,21 @@ namespace Wrapper {
 		return (int)rayCallback.hasHit();
 	}
 
-	
+	void set_body_gravity(int id, Vec3 gravity)
+	{
+		glm::vec3 gravity_tmp = wrapper_to_glm(gravity);
+		simulation->bullet_physics_simulation.rigidbodies[id]->setGravity(btVector3(gravity_tmp.x, gravity_tmp.y, gravity_tmp.z));
+	}
+
+	void set_body_no_collision_response(int id)
+	{
+		simulation->bullet_physics_simulation.rigidbodies[id]->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	}
+
+	int collide_with_player(int id)
+	{
+		return check_collision(id, simulation->bullet_physics_simulation.player_id);
+	}
 	/**
 	 * @brief remove body's rotation
 	 * 
