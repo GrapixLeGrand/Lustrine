@@ -392,7 +392,6 @@ namespace Wrapper {
 	void set_player_id(int id)
 	{
 		simulation->bullet_physics_simulation.player_id = id;
-		simulation->bullet_physics_simulation.rigidbodies[id]->setGravity(btVector3(0.0f, -25.0f, 0.0f));
 	}
 
 	void set_player_box_scale(Vec3 scale)
