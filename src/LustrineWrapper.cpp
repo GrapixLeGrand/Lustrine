@@ -611,6 +611,10 @@ namespace Wrapper {
 		return Lustrine::get_sink_despawned(simulation, index);
 	}
 
+	int get_grid_cell_size() {
+		return simulation->cell_size;
+	}
+
 	
 }	
 }

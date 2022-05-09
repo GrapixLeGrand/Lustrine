@@ -293,6 +293,7 @@ void init_simulation(
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
 
+    simulation->computed_static_particles = false;
     std::align_val_t simd_vector_align{64};
     ::operator delete[] (simulation->positions, simd_vector_align);
     ::operator delete[] (simulation->positions_star, simd_vector_align);
