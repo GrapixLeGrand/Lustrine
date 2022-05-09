@@ -436,6 +436,8 @@ void simulate(Simulation* simulation, float dt) {
             
             memcpy(simulation->positions + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
             memcpy(simulation->positions_star + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+            memset(simulation->attracted + simulation->ptr_sand_end, 0, pattern.num_particles * sizeof(bool));
+            
             //memset(simulation->colors + simulation->ptr_sand_end, simulation->spawner.patterns[i].color);
 
             int end_ptr_tmp = simulation->ptr_sand_end;
@@ -484,6 +486,7 @@ void simulate(Simulation* simulation, float dt) {
         simulation->positions[evicted] = simulation->positions[simulation->ptr_sand_end - 1];
         simulation->positions_star[evicted] = simulation->positions_star[simulation->ptr_sand_end - 1];
         simulation->velocities[evicted] = simulation->velocities[simulation->ptr_sand_end - 1];
+        simulation->attracted[evicted] = simulation->attracted[simulation->ptr_sand_end - 1];
         simulation->ptr_sand_end--;
         simulation->num_sand_particles--;
         simulation->num_remaining_sand_particles++;
