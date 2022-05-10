@@ -117,8 +117,10 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_box(Vec3 position, bool is_dynamic, Vec3 half_dimensions);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_capsule(Vec3 position, float radius, float height);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_detector_block(Vec3 position, Vec3 half_dims);
+	//extern "C" LUSTRINE_WRAPPER_EXPORT int add_detector_cylinder(Vec3 position, Vec3 half_dims);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int check_collision(int body1, int body2);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int do_collide(int body);
+	extern "C" LUSTRINE_WRAPPER_EXPORT int do_collide_except_for(int body, int exception_id);
 	extern "C" LUSTRINE_WRAPPER_EXPORT void check_collisions(int body, int* indices, int* size);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int get_num_bodies();
 	extern "C" LUSTRINE_WRAPPER_EXPORT void apply_impulse(int body, Vec3 impulse, Vec3 relative_pos);

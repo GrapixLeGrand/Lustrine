@@ -32,6 +32,7 @@ namespace Bullet {
 	extern LUSTRINE_EXPORT int add_box(Simulation* simulation, glm::vec3 position, bool is_dynamic, glm::vec3 half_dims);//, int group, int mask);
 	
 	extern LUSTRINE_EXPORT int add_detector_block(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims);
+	extern LUSTRINE_EXPORT int add_detector_cylinder(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims);
 	extern LUSTRINE_EXPORT int add_capsule(Simulation* simulation, glm::vec3 position, float radius, float height);
 
 	
@@ -72,6 +73,7 @@ namespace Bullet {
 	extern LUSTRINE_EXPORT bool check_collision(Simulation* simulation, int body1, int body2);
 	extern LUSTRINE_EXPORT void check_collisions(Simulation* simulation, int body, int* indices, int* size);
 	extern LUSTRINE_EXPORT bool do_collide(Simulation* simulation, int body);
+	extern LUSTRINE_EXPORT bool do_collide_except_for(Simulation* simulation, int body, int exception_id);
 
 	/**
 	 * @brief Particles/rigidbodies related function

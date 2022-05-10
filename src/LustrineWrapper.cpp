@@ -263,6 +263,11 @@ namespace Wrapper {
 		return Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
 	}
 
+	//int add_detector_cylinder(Vec3 position, Vec3 half_dims)
+	//{
+	//	return Lustrine::Bullet::add_detector_cylinder(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
+	//}
+
 	void init_grid_box(const SimulationParameters* parameters, GridWrapper* wrapped, int X, int Y, int Z, Vec3 position, Color color, int type) {
 		std::cout << "init grid called" << std::endl;
 		Lustrine::Grid original_grid;
@@ -338,6 +343,10 @@ namespace Wrapper {
 	 */
 	int do_collide(int body) {
 		return (int) Lustrine::Bullet::do_collide(&simulation->bullet_physics_simulation, body);
+	}
+
+	int do_collide_except_for(int body, int exception_id) {
+		return (int)Lustrine::Bullet::do_collide_except_for(&simulation->bullet_physics_simulation, body, exception_id);
 	}
 
 	/**
