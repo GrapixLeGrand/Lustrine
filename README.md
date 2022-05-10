@@ -13,6 +13,6 @@ Needs CMake and a C++ compiler
 Everything else is included
 ### Linux
 ```sh
-sudo apt install freeglut3-dev libglfw3-dev libbullet-dev  # Debian/Ubuntu
-sudo dnf install freeglut-devel glfw-devel bullet-devel    # Fedora
+sudo apt install freeglut3-dev libglfw3-dev libbullet-dev libassimp-dev  # Debian/Ubuntu
+sudo dnf install freeglut-devel glfw-devel bullet-devel assimp-devel     # Fedora
 ```
