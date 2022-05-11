@@ -260,7 +260,9 @@ namespace Wrapper {
 	 * @return the index of the new detector block
 	 */
 	int add_detector_block(Vec3 position, Vec3 half_dims) {
-		return Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
+		int id = Lustrine::Bullet::add_detector_block(&simulation->bullet_physics_simulation, wrapper_to_glm(position), wrapper_to_glm(half_dims));
+		set_body_gravity(id, { 0.0f, 0.0f, 0.0f });
+		return id;
 	}
 
 	//int add_detector_cylinder(Vec3 position, Vec3 half_dims)
