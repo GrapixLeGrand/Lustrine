@@ -57,7 +57,12 @@ namespace Bullet {
 			btRigidBody::btRigidBodyConstructionInfo cInfo(mass, myMotionState, shape, localInertia);
 			body = new btRigidBody(cInfo);
 			//body->setActivationState(ISLAND_SLEEPING);
-			body->setCollisionFlags(body->getCollisionFlags() |btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			//body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+
+			// Kinematic objects can not collide with each other, see
+			// https://stackoverflow.com/questions/42782748/collision-between-kinematic-bodies-in-bullet-physics
+			body->setCollisionFlags(body->getCollisionFlags()  | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+			//body->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		} else {	
 			assert(false);
 		}
@@ -208,7 +213,7 @@ namespace Bullet {
 		newBody->setFriction(simulation->default_body_friction);
 		//newBody->setLinearFactor(btVector3(1.5f, 1.5f, 1.5f));
 		//newBody->setDamping(-100.0f, 0.0f);
-		
+
 		//btVector3 linearFactor = btVector3(0, 1.f, 0);
 		//newBody->setLinearFactor(linearFactor);
 
@@ -225,7 +230,7 @@ namespace Bullet {
 		
 		btBoxShape* new_box_shape = new btBoxShape(glmToBullet(half_dims)); //for now we register only a unit cube
 		simulation->collisionShapes.push_back(new_box_shape);
-		
+
 		int result = add_shape(simulation, new_box_shape, position, is_dynamic); //, group, mask);
 		return result;
 	}
@@ -233,14 +238,15 @@ namespace Bullet {
 	/**
 	 * @brief Add a ghost object with box shape. No collision response is generated, however collisions
 	 * get registered.
-	 * 
-	 * @param simulation 
-	 * @param position 
-	 * @param is_dynamic 
-	 * @param half_dims 
-	 * @return int 
+	 *
+	 * @param simulation
+	 * @param position
+	 * @param is_dynamic
+	 * @param half_dims
+	 * @return int
 	 */
 	int add_detector_block(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims) {
+
 		
 		btTransform tmpTransform;
 		tmpTransform.setIdentity();
@@ -250,9 +256,9 @@ namespace Bullet {
 		btBoxShape* shape = new btBoxShape(glmToBullet(half_dims));
 		simulation->collisionShapes.push_back(shape);
 
-		btRigidBody* newBody = bullet_create_rigidbody(simulation, DETECTOR, 0.0f, tmpTransform, shape, simulation->num_bodies);
+		btRigidBody* newBody = bullet_create_rigidbody(simulation, DETECTOR, 1.0f, tmpTransform, shape, simulation->num_bodies);
 		newBody->setFriction(simulation->default_body_friction);
-		
+
 		simulation->rigidbodies.emplace_back(newBody);
 		simulation->transforms.push_back(tmpTransform);
 		int result = simulation->num_bodies;
@@ -262,6 +268,37 @@ namespace Bullet {
 		//simulation->rigidbodies[simulation->num_bodies]->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		return result;
 	}
+
+
+
+
+	//int add_detector_cylinder(Simulation* simulation, glm::vec3 position, glm::vec3 half_dims)
+	//{
+	//	btCylinderShape* shape = new btCylinderShape(glmToBullet(half_dims));
+	//	return add_detector(simulation, position, shape);
+	//}
+
+
+	//int add_detector(Simulation* simulation, glm::vec3 position, btCollisionShape* shape) {
+	//	btTransform tmpTransform;
+	//	tmpTransform.setIdentity();
+	//	btVector3 pos = glmToBullet(position);
+	//	tmpTransform.setOrigin(pos);
+
+	//	simulation->collisionShapes.push_back(shape);
+
+	//	btRigidBody* newBody = bullet_create_rigidbody(simulation, DETECTOR, 0.0f, tmpTransform, shape, simulation->num_bodies);
+	//	newBody->setFriction(simulation->default_body_friction);
+
+	//	simulation->rigidbodies.emplace_back(newBody);
+	//	simulation->transforms.push_back(tmpTransform);
+	//	int result = simulation->num_bodies;
+	//	simulation->num_bodies++;
+	//	simulation->bodies_collisions.resize(simulation->num_bodies, {});
+	//	simulation->dynamicWorld->addRigidBody(newBody);//, group, mask);
+	//	//simulation->rigidbodies[simulation->num_bodies]->setGravity(btVector3(0.0f, 0.0f, 0.0f));
+	//	return result;
+	//}
 
 
 	/**
@@ -472,6 +509,16 @@ namespace Bullet {
 		} else {
 			return false;
 		}
+	}
+
+	bool do_collide_except_for(Simulation* simulation, int body, int exception_id) {
+		std::cout << simulation->bodies_collisions[body].size() << std::endl; 
+		for (int id : simulation->bodies_collisions[body]) {
+			if (id != exception_id) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
