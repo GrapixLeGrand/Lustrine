@@ -145,8 +145,9 @@ void simulate_sand(Simulation* simulation, float dt) {
     float friction_coeff = 0.5f;
     float mu_s = 0.8f;
     float mu_k = 0.8f;
-
-    dt = glm::clamp(dt, 0.001f, 0.016f);
+    
+    dt = 0.016;
+    //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY
     //dt = (1.0f / 30.0f);
     simulation->time_step = dt;
 

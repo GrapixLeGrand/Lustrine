@@ -414,18 +414,62 @@ void init_chunk_from_grid(Chunk* chunk, const Grid* grid, MaterialType type, flo
 }
 
 
+float total_time = 0.0f;
+
+int ll = 0;
+float kk = 0.0f;
 
 void simulate(Simulation* simulation, float dt) {
 
+/*
+    if (ll % 2 == 0) {
+        for (int i = 0; i < 100000; i++) {
+            kk += std::sqrt(kk);
+        }
+        std::cout << "doo the work " << dt << "\n";
+    } else {
+        std::cout << "nope " << dt << "\n"; 
+    }
+
+    ll++;
+*/
+float dt_clamped = 0.016f; //glm::clamp(dt, 0.001f, 0.016f);
     for (int i = 0; i < simulation->source->num_sources; i++) {
-        if (simulation->source->spawned[i] < simulation->source->capacities[i] && simulation->source->timers[i] > simulation->source->frequencies[i]) {
+        simulation->source->timers[i] += dt_clamped;
+    }
+
+    for (int i = 0; i < simulation->source->num_sources; i++) {
+        if (simulation->source->spawned[i] < simulation->source->capacities[i] && simulation->source->timers[i] >= simulation->source->frequencies[i]) {
             Chunk& pattern = simulation->source->patterns[i];
             if (simulation->num_remaining_sand_particles < pattern.num_particles && simulation->source->source_state[i]) {
                 continue;
             }
             
-            memcpy(simulation->positions + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
-            memcpy(simulation->positions_star + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+            float freq = simulation->source->frequencies[i];
+            float t_last = total_time;- simulation->source->timers[i];
+            float offset = freq - fmodf(t_last, freq);  
+            int num_to_spawn = std::floor((simulation->source->timers[i] + offset) / freq);
+            
+            float particle_diameter = 2.0f * simulation->particleRadius;
+            float speed = freq > 0.0f ? 1.0f * particle_diameter / freq : 1.0f;
+            
+            std::cout << "total time: " << total_time << ", t_last:" << t_last << ", spawed " << num_to_spawn << " offset:" << offset << "\n";
+            glm::vec3& direction = simulation->source->directions[i];
+            glm::vec3 offset_freq = direction * offset; //fractional offset
+            
+            for (int j = 0; j < 1; j++) {
+                
+                glm::vec3 current_offset = j * particle_diameter * direction + offset_freq;
+                for (int k = 0; k < pattern.num_particles; k++) {
+                    simulation->positions[k + simulation->ptr_sand_end] = pattern.positions[k] + current_offset;
+                    simulation->velocities[k + simulation->ptr_sand_end] = direction * speed + simulation->gravity * (j * freq);
+                    simulation->colors[k + simulation->ptr_sand_end] = pattern.color;
+                }
+                
+            }
+
+            //memcpy(simulation->positions + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
+            //memcpy(simulation->positions_star + simulation->ptr_sand_end, pattern.positions.data(), pattern.num_particles * sizeof(glm::vec3));
             //memset(simulation->colors + simulation->ptr_sand_end, simulation->spawner.patterns[i].color);
 
             int end_ptr_tmp = simulation->ptr_sand_end;
@@ -433,6 +477,7 @@ void simulate(Simulation* simulation, float dt) {
             simulation->num_remaining_sand_particles -= pattern.num_particles;
             simulation->num_sand_particles += pattern.num_particles;
 
+            /*
             glm::vec3& direction = simulation->source->directions[i];
             float factor = simulation->source->frequencies[i] > 0.0f ? 1.5f * (simulation->particleRadius * 2.0f) / simulation->source->frequencies[i] : 1.0f;
             for (int j = end_ptr_tmp; j < simulation->ptr_sand_end; j++) {
@@ -441,6 +486,10 @@ void simulate(Simulation* simulation, float dt) {
             }
 
             simulation->velocities[end_ptr_tmp + pattern.num_particles / 2] += 0.001f * glm::vec3(1.0); //small pertuabation to avoid particles stacking
+            simulation->source->timers[i] = 0.0f;
+            simulation->source->spawned[i] += pattern.num_particles;
+            */
+           simulation->velocities[end_ptr_tmp + pattern.num_particles / 2] += 0.001f * glm::vec3(1.0); //small pertuabation to avoid particles stacking
             simulation->source->timers[i] = 0.0f;
             simulation->source->spawned[i] += pattern.num_particles;
         }
@@ -497,14 +546,13 @@ void simulate(Simulation* simulation, float dt) {
             }
         }*/
 
-    for (int i = 0; i < simulation->source->num_sources; i++) {
-        simulation->source->timers[i] += dt;
-    }
+    
 
     for (int i = 0; i < simulation->sink->num_sinks; i++) {
         simulation->sink->timers[i] += dt;
     }
 
+    total_time += dt_clamped;
 }
 
 
