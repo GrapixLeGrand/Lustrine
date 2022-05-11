@@ -264,7 +264,8 @@ namespace Bullet {
 		int result = simulation->num_bodies;
 		simulation->num_bodies++;
 		simulation->bodies_collisions.resize(simulation->num_bodies, {});
-		simulation->dynamicWorld->addRigidBody(newBody);//, group, mask);
+		// Triggers do not collide with each other
+		simulation->dynamicWorld->addRigidBody(newBody, btBroadphaseProxy::CollisionFilterGroups::SensorTrigger, btBroadphaseProxy::CollisionFilterGroups::AllFilter ^ btBroadphaseProxy::CollisionFilterGroups::SensorTrigger);//, group, mask);
 		//simulation->rigidbodies[simulation->num_bodies]->setGravity(btVector3(0.0f, 0.0f, 0.0f));
 		return result;
 	}
@@ -512,7 +513,6 @@ namespace Bullet {
 	}
 
 	bool do_collide_except_for(Simulation* simulation, int body, int exception_id) {
-		std::cout << simulation->bodies_collisions[body].size() << std::endl; 
 		for (int id : simulation->bodies_collisions[body]) {
 			if (id != exception_id) {
 				return true;
