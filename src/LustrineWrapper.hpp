@@ -171,5 +171,8 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT int query_cell_num_particles(Vec3 min, Vec3 max, bool include_solid);
 
 
+	extern "C" LUSTRINE_WRAPPER_EXPORT void test_allocate_1gb();
+	extern "C" LUSTRINE_WRAPPER_EXPORT void test_deallocate_1gb();
+
 } //Wrapper
 } //Lustrine

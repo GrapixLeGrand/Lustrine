@@ -645,6 +645,16 @@ namespace Wrapper {
 		return simulation->cell_size;
 	}
 
-	
+
+	static char* dummy_ptr = nullptr;
+	std::align_val_t simd_vector_align{ 64 };
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT void test_allocate_1gb() {
+		dummy_ptr = new (simd_vector_align) char[1000000000];
+	}
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT void test_deallocate_1gb() {
+		delete[] dummy_ptr;
+	}
 }	
 }
