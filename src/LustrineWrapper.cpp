@@ -295,6 +295,7 @@ namespace Wrapper {
 		delete simulation;
 		simulation = nullptr;
 
+		/*
 		std::cout << "cleaning up the " << current_saved_grids_num << " Grids\n";
 		for (int i = 0; i < current_saved_grids_num; i++) {
 			GridWrapper* current = saved_grids[i];
@@ -308,7 +309,7 @@ namespace Wrapper {
 				delete[] current->colors;
 			}
 			
-		}
+		}*/
 
 	}
 
