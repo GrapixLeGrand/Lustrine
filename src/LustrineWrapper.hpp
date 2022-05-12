@@ -78,13 +78,17 @@ namespace Wrapper {
 	    char* data;
 	};
 
+	const size_t max_num_grids = 10000;
 	static Simulation* simulation = nullptr;
+	static GridWrapper** saved_grids = nullptr;//saved grids for clean up
+	static size_t current_saved_grids_num = 0;//the actual current saved grids
+
 	extern "C" LUSTRINE_WRAPPER_EXPORT void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const GridWrapper* sand_grids,
+		GridWrapper* sand_grids,
 		int num_sand_grids,
-		const GridWrapper* solid_grids,
+		GridWrapper* solid_grids,
 		int num_solid_grids,
 		int subdivision
 	);

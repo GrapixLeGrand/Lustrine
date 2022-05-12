@@ -165,9 +165,9 @@ namespace Wrapper {
 	void init_simulation(
 		const SimulationParameters* parameters,
 		SimulationData* data,
-		const GridWrapper* sand_grid,
+		GridWrapper* sand_grid,
 		int num_sand_grids,
-		const GridWrapper* solid_grids, 
+		GridWrapper* solid_grids, 
 		int num_solid_grids,
 		int subdivision
 	) {
@@ -179,6 +179,13 @@ namespace Wrapper {
 			return;
 		}
 
+		if (saved_grids != nullptr) {
+			std::cout << "[Error] problem of state gridWrapper wasn't null" << std::endl;
+		}
+
+		saved_grids = new GridWrapper*[max_num_grids];
+		memset(saved_grids, 0, max_num_grids * sizeof(GridWrapper*));
+
 		simulation = new Simulation();
 
 		std::vector<Lustrine::Grid> original_sand_grids(num_sand_grids);
@@ -186,8 +193,8 @@ namespace Wrapper {
 		//init the converted grids
 		for (int i = 0; i < num_sand_grids; i++) {
 			grid_wrapper_to_grid(&sand_grid[i], &original_sand_grids[i]);
+			saved_grids[current_saved_grids_num++] = &sand_grid[i];
 		}
-		
 
 		//solid
 		std::vector<Lustrine::Grid> original_solid_grids(num_solid_grids);
@@ -195,6 +202,7 @@ namespace Wrapper {
 		//init the converted grids
 		for (int i = 0; i < num_solid_grids; i++) {
 			grid_wrapper_to_grid(&solid_grids[i], &original_solid_grids[i]);
+			saved_grids[current_saved_grids_num++] = &solid_grids[i];
 		}
 
 		Lustrine::init_simulation(
@@ -292,6 +300,18 @@ namespace Wrapper {
 		Lustrine::clean_simulation(simulation);
 		delete simulation;
 		simulation = nullptr;
+
+		std::cout << "cleaning up the " << current_saved_grids_num << " Grids\n";
+		for (int i = 0; i < current_saved_grids_num; i++) {
+			GridWrapper* current = saved_grids[i];
+			if (current == nullptr) {
+				std::cout << "null grid encountered on cleanup\n";
+			}
+			delete[] current->cells;
+			if (current->has_one_color_per_cell)
+				delete[] current->colors;
+		}
+
 	}
 
 	void simulation_bind_positions_copy(float* position_ptr) {
