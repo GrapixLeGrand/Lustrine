@@ -654,7 +654,7 @@ namespace Wrapper {
 	}
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT void test_deallocate_1gb() {
-		delete[] dummy_ptr;
+		::operator delete[](dummy_ptr, simd_vector_align);
 	}
 }	
 }
