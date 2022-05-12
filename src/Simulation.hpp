@@ -242,6 +242,8 @@ struct Simulation {
     WindSystem* wind_system;
     CountingSortArrays* counting_sort_arrays;
 
+    float total_time = 0.0f;
+
 };
 
 
