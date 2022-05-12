@@ -181,9 +181,7 @@ namespace Wrapper {
 
 		//saved_grids = new GridWrapper*[max_num_grids];
 		memset(saved_grids, 0, max_num_grids * sizeof(GridWrapper*));
-
 		simulation = new Simulation();
-
 		std::vector<Lustrine::Grid> original_sand_grids(num_sand_grids);
 		
 		//init the converted grids
@@ -303,9 +301,13 @@ namespace Wrapper {
 			if (current == nullptr) {
 				std::cout << "null grid encountered on cleanup\n";
 			}
+			std::cout << "here " << std::endl;
 			delete[] current->cells;
-			if (current->has_one_color_per_cell)
+			if (current->has_one_color_per_cell) {
+				std::cout << "color" << std::endl;
 				delete[] current->colors;
+			}
+			
 		}
 
 	}

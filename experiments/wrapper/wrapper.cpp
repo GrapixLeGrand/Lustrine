@@ -33,7 +33,7 @@ int main(void) {
 		1,
 		solid_grids,
 		2,
-		1
+		2
 	);
 
 	int box = Lustrine::Wrapper::add_box({5.0f, 2.0f, 5.0f}, true, {0.5f, 0.5f, 0.5f});
@@ -71,4 +71,5 @@ int main(void) {
 	std::cout << "dt = " << dt << std::endl;
 	Lustrine::Wrapper::cleanup_simulation();
 
+	std::cout << "hello :)" << std::endl;
 }
