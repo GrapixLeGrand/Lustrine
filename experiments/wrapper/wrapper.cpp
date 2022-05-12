@@ -8,6 +8,8 @@ int main(void) {
 	parameters.X = 30;
 	parameters.Y = 20;
 	parameters.Z = 30;
+	parameters.particleRadius = 0.5f;
+	parameters.particleDiameter = 1.0f;
 
 	Lustrine::Wrapper::SimulationData data;
 	Lustrine::Wrapper::GridWrapper sand_grids[1];

@@ -179,11 +179,7 @@ namespace Wrapper {
 			return;
 		}
 
-		if (saved_grids != nullptr) {
-			std::cout << "[Error] problem of state gridWrapper wasn't null" << std::endl;
-		}
-
-		saved_grids = new GridWrapper*[max_num_grids];
+		//saved_grids = new GridWrapper*[max_num_grids];
 		memset(saved_grids, 0, max_num_grids * sizeof(GridWrapper*));
 
 		simulation = new Simulation();
