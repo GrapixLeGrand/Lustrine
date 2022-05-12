@@ -291,6 +291,7 @@ namespace Wrapper {
 		std::cout << "clean up simulation" << std::endl;
 		Lustrine::clean_simulation(simulation);
 		delete simulation;
+		simulation = nullptr;
 	}
 
 	void simulation_bind_positions_copy(float* position_ptr) {
