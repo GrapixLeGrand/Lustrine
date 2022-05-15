@@ -619,7 +619,7 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
 int add_particle_source(Simulation* simulation, const Grid* pattern, glm::vec3 direction, float freq, int capacity) {
 
     Chunk chunk;
-    init_chunk_from_grid(&chunk, pattern, Lustrine::MaterialType::SAND, simulation->particleDiameter, simulation->subdivision, false);
+    init_chunk_from_grid(&chunk, pattern, Lustrine::MaterialType::SAND, simulation->particleDiameter, 1, false);
     int index = simulation->source->num_sources;
     simulation->source->num_sources++;
     simulation->source->patterns.push_back(chunk);
