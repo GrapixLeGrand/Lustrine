@@ -561,9 +561,12 @@ int query_cell_num_particles(Simulation* simulation, glm::vec3 min_pos, glm::vec
                     
                     const int size = simulation->uniform_gird_cells[cell_id].size();
                     for (int i = 0; i < size; i++) {
-                        if (simulation->uniform_gird_cells[cell_id][i] < simulation->ptr_sand_end) {
-                            counter++;
-                        }
+                        int particle_id = simulation->uniform_gird_cells[cell_id][i];
+                        if (particle_id < simulation->ptr_sand_end && 
+                            glm::all(glm::greaterThanEqual(simulation->positions[particle_id], min_pos)) && 
+                            glm::all(glm::lessThanEqual(simulation->positions[particle_id], max_pos))) {
+                                counter++;
+                            }
                     }
                 }
             }
