@@ -449,9 +449,9 @@ void simulate(Simulation* simulation, float dt) {
     }
 
     for (int i = 0; i < simulation->source->num_sources; i++) {
-        if (simulation->source->spawned[i] < simulation->source->capacities[i] && simulation->source->timers[i] >= simulation->source->frequencies[i]) {
+        if (simulation->source->source_state[i] && simulation->source->spawned[i] < simulation->source->capacities[i] && simulation->source->timers[i] >= simulation->source->frequencies[i]) {
             Chunk& pattern = simulation->source->patterns[i];
-            if (simulation->num_remaining_sand_particles < pattern.num_particles && simulation->source->source_state[i]) {
+            if (simulation->num_remaining_sand_particles < pattern.num_particles) {
                 continue;
             }
             
