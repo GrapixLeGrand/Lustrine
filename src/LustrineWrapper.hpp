@@ -149,8 +149,8 @@ namespace Wrapper {
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_particle_source(GridWrapper* pattern, Vec3 direction, float freq, int capacity);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int add_particle_sink(Vec3 min_pos, Vec3 max_pos, float frequency);
 
-	extern "C" LUSTRINE_WRAPPER_EXPORT void set_source_state(int index, bool state);
-	extern "C" LUSTRINE_WRAPPER_EXPORT void set_sink_state(int index, bool state);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_source_state(int index, int state);
+	extern "C" LUSTRINE_WRAPPER_EXPORT void set_sink_state(int index, int state);
 
 	extern "C" LUSTRINE_WRAPPER_EXPORT int get_source_spawned(int index);
 	extern "C" LUSTRINE_WRAPPER_EXPORT int get_sink_despawned(int index);

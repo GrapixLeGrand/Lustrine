@@ -629,7 +629,7 @@ namespace Wrapper {
 		Lustrine::set_source_state(simulation, index, state != 0 ? true : false);
 	}
 
-	void set_sink_state(int index, bool state) {
+	void set_sink_state(int index, int state) {
 		Lustrine::set_sink_state(simulation, index, state != 0 ? true : false);
 	}
 
