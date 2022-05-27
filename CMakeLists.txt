@@ -40,11 +40,14 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ") #-fsanitize=undefined
     else()
-         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 /clang:-ffast-math /clang:-mfma ") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
+         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /clang:-O3 /clang:-ffast-math /clang:-mfma") #  /clang: /clang: /clang: -mfma -ffp-contract=fast") #
     endif()
    
 endif()
 endif()
+
+
+find_package(OpenMP REQUIRED)
 
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -145,7 +148,7 @@ set_target_properties(
 target_include_directories(LustrineWrapper PUBLIC ${CMAKE_BINARY_DIR}/exports)
 
 
-target_link_libraries(Lustrine LevekGL)
+target_link_libraries(Lustrine LevekGL OpenMP::OpenMP_CXX)
 
 
 

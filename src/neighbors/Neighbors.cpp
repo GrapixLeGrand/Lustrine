@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <utility>
 #include "Sorting.hpp"
-
+#include <omp.h>
 namespace Lustrine {
 /*
 bool check_index(int i, int min, int max) {
@@ -272,6 +272,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     }
 
     //simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
+    #pragma omp parallel for
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         int cell_id = get_cell_id(simulation, simulation->positions_star[i]);
         simulation->counting_sort_arrays->particles_unsorted_indices[i] = cell_id;
@@ -293,6 +294,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 
     int* sorted_indices = simulation->counting_sort_arrays->particles_sorted_indices;
+    #pragma omp parallel for
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         simulation->positions[i] = simulation->position_neighbor_tmp[sorted_indices[i]];
         simulation->positions_star[i] = simulation->position_star_neighbor_tmp[sorted_indices[i]];
@@ -303,6 +305,8 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
         simulation->uniform_gird_cells[cell_id].push_back(i);
     }
 
+    // TODO:
+    //#pragma omp parallel for
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
 
         int cell_id = sorted_indices[i];

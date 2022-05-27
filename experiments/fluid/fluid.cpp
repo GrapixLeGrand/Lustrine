@@ -51,7 +51,7 @@ int main(void) {
     parameters.particleRadius = 0.5f;
     parameters.particleDiameter = 1.0f;
 
-    std::vector<Lustrine::Grid> sand_grids (1);
+    std::vector<Lustrine::Grid> sand_grids (4);
     std::vector<glm::vec3> sand_grids_positions (4);
     sand_grids_positions[0] = {0, 0, 0};
     sand_grids_positions[1] = {20, 0, 20};
@@ -69,9 +69,9 @@ int main(void) {
     Lustrine::init_grid_from_magika_voxel(&solid_grids[3], LUSTRINE_EXPERIMENTS_DIRECTORY"/resources/level1_physical.vox", { 0, 0, 30 }, Lustrine::MaterialType::SOLID);
     */
     Lustrine::init_grid_box(&parameters, &sand_grids[0], 3, 3, 3, glm::vec3(0, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    //Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    //Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
-    //Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[1], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[2], 20, 20, 20, glm::vec3(20, 0, 0), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
+    Lustrine::init_grid_box(&parameters, &sand_grids[3], 20, 20, 20, glm::vec3(0, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
     //Lustrine::init_grid_box(&parameters, &sand_grids[4], 20, 20, 20, glm::vec3(20, 0, 20), glm::vec4(1.0, 0.2, 1.0, 1.0), Lustrine::MaterialType::SAND);
 
 
@@ -107,7 +107,7 @@ int main(void) {
     Lustrine::add_particle_source(&simulation, &source_grids[2], {0, 0, 1}, 1.0f / 10.f, -1);
     Lustrine::add_particle_source(&simulation, &source_grids[3], {1, 0, 0}, 1.0f / 10.f, -1);
             
-    Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {40, 5, 40}, 0.0f);
+    //Lustrine::add_particle_sink(&simulation, {0, 0, 0}, {40, 5, 40}, 0.0f);
 
     while (!windowController->exit() && !inputController->isKeyPressed(Levek::LEVEK_KEY_Q)) {
 

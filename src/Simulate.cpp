@@ -1,7 +1,7 @@
 #include "Simulate.hpp"
 #include "profiling/Profiling.hpp"
 #include "neighbors/Neighbors.hpp"
-
+#include <omp.h>
 namespace Lustrine {
 
     float s_coor(const Simulation* simulation, float rl) {
@@ -154,6 +154,7 @@ namespace Lustrine {
     }
 
 void simulate_sand(Simulation* simulation, float dt) {
+
     Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
 
     float collision_coeff = 0.8f;
@@ -184,6 +185,10 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     static bool prev_attract_flag = false;
     //integration
+
+    static bool first_iteration = true;
+
+    #pragma omp parallel for
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
         velocities[i] += simulation->gravity * dt;
@@ -210,11 +215,14 @@ void simulate_sand(Simulation* simulation, float dt) {
     }
     //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
     find_neighbors_uniform_grid_v1(simulation);
-    memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
-
+    if (first_iteration)
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+    else {
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->num_sand_particles);
+    }
         // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
     for (int substep = 0; substep < 4; ++substep) {
-
+        #pragma omp parallel for
         for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
             glm::vec3 deltap = glm::vec3(0, 0, 0);
             for (int j : neighbors[i]) {
@@ -280,6 +288,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
 
         // particle-bounadry collision
+        #pragma omp parallel for
         for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
             glm::vec3 p = simulation->positions_tmp[i];
             float r = simulation->particleRadius;
@@ -300,6 +309,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
 
     //update velocities and sync positions
+    #pragma omp parallel for
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
         positions[i] = positions_star[i];
@@ -308,7 +318,7 @@ void simulate_sand(Simulation* simulation, float dt) {
 
 
     prev_attract_flag = simulation->attract_flag;
-
+    first_iteration = false;
 }
 
 
