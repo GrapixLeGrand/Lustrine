@@ -17,5 +17,13 @@ namespace Lustrine {
             const size_t num_cells,
             int* sorted_indices
         );
+
+        extern void LUSTRINE_EXPORT counting_sort2(
+            int* counts,
+            int* initial_indices,
+            const size_t num_positions,
+            const size_t num_cells,
+            int* sorted_indices
+        );
     }
 }
