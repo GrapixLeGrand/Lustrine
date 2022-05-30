@@ -158,11 +158,11 @@ void simulate_sand(Simulation* simulation, float dt) {
 
     float collision_coeff = 0.8f;
     float boundary_collision_coeff = 0.9f;
-    float friction_coeff = 0.5f;
-    float mu_s = 0.8f;
+    float friction_coeff = 0.7f;
+    float mu_s = 0.95f;
     float mu_k = 0.8f;
     
-    dt = 0.016;
+    //dt = 0.016;
     //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY
     //dt = (1.0f / 30.0f);
     simulation->time_step = dt;
@@ -207,7 +207,9 @@ void simulate_sand(Simulation* simulation, float dt) {
             }
         }
 
-        positions_star[i] = positions[i] + velocities[i] * dt; // update both
+        positions_star[i] = positions[i] + velocities[i] * dt; 
+        // clamp particle positions to be inside boundaries
+        positions_star[i] = glm::clamp(positions_star[i], glm::vec3(simulation->particleRadius), glm::vec3(X, Y, Z) - glm::vec3(simulation->particleRadius));
     }
     //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
     find_neighbors_uniform_grid_v1(simulation);
@@ -230,6 +232,9 @@ void simulate_sand(Simulation* simulation, float dt) {
                 glm::vec3 pj = simulation->positions_tmp[j];
 
                 glm::vec3 ij = pi - pj;
+                if (glm::length(ij) == 0.0f) {
+                    ij = glm::vec3(0.0f, 0.00001f, 0.0f);
+                }
                 float len = glm::length(ij);
                 if (len > simulation->particleDiameter) continue;
 
@@ -289,16 +294,16 @@ void simulate_sand(Simulation* simulation, float dt) {
         // particle-bounadry collision
         for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
             glm::vec3 p = simulation->positions_tmp[i];
-            float r = simulation->particleRadius;
 
-            glm::vec3 dp = glm::vec3(0.0);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(1, 0, 0), glm::vec3(0, 0, 0), p, r);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(-1, 0, 0), glm::vec3(X, 0, 0), p, r);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 1, 0), glm::vec3(0, 0, 0), p, r);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, -1, 0), glm::vec3(0, Y, 0), p, r);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), p, r);
-            dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z), p, r);
-            positions_star[i] += dp;
+            //glm::vec3 dp = glm::vec3(0.0);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(1, 0, 0), glm::vec3(simulation->particleRadius, 0, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(-1, 0, 0), glm::vec3(X- simulation->particleRadius, 0, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 1, 0), glm::vec3(0, simulation->particleRadius, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, -1, 0), glm::vec3(0, Y- simulation->particleRadius, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, 1), glm::vec3(0, 0, simulation->particleRadius), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z- simulation->particleRadius), p, simulation->particleRadius);
+            //positions_star[i] += dp;
+            positions_star[i] = glm::clamp(positions_star[i], glm::vec3(simulation->particleRadius), glm::vec3(X, Y, Z) - glm::vec3(simulation->particleRadius));
         }
 
         memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
