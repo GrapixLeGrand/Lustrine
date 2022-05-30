@@ -51,6 +51,16 @@ struct Simulation;
 );
 
 
+ extern void LUSTRINE_EXPORT init_simulation_kernel_radius_scale(
+     const SimulationParameters* parameters,
+     Simulation* simulation,
+     const std::vector<Grid>& grids_sand_arg,
+     const std::vector<Grid>& grids_solid_arg,
+     int subdivision,
+     float kernel_radius_scale
+ );
+
+
 /**
  * @brief init simulation with player box shape
  * 
@@ -67,6 +77,8 @@ struct Simulation;
     const std::vector<Grid>& grids_sand_arg,
     const std::vector<Grid>& grids_solid_arg
 );
+
+
 
 /**
  * @brief Clean any allocated and unmanaged memory.

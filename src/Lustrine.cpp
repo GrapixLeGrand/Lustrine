@@ -290,6 +290,241 @@ void init_simulation(
 
 }
 
+void init_simulation_kernel_radius_scale(
+    const SimulationParameters* parameters,
+    Simulation* simulation,
+    const std::vector<Grid>& grids_sand_arg,
+    const std::vector<Grid>& grids_solid_arg,
+    int subdivision,
+    float kernel_radius_scale
+) {
+
+    Profiling::init_profiling();
+    Bullet::init_bullet(&simulation->bullet_physics_simulation);
+
+    simulation->simulate_fun = simulate_sand;
+
+    simulation->subdivision = subdivision;
+    simulation->parameters_copy = *parameters;
+
+    simulation->source = new ParticleSource();
+    simulation->source->num_sources = 0;
+    simulation->sink = new ParticleSink();
+    simulation->sink->num_sinks = 0;
+    simulation->sink->temp_removal.reserve(100000);//safe amount to avoid resize
+    simulation->wind_system = new WindSystem();
+    simulation->wind_system->direction = glm::vec3(0, 0, -1);
+    simulation->wind_system->magnitude = 5.0f;
+
+    simulation->bullet_physics_simulation.particle_radius = parameters->particleRadius;
+
+    std::vector<glm::vec3> grids_sand_positions_arg;
+    std::vector<glm::vec3> grids_solid_positions_arg;
+
+    grids_sand_positions_arg.reserve(grids_sand_arg.size());
+    for (int i = 0; i < grids_sand_arg.size(); i++) {
+        grids_sand_positions_arg.push_back(grids_sand_arg[i].position);
+    }
+
+    grids_solid_positions_arg.reserve(grids_solid_arg.size());
+    for (int i = 0; i < grids_solid_arg.size(); i++) {
+        grids_solid_positions_arg.push_back(grids_solid_arg[i].position);
+    }
+
+    simulation->domainX = parameters->X;
+    simulation->domainY = parameters->Y;
+    simulation->domainZ = parameters->Z;
+
+    int first_guess_allocation = simulation->domainX * simulation->domainY * simulation->domainZ * subdivision * subdivision * subdivision;
+    assert(first_guess_allocation > 0);
+    int initial_allocated_particles_num = 0;
+
+    for (int i = 0; i < grids_sand_arg.size(); i++) {
+        initial_allocated_particles_num += grids_sand_arg[i].num_occupied_grid_cells;
+    }
+
+    simulation->num_sand_particles = initial_allocated_particles_num;
+
+    for (int i = 0; i < grids_solid_arg.size(); i++) {
+        initial_allocated_particles_num += grids_solid_arg[i].num_occupied_grid_cells * subdivision * subdivision * subdivision;
+    }
+
+    simulation->num_solid_particles = initial_allocated_particles_num - simulation->num_sand_particles;
+
+    simulation->total_allocated = (size_t)std::max(initial_allocated_particles_num, first_guess_allocation);
+    simulation->leftover_allocated = simulation->total_allocated - initial_allocated_particles_num;
+
+    std::align_val_t simd_vector_align{ 64 };
+    simulation->positions = new (simd_vector_align)glm::vec3[simulation->total_allocated];
+    simulation->positions_star = new (simd_vector_align) glm::vec3[simulation->total_allocated];
+    simulation->colors = new (simd_vector_align) glm::vec4[simulation->total_allocated];
+    simulation->positions_tmp = new (simd_vector_align) glm::vec3[simulation->total_allocated];
+
+    // for attraction
+    simulation->attracted = new (simd_vector_align) bool[simulation->total_allocated]; //std::vector<bool>(simulation->total_allocated);
+    simulation->attracted_tmp = new (simd_vector_align) bool[simulation->total_allocated];
+
+    memset(simulation->attracted, 0, simulation->total_allocated * sizeof(bool));
+    memset(simulation->positions, 0, simulation->total_allocated * 4 * 3);
+    memset(simulation->positions_star, 0, simulation->total_allocated * 4 * 3);
+    memset(simulation->colors, 0, simulation->total_allocated * 4 * 4);
+
+    { //sand
+
+        simulation->ptr_sand_start = 0;
+        simulation->ptr_sand_end = 0;
+
+        simulation->grids_sand = grids_sand_arg;
+        simulation->grids_initial_positions_sand = grids_sand_positions_arg;
+        simulation->chunks_sand.reserve(simulation->grids_sand.size());
+
+        for (int i = 0; i < simulation->grids_sand.size(); i++) {
+            Chunk chunk;
+            assert(simulation->grids_sand[i].type == SAND);
+            init_chunk_from_grid(&chunk, &simulation->grids_sand[i], SAND, parameters->particleDiameter, 1, false);
+            simulation->chunks_sand.push_back(chunk);
+
+            for (int j = 0; j < chunk.num_particles; j++) {
+                simulation->positions[simulation->ptr_sand_end] = chunk.positions[j];
+                simulation->positions_star[simulation->ptr_sand_end] = chunk.positions[j];
+                if (chunk.has_one_color_per_particles == true) {
+                    simulation->colors[simulation->ptr_sand_end] = chunk.colors[j];
+                }
+                else {
+                    simulation->colors[simulation->ptr_sand_end] = chunk.color;
+                }
+                simulation->ptr_sand_end++;
+            }
+
+        }
+    }// end sand
+
+    {//solids
+
+        simulation->ptr_solid_ordered_start = simulation->total_allocated - 1; //simulation->total_allocated - simulation->num_solid_particles; //simulation->total_allocated - 1; //head is going down so list is in order
+        simulation->ptr_solid_ordered_end = simulation->total_allocated - 1;
+
+        simulation->grids_solid = grids_solid_arg;
+        simulation->grids_initial_positions_solid = grids_solid_positions_arg;
+        simulation->chunks_solid.reserve(simulation->grids_solid.size());
+        simulation->solid_grid_to_body = std::vector<std::pair<int, int>>(simulation->grids_solid.size(), std::make_pair(-1, -1));
+        simulation->grids_solid_chunk_ptrs = std::vector<std::pair<int, int>>(simulation->grids_solid.size(), std::make_pair(-1, -1));
+
+        for (int i = 0; i < simulation->grids_solid.size(); i++) {
+            assert(simulation->grids_solid[i].type == SOLID);
+            Chunk chunk;
+            init_chunk_from_grid(&chunk, &simulation->grids_solid[i], SOLID, parameters->particleDiameter, subdivision, true);
+            simulation->chunks_solid.push_back(chunk);
+            simulation->grids_solid_chunk_ptrs[i].second = simulation->ptr_solid_ordered_end + 1;
+
+            // add boxes in bullet
+            Chunk chunk_boxes;
+            init_chunk_from_grid(&chunk_boxes, &simulation->grids_solid[i], SOLID, 1.0f, 1, false);
+            for (int j = 0; j < chunk_boxes.num_particles; j++) {
+                assert(simulation->grids_solid[i].dynamic_solid == false);
+                int bullet_body_index = Bullet::add_box(&simulation->bullet_physics_simulation, chunk_boxes.positions[j], simulation->grids_solid[i].dynamic_solid);
+            }
+
+            for (int j = 0; j < chunk.num_particles; j++) {
+
+                assert(simulation->grids_solid[i].dynamic_solid == false);
+
+                simulation->positions[simulation->ptr_solid_ordered_end] = chunk.positions[j];
+                simulation->positions_star[simulation->ptr_solid_ordered_end] = chunk.positions[j];
+                if (chunk.has_one_color_per_particles == true) {
+                    simulation->colors[simulation->ptr_solid_ordered_end] = chunk.colors[j];
+                }
+                else {
+                    simulation->colors[simulation->ptr_solid_ordered_end] = chunk.color;
+                }
+                simulation->ptr_solid_ordered_end--;
+            }
+            simulation->grids_solid_chunk_ptrs[i].first = simulation->ptr_solid_ordered_end;
+        }
+
+        simulation->ptr_solid_start = simulation->ptr_solid_ordered_end + 1;
+        simulation->ptr_solid_end = simulation->ptr_solid_ordered_start + 1; //start was inclusive
+
+        if (simulation->ptr_solid_ordered_start == simulation->ptr_solid_ordered_end) { //not sure
+            simulation->ptr_solid_start = simulation->ptr_solid_ordered_start;
+            simulation->ptr_solid_end = simulation->ptr_solid_ordered_end;
+        }
+
+        //TODO rethink these asserts...
+        //assert(simulation->ptr_solid_start <= simulation->ptr_solid_ordered_start);
+        //assert(simulation->ptr_solid_end >= simulation->ptr_solid_ordered_start + 1);
+        //assert(simulation->ptr_solid_start >= simulation->ptr_solid_ordered_end + 1);
+
+        assert(simulation->ptr_solid_ordered_start == simulation->total_allocated - 1);
+        assert(simulation->ptr_solid_ordered_end == simulation->ptr_solid_ordered_start - simulation->num_solid_particles);
+
+        simulation->positions_solid = simulation->positions + simulation->total_allocated - simulation->num_solid_particles;
+        simulation->colors_solid = simulation->colors + simulation->total_allocated - simulation->num_solid_particles;
+
+    }// end solids
+
+    simulation->num_remaining_sand_particles = simulation->ptr_solid_ordered_end - simulation->ptr_sand_end;//TODO check this
+
+    int total_possible_num_sand_particles = simulation->ptr_solid_ordered_start;
+
+    simulation->velocities = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    memset(simulation->velocities, 0, total_possible_num_sand_particles);
+    //simulation->velocities = std::vector<glm::vec3>(simulation->num_sand_particles, {0.0f, 0.0f, 0.0f});
+    simulation->lambdas = std::vector<float>(total_possible_num_sand_particles, 0.0f);
+    simulation->neighbors = std::vector<std::vector<int>>(total_possible_num_sand_particles, std::vector<int>{});
+
+    simulation->W = cubic_kernel;
+    simulation->gradW = cubic_kernel_grad;
+
+    //sorting neighbor strategy with grid
+    simulation->particleRadius = parameters->particleRadius;
+    simulation->particleDiameter = parameters->particleDiameter;
+    simulation->kernelRadius = kernel_radius_scale * parameters->particleRadius;//be careful with these parameters they affect both stabiliy and performance! Do not change without checking performance and stability
+    simulation->cell_size = 1.0f * simulation->kernelRadius;
+
+    //for the kernel
+    float h3 = std::pow(simulation->kernelRadius, 3);
+    simulation->cubic_kernel_k = 8.0f / (pi * h3);
+    simulation->cubic_kernel_l = 48.0f / (pi * h3);
+
+    simulation->gridX = (int)(simulation->domainX / simulation->cell_size) + 1; //plus 1 because its a full range
+    simulation->gridY = (int)(simulation->domainY / simulation->cell_size) + 1;
+    simulation->gridZ = (int)(simulation->domainZ / simulation->cell_size) + 1;
+
+    //uniform grid
+    simulation->num_grid_cells = simulation->gridX * simulation->gridY * simulation->gridZ;
+    simulation->uniform_gird_cells = std::vector<std::vector<int>>(simulation->num_grid_cells, std::vector<int>{});
+
+    //perf test
+    simulation->uniform_grid_cells_static_saved = std::vector<std::vector<int>>(simulation->num_grid_cells, std::vector<int>{});
+    simulation->sand_particle_cell_id = std::vector<std::pair<int, int>>(total_possible_num_sand_particles, std::make_pair(0, 0));
+    simulation->position_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    simulation->position_star_neighbor_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles];
+    simulation->velocity_tmp = new (simd_vector_align) glm::vec3[total_possible_num_sand_particles]; //std::vector<glm::vec3>(simulation->num_sand_particles, {0, 0, 0});
+    //simulation->colors_neighbor_tmp = new glm::vec4[simulation->num_sand_particles];
+    //perf test
+
+    {
+        //used in the counting sort
+        simulation->counting_sort_arrays = new CountingSortArrays();
+        simulation->counting_sort_arrays->counts = new (simd_vector_align) int[simulation->num_grid_cells + 1];
+        simulation->counting_sort_arrays->particles_unsorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+        simulation->counting_sort_arrays->particles_sorted_indices = new (simd_vector_align) int[total_possible_num_sand_particles];
+    }
+
+    Bullet::allocate_particles_colliders(&simulation->bullet_physics_simulation, simulation->bullet_physics_simulation.num_particles_allocated, simulation->particleRadius);
+    Bullet::bind_foreign_sand_positions(&simulation->bullet_physics_simulation, simulation->positions);
+    Bullet::print_resume(&simulation->bullet_physics_simulation);
+
+    std::cout << "registered " << simulation->num_sand_particles << " sand particles and " << simulation->num_solid_particles << " solid particles\n";
+    std::cout << "registered (at start at lease)" << simulation->bullet_physics_simulation.ptr_bounding_box_end - simulation->bullet_physics_simulation.ptr_bounding_box_start << " boxes for colliding with the player\n";
+    std::cout << "sand start " << simulation->ptr_sand_start << "\n";
+    std::cout << "sand end " << simulation->ptr_sand_end << "\n";
+    std::cout << "solid start " << simulation->ptr_solid_start << "\n";
+    std::cout << "solid end " << simulation->ptr_solid_end << "\n";
+
+}
+
 void clean_simulation(Simulation* simulation) {
     clean_bullet(&simulation->bullet_physics_simulation);
 

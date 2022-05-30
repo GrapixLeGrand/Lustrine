@@ -220,6 +220,57 @@ namespace Wrapper {
 
 	}
 
+	void init_simulation_kernel_radius_scale(const SimulationParameters* parameters, SimulationData* data, GridWrapper* sand_grids, int num_sand_grids, GridWrapper* solid_grids, int num_solid_grids, int subdivision, float kernel_radius_scale)
+	{
+		std::cout << "Lustrine::wrapper init called!" << std::endl;
+
+		if (num_sand_grids < 0 || num_solid_grids < 0) {
+			std::cout << "Lustrine bad arguments...?" << std::endl;
+			return;
+		}
+
+		//saved_grids = new GridWrapper*[max_num_grids];
+		memset(saved_grids, 0, max_num_grids * sizeof(GridWrapper*));
+		simulation = new Simulation();
+		std::vector<Lustrine::Grid> original_sand_grids(num_sand_grids);
+
+		//init the converted grids
+		for (int i = 0; i < num_sand_grids; i++) {
+			grid_wrapper_to_grid(&sand_grids[i], &original_sand_grids[i]);
+			saved_grids[current_saved_grids_num++] = &sand_grids[i];
+		}
+
+		//solid
+		std::vector<Lustrine::Grid> original_solid_grids(num_solid_grids);
+
+		//init the converted grids
+		for (int i = 0; i < num_solid_grids; i++) {
+			grid_wrapper_to_grid(&solid_grids[i], &original_solid_grids[i]);
+			saved_grids[current_saved_grids_num++] = &solid_grids[i];
+		}
+
+		Lustrine::init_simulation_kernel_radius_scale(
+			parameters,
+			simulation,
+			original_sand_grids,
+			original_solid_grids,
+			subdivision,
+			kernel_radius_scale
+		);
+
+		data->start_sand_index = simulation->ptr_sand_start;
+		data->end_sand_index = simulation->ptr_sand_end;
+
+		data->start_solid_index = simulation->ptr_solid_start;
+		data->end_solid_index = simulation->ptr_solid_end;
+
+		data->num_sand_particles = simulation->num_sand_particles;
+		data->num_solid_particles = simulation->num_solid_particles;
+
+		std::cout << "Lustrine::wrapper: end init" << std::endl;
+
+	}
+
 	void set_player_particles_bounding_spheres_radius_placement(float radius) {
 		simulation->bullet_physics_simulation.player_box_radius = radius;
 	}

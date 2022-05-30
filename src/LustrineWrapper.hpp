@@ -93,6 +93,18 @@ namespace Wrapper {
 		int subdivision
 	);
 
+
+	extern "C" LUSTRINE_WRAPPER_EXPORT void init_simulation_kernel_radius_scale(
+		const SimulationParameters * parameters,
+		SimulationData * data,
+		GridWrapper * sand_grids,
+		int num_sand_grids,
+		GridWrapper * solid_grids,
+		int num_solid_grids,
+		int subdivision,
+		float kernel_radius_scale
+	);
+
 	/**
 	 * @brief Utils function of the bindings
 	 * 
