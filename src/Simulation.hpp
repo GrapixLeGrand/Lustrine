@@ -225,6 +225,7 @@ struct Simulation {
     int num_remaining_sand_particles;
     //utils
     glm::vec3* positions_tmp = nullptr;
+    bool first_iteration = true;
 
     //for blowing, attracting sand
     bool attract_flag = false;

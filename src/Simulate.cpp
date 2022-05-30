@@ -183,6 +183,7 @@ void simulate_sand(Simulation* simulation, float dt) {
     float kernelRadius = simulation->kernelRadius;
 
     static bool prev_attract_flag = false;
+
     //integration
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
@@ -210,7 +211,13 @@ void simulate_sand(Simulation* simulation, float dt) {
     }
     //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
     find_neighbors_uniform_grid_v1(simulation);
-    memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+    //memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+    if (simulation->first_iteration) {
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+        simulation->first_iteration = false;
+    } else {
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->num_sand_particles);
+    }
 
         // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
     for (int substep = 0; substep < 4; ++substep) {
