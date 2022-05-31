@@ -476,7 +476,7 @@ void init_simulation_extra_parameters(
         for (int i = 0; i < simulation->grids_solid.size(); i++) {
             assert(simulation->grids_solid[i].type == SOLID);
             Chunk chunk;
-            init_chunk_from_grid(&chunk, &simulation->grids_solid[i], SOLID, parameters->particleDiameter, subdivision, true);
+            init_chunk_from_grid(&chunk, &simulation->grids_solid[i], SOLID, parameters->particleDiameter, subdivision, false);
             simulation->chunks_solid.push_back(chunk);
             simulation->grids_solid_chunk_ptrs[i].second = simulation->ptr_solid_ordered_end + 1;
 
