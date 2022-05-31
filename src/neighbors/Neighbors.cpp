@@ -288,7 +288,7 @@ void find_neighbors_uniform_grid_v1(Simulation* simulation) {
     memcpy(simulation->position_neighbor_tmp, simulation->positions, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->position_star_neighbor_tmp, simulation->positions_star, simulation->num_sand_particles * sizeof(glm::vec3));
     memcpy(simulation->velocity_tmp, simulation->velocities, simulation->num_sand_particles * sizeof(glm::vec3));
-    memcpy(simulation->attracted_tmp, simulation->attracted, simulation->num_sand_particles * sizeof(bool));
+    memcpy(simulation->attracted_tmp, simulation->attracted, simulation->num_sand_particles * sizeof(int));
 
     simulation->uniform_gird_cells = simulation->uniform_grid_cells_static_saved;
 

@@ -230,8 +230,11 @@ struct Simulation {
     //for blowing, attracting sand
     bool attract_flag = false;
     bool blow_flag = false;
-    bool* attracted = nullptr;
-    bool* attracted_tmp = nullptr;
+    // WIP: use bit to store states
+    // 0: attracted
+    // 1: no_gravity
+    int* attracted = nullptr;
+    int* attracted_tmp = nullptr;
 
     float attract_radius = 1.5f;
     float blow_radius = 2.0f;

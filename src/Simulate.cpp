@@ -159,8 +159,8 @@ void simulate_sand(Simulation* simulation, float dt) {
     float collision_coeff = 0.8f;
     float boundary_collision_coeff = 0.9f;
     float friction_coeff = 0.7f;
-    float mu_s = 0.95f;
-    float mu_k = 0.8f;
+    float mu_s = 0.8f;
+    float mu_k = 0.7f;
     
     //dt = 0.016;
     //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY
@@ -187,15 +187,20 @@ void simulate_sand(Simulation* simulation, float dt) {
     //integration
     for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
         float w = 1.0f / simulation->mass;
+        // if credits
+        if (simulation->attracted[i] & 2) {
+            velocities[i] = glm::vec3(0.0f, -1.0f, 0.0f);
+        }
         velocities[i] += simulation->gravity * dt;
         if (prev_attract_flag && !simulation->attract_flag) {
-            simulation->attracted[i] = false;
+            simulation->attracted[i] &= ~1;
         }
         if (simulation->attract_flag) {
             if (glm::length(simulation->bullet_physics_simulation.player_position - positions[i]) < simulation->attract_radius) {
-                simulation->attracted[i] = true;
+                simulation->attracted[i] |= 1;
+                simulation->attracted[i] &= ~2; // set to has_gravity once attracted
             }
-            if (simulation->attracted[i]) {
+            if (simulation->attracted[i] & 1) {
                 glm::vec3 particle_to_attraction_origin = (simulation->bullet_physics_simulation.player_position + glm::vec3(0.0f, 1.5f, 0.0f)) - positions[i]; // above player's head
                 velocities[i] += glm::normalize(particle_to_attraction_origin)* attract_kernel(glm::length(particle_to_attraction_origin)) * simulation->attract_coeff * simulation->particleRadius * dt * w;
             }
@@ -204,6 +209,7 @@ void simulate_sand(Simulation* simulation, float dt) {
             glm::vec3 particle_to_blow_origin = simulation->bullet_physics_simulation.player_position - positions[i];
             if (glm::length(particle_to_blow_origin) < simulation->blow_radius) {
                 velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), simulation->blow_radius) * simulation->blow_coeff * simulation->particleRadius * w;
+                simulation->attracted[i] &= ~2; // set to has_gravity once blowed
             }
         }
 
@@ -283,6 +289,15 @@ void simulate_sand(Simulation* simulation, float dt) {
                         deltap -= friction_coeff * xtan * ratio;
                     }
                 }
+                if (simulation->attracted[i] & 2) {
+                    // add some perturbation to prevent credits strings stack up together
+                    float rx = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+                    float ry = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+                    float rz = (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 2.0f;
+                    //deltap += glm::vec3(0.01f * rx, 0.01f * ry, 0.01f * rz);
+                    simulation->attracted[i] &= ~2; // set to has_gravity once collided with other particles
+                }
+                
             }
             positions_star[i] = simulation->positions_tmp[i] + deltap;
 
