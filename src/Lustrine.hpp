@@ -51,13 +51,14 @@ struct Simulation;
 );
 
 
- extern void LUSTRINE_EXPORT init_simulation_kernel_radius_scale(
+ extern void LUSTRINE_EXPORT init_simulation_extra_parameters(
      const SimulationParameters* parameters,
      Simulation* simulation,
      const std::vector<Grid>& grids_sand_arg,
      const std::vector<Grid>& grids_solid_arg,
      int subdivision,
-     float kernel_radius_scale
+     float kernel_radius_scale,
+     bool with_credits
  );
 
 

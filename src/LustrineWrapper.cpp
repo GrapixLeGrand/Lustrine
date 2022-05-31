@@ -220,8 +220,17 @@ namespace Wrapper {
 
 	}
 
-	void init_simulation_kernel_radius_scale(const SimulationParameters* parameters, SimulationData* data, GridWrapper* sand_grids, int num_sand_grids, GridWrapper* solid_grids, int num_solid_grids, int subdivision, float kernel_radius_scale)
-	{
+	void init_simulation_extra_parameters(
+		const SimulationParameters* parameters, 
+		SimulationData* data, 
+		GridWrapper* sand_grids, 
+		int num_sand_grids, 
+		GridWrapper* solid_grids, 
+		int num_solid_grids, 
+		int subdivision, 
+		float kernel_radius_scale,
+		int with_credits
+	) {
 		std::cout << "Lustrine::wrapper init called!" << std::endl;
 
 		if (num_sand_grids < 0 || num_solid_grids < 0) {
@@ -249,13 +258,14 @@ namespace Wrapper {
 			saved_grids[current_saved_grids_num++] = &solid_grids[i];
 		}
 
-		Lustrine::init_simulation_kernel_radius_scale(
+		Lustrine::init_simulation_extra_parameters(
 			parameters,
 			simulation,
 			original_sand_grids,
 			original_solid_grids,
 			subdivision,
-			kernel_radius_scale
+			kernel_radius_scale,
+			with_credits
 		);
 
 		data->start_sand_index = simulation->ptr_sand_start;

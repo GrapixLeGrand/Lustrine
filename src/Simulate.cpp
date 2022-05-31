@@ -161,6 +161,177 @@ void simulate_sand(Simulation* simulation, float dt) {
     float friction_coeff = 0.7f;
     float mu_s = 0.8f;
     float mu_k = 0.7f;
+
+    //dt = 0.016;
+    //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY
+    //dt = (1.0f / 30.0f);
+    simulation->time_step = dt;
+
+    int n = simulation->num_particles;
+    float X = simulation->domainX;
+    float Y = simulation->domainY;
+    float Z = simulation->domainZ;
+
+    glm::vec3* positions = simulation->positions;
+    glm::vec3* positions_star = simulation->positions_star;
+    glm::vec3* velocities = simulation->velocities;
+
+
+    std::vector<float>& lambdas = simulation->lambdas;
+    std::vector<std::vector<int>>& neighbors = simulation->neighbors;
+
+    float kernelRadius = simulation->kernelRadius;
+
+    static bool prev_attract_flag = false;
+
+    //integration
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        float w = 1.0f / simulation->mass;
+        velocities[i] += simulation->gravity * dt;
+        if (prev_attract_flag && !simulation->attract_flag) {
+            simulation->attracted[i] = false;
+        }
+        if (simulation->attract_flag) {
+            if (glm::length(simulation->bullet_physics_simulation.player_position - positions[i]) < simulation->attract_radius) {
+                simulation->attracted[i] = true;
+            }
+            if (simulation->attracted[i]) {
+                glm::vec3 particle_to_attraction_origin = (simulation->bullet_physics_simulation.player_position + glm::vec3(0.0f, 1.5f, 0.0f)) - positions[i]; // above player's head
+                velocities[i] += glm::normalize(particle_to_attraction_origin) * attract_kernel(glm::length(particle_to_attraction_origin)) * simulation->attract_coeff * simulation->particleRadius * dt * w;
+            }
+        }
+        if (simulation->blow_flag) {
+            glm::vec3 particle_to_blow_origin = simulation->bullet_physics_simulation.player_position - positions[i];
+            if (glm::length(particle_to_blow_origin) < simulation->blow_radius) {
+                velocities[i] += -glm::normalize(particle_to_blow_origin) * blow_kernel(glm::length(particle_to_blow_origin), simulation->blow_radius) * simulation->blow_coeff * simulation->particleRadius * w;
+            }
+        }
+
+        positions_star[i] = positions[i] + velocities[i] * dt;
+        // clamp particle positions to be inside boundaries
+        positions_star[i] = glm::clamp(positions_star[i], glm::vec3(simulation->particleRadius), glm::vec3(X, Y, Z) - glm::vec3(simulation->particleRadius));
+    }
+    //glm::vec3 *positions_tmp = new glm::vec3[simulation->total_allocated];
+    find_neighbors_uniform_grid_v1(simulation);
+    //memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+    if (simulation->first_iteration) {
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->total_allocated);
+        simulation->first_iteration = false;
+    }
+    else {
+        memcpy(simulation->positions_tmp, positions_star, sizeof(glm::vec3) * simulation->num_sand_particles);
+    }
+
+    // solve contact constraints(collision, friction), http://mmacklin.com/flex_eurographics_tutorial.pdf
+    for (int substep = 0; substep < 4; ++substep) {
+
+        for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+            glm::vec3 deltap = glm::vec3(0, 0, 0);
+            for (int j : neighbors[i]) {
+                if (i == j) continue;
+                glm::vec3 pi = simulation->positions_tmp[i];
+                glm::vec3 pj = simulation->positions_tmp[j];
+
+                glm::vec3 ij = pi - pj;
+                if (glm::length(ij) == 0.0f) {
+                    ij = glm::vec3(0.0f, 0.00001f, 0.0f);
+                }
+                float len = glm::length(ij);
+                if (len > simulation->particleDiameter) continue;
+
+                if (j >= simulation->ptr_sand_start && j < simulation->ptr_sand_end)
+                {
+                    float mass = simulation->mass;
+                    float neighbor_mass = simulation->mass;
+                    glm::vec3 tmp = collision_coeff * (neighbor_mass) / (mass + neighbor_mass) * (len - simulation->particleDiameter) * ij / len;
+
+                    deltap -= tmp;
+
+                    float d = glm::length(tmp);
+                    glm::vec3 xidelta = (pi - tmp) - positions[i];
+                    glm::vec3 xjdelta = (pj + tmp) - positions[j];
+                    glm::vec3 normalX = (pi - tmp) - (pj + tmp);
+                    normalX = glm::normalize(normalX);
+                    glm::vec3 relativeX = xidelta - xjdelta;
+
+                    glm::vec3 xtan = (relativeX - dot(relativeX, normalX) * normalX);
+                    if ((d * mu_s) > avoid0(glm::length(xtan))) {
+                        deltap -= friction_coeff * xtan;
+                    }
+                    else {
+                        float ratio = (mu_k * d / avoid0(glm::length(xtan))) < 1 ? (mu_k * d / avoid0(glm::length(xtan))) : 1;
+                        deltap -= friction_coeff * xtan * ratio;
+                    }
+                }
+                else
+                {
+                    glm::vec3 tmp = collision_coeff * (len - simulation->particleDiameter) * ij / len;
+                    deltap -= tmp;
+
+                    float d = length(tmp);
+                    glm::vec3 xidelta = (pi - tmp) - positions[i];
+                    glm::vec3 xjdelta = glm::vec3(0, 0, 0);
+                    glm::vec3 normalX = (pi - tmp) - pj;
+                    normalX = glm::normalize(normalX);
+                    glm::vec3 relativeX = xidelta - xjdelta;
+
+                    glm::vec3 xtan = (relativeX - dot(relativeX, normalX) * normalX);
+                    if ((d * mu_s) > avoid0(glm::length(xtan))) {
+                        deltap -= friction_coeff * xtan;
+                    }
+                    else {
+                        float ratio = (mu_k * d / avoid0(glm::length(xtan))) < 1 ? (mu_k * d / avoid0(glm::length(xtan))) : 1;
+                        deltap -= friction_coeff * xtan * ratio;
+                    }
+                }
+            }
+            positions_star[i] = simulation->positions_tmp[i] + deltap;
+
+
+            //here
+        }
+
+
+        // particle-bounadry collision
+        for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+            glm::vec3 p = simulation->positions_tmp[i];
+
+            //glm::vec3 dp = glm::vec3(0.0);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(1, 0, 0), glm::vec3(simulation->particleRadius, 0, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(-1, 0, 0), glm::vec3(X- simulation->particleRadius, 0, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 1, 0), glm::vec3(0, simulation->particleRadius, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, -1, 0), glm::vec3(0, Y- simulation->particleRadius, 0), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, 1), glm::vec3(0, 0, simulation->particleRadius), p, simulation->particleRadius);
+            //dp += boundary_collision_coeff * solve_boundary_collision_constraint(glm::vec3(0, 0, -1), glm::vec3(0, 0, Z- simulation->particleRadius), p, simulation->particleRadius);
+            //positions_star[i] += dp;
+            positions_star[i] = glm::clamp(positions_star[i], glm::vec3(simulation->particleRadius), glm::vec3(X, Y, Z) - glm::vec3(simulation->particleRadius));
+        }
+
+        memcpy(simulation->positions_tmp + simulation->ptr_sand_start, positions_star + simulation->ptr_sand_start, sizeof(glm::vec3) * simulation->num_sand_particles);
+    }
+
+
+
+    //update velocities and sync positions
+    for (int i = simulation->ptr_sand_start; i < simulation->ptr_sand_end; i++) {
+        velocities[i] = (positions_star[i] - positions[i]) / simulation->time_step;
+        positions[i] = positions_star[i];
+    }
+    Profiling::stop_counter(6);
+
+
+    prev_attract_flag = simulation->attract_flag;
+
+}
+
+void simulate_sand_credits(Simulation* simulation, float dt) {
+    Bullet::simulate_bullet(&simulation->bullet_physics_simulation, dt, simulation->ptr_sand_start, simulation->ptr_sand_end);
+
+    float collision_coeff = 0.8f;
+    float boundary_collision_coeff = 0.9f;
+    float friction_coeff = 0.7f;
+    float mu_s = 0.8f;
+    float mu_k = 0.7f;
     
     //dt = 0.016;
     //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY

@@ -98,47 +98,8 @@ void init_simulation(
         grids_solid_positions_arg.push_back(grids_solid_arg[i].position);
     }
 
-    // for credits
-    std::vector<Chunk> credits_chunks;
+  
 
-    std::vector<std::string> names = {
-        "GILLES WAEBER",
-        "AMRO ABDRABO",
-        "ATTILA HIRSCHI",
-        "QUENTIN GUIGNARD",
-        "YITIAN MA",
-        "ZHEYU SHI"
-    };
-
-    for (int name_idx = 0; name_idx < names.size(); ++name_idx) {
-
-        Chunk chunk;
-        chunk.has_one_color_per_particles = false;
-        chunk.color = glm::vec4();
-
-        std::string name = names[name_idx];
-        float delta = 0.11f;
-
-
-        for (int char_idx = 0; char_idx < name.size(); ++char_idx) {
-            if (name[char_idx] == ' ') continue;
-            std::vector<std::vector<int>> bits = char_to_bits(name[char_idx]);
-            for (int i = 0; i < bits.size(); ++i) {
-                for (int j = 0; j < bits[0].size(); ++j) {
-                    if (bits[i][j]) {
-                        for (int k = 0; k < 2; ++k) {
-                            chunk.positions.push_back(glm::vec3(j * delta, (bits.size() - 1 - i) * delta, k*delta) + glm::vec3(0.1f, 10.0f + 3.0f * (names.size() - 1 - name_idx), 5.0f) + glm::vec3(char_idx * 1.2f, 0.0f, 0.0f));
-                        }
-                        
-                    }
-                }
-            }
-        }
-
-
-        chunk.num_particles = chunk.positions.size();
-        credits_chunks.push_back(chunk);
-    }
 
 
     simulation->domainX = parameters->X;
@@ -153,9 +114,6 @@ void init_simulation(
         initial_allocated_particles_num += grids_sand_arg[i].num_occupied_grid_cells;
     }
 
-    for (const Chunk& chunk : credits_chunks) {
-        initial_allocated_particles_num += chunk.num_particles;
-    }
 
     simulation->num_sand_particles = initial_allocated_particles_num;
 
@@ -210,18 +168,6 @@ void init_simulation(
             }
 
         }
-
-
-        for (const Chunk& chunk : credits_chunks) {
-            for (int j = 0; j < chunk.num_particles; j++) {
-                simulation->positions[simulation->ptr_sand_end] = chunk.positions[j];
-                simulation->positions_star[simulation->ptr_sand_end] = chunk.positions[j];
-                simulation->colors[simulation->ptr_sand_end] = chunk.color;
-                simulation->attracted[simulation->ptr_sand_end] |= 2;
-                simulation->ptr_sand_end++;
-            }
-        }
-
 
     }// end sand
 
@@ -350,19 +296,20 @@ void init_simulation(
 
 }
 
-void init_simulation_kernel_radius_scale(
+void init_simulation_extra_parameters(
     const SimulationParameters* parameters,
     Simulation* simulation,
     const std::vector<Grid>& grids_sand_arg,
     const std::vector<Grid>& grids_solid_arg,
     int subdivision,
-    float kernel_radius_scale
+    float kernel_radius_scale,
+    bool with_credits
 ) {
 
     Profiling::init_profiling();
     Bullet::init_bullet(&simulation->bullet_physics_simulation);
 
-    simulation->simulate_fun = simulate_sand;
+    simulation->simulate_fun = with_credits ? simulate_sand_credits : simulate_sand;
 
     simulation->subdivision = subdivision;
     simulation->parameters_copy = *parameters;
@@ -391,6 +338,48 @@ void init_simulation_kernel_radius_scale(
         grids_solid_positions_arg.push_back(grids_solid_arg[i].position);
     }
 
+    // for credits
+    std::vector<Chunk> credits_chunks;
+    if (with_credits) {
+        std::vector<std::string> names = {
+            "GILLES WAEBER",
+            "AMRO ABDRABO",
+            "ATTILA HIRSCHI",
+            "QUENTIN GUIGNARD",
+            "YITIAN MA",
+            "ZHEYU SHI"
+        };
+        for (int name_idx = 0; name_idx < names.size(); ++name_idx) {
+
+            Chunk chunk;
+            chunk.has_one_color_per_particles = false;
+            chunk.color = glm::vec4();
+
+            std::string name = names[name_idx];
+            float delta = 0.11f;
+
+
+            for (int char_idx = 0; char_idx < name.size(); ++char_idx) {
+                if (name[char_idx] == ' ') continue;
+                std::vector<std::vector<int>> bits = char_to_bits(name[char_idx]);
+                for (int i = 0; i < bits.size(); ++i) {
+                    for (int j = 0; j < bits[0].size(); ++j) {
+                        if (bits[i][j]) {
+                            for (int k = 0; k < 2; ++k) {
+                                chunk.positions.push_back(glm::vec3(j * delta, (bits.size() - 1 - i) * delta, k * delta) + glm::vec3(0.1f, 10.0f + 3.0f * (names.size() - 1 - name_idx), 5.0f) + glm::vec3(char_idx * 1.2f, 0.0f, 0.0f));
+                            }
+
+                        }
+                    }
+                }
+            }
+
+
+            chunk.num_particles = chunk.positions.size();
+            credits_chunks.push_back(chunk);
+        }
+    }
+
     simulation->domainX = parameters->X;
     simulation->domainY = parameters->Y;
     simulation->domainZ = parameters->Z;
@@ -401,6 +390,10 @@ void init_simulation_kernel_radius_scale(
 
     for (int i = 0; i < grids_sand_arg.size(); i++) {
         initial_allocated_particles_num += grids_sand_arg[i].num_occupied_grid_cells;
+    }
+
+    for (const Chunk& chunk : credits_chunks) {
+        initial_allocated_particles_num += chunk.num_particles;
     }
 
     simulation->num_sand_particles = initial_allocated_particles_num;
@@ -456,6 +449,16 @@ void init_simulation_kernel_radius_scale(
                 simulation->ptr_sand_end++;
             }
 
+        }
+
+        for (const Chunk& chunk : credits_chunks) {
+            for (int j = 0; j < chunk.num_particles; j++) {
+                simulation->positions[simulation->ptr_sand_end] = chunk.positions[j];
+                simulation->positions_star[simulation->ptr_sand_end] = chunk.positions[j];
+                simulation->colors[simulation->ptr_sand_end] = chunk.color;
+                simulation->attracted[simulation->ptr_sand_end] |= 2;
+                simulation->ptr_sand_end++;
+            }
         }
     }// end sand
 
