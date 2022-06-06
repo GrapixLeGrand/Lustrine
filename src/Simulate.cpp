@@ -159,8 +159,8 @@ void simulate_sand(Simulation* simulation, float dt) {
     float collision_coeff = 0.8f;
     float boundary_collision_coeff = 0.9f;
     float friction_coeff = 0.7f;
-    float mu_s = 0.8f;
-    float mu_k = 0.7f;
+    float mu_s = 0.95f;
+    float mu_k = 0.9f;
 
     //dt = 0.016;
     //dt = glm::clamp(dt, 0.001f, 0.016f); //TEMPORARY
